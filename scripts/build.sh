@@ -14,6 +14,7 @@ source "$AVALANCHE_PATH"/scripts/constants.sh
 # Download dependencies
 echo "Downloading dependencies..."
 go mod download
+echo "bro.... Didn't reach here."
 
 # Build avalanchego
 "$AVALANCHE_PATH"/scripts/build_avalanche.sh
