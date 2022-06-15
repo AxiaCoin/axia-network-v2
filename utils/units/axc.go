@@ -8,8 +8,8 @@ const (
 	NanoAxc  uint64 = 1
 	MicroAxc uint64 = 1000 * NanoAxc
 	Schmeckle uint64 = 49*MicroAxc + 463*NanoAxc
-	MilliAvax uint64 = 1000 * MicroAxc
-	Axc      uint64 = 1000 * MilliAvax
+	MilliAxc uint64 = 1000 * MicroAxc
+	Axc      uint64 = 1000 * MilliAxc
 	KiloAxc  uint64 = 1000 * Axc
 	MegaAxc  uint64 = 1000 * KiloAxc
 )

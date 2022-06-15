@@ -138,7 +138,7 @@ var _ = ginkgo.Describe("[StaticHandlers]", func() {
 			addr, err := address.FormatBech32(hrp, id.Bytes())
 			gomega.Expect(err).Should(gomega.BeNil())
 			genesisUTXOs[i] = platformvm.APIUTXO{
-				Amount:  json.Uint64(50000 * units.MilliAvax),
+				Amount:  json.Uint64(50000 * units.MilliAxc),
 				Address: addr,
 			}
 		}

@@ -88,9 +88,9 @@ var (
 	// each key controls an address that has [defaultBalance] AXC at genesis
 	keys = crypto.BuildTestKeys()
 
-	defaultMinValidatorStake = 5 * units.MilliAvax
-	defaultMaxValidatorStake = 500 * units.MilliAvax
-	defaultMinDelegatorStake = 1 * units.MilliAvax
+	defaultMinValidatorStake = 5 * units.MilliAxc
+	defaultMaxValidatorStake = 500 * units.MilliAxc
+	defaultMinDelegatorStake = 1 * units.MilliAxc
 
 	// amount all genesis validators have in defaultVM
 	defaultBalance = 100 * defaultMinValidatorStake

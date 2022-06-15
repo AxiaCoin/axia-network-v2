@@ -175773,8 +175773,8 @@ var (
 	// MainnetParams are the params used for mainnet
 	MainnetParams = Params{
 		TxFeeConfig: TxFeeConfig{
-			TxFee:                 units.MilliAvax,
-			CreateAssetTxFee:      10 * units.MilliAvax,
+			TxFee:                 units.MilliAxc,
+			CreateAssetTxFee:      10 * units.MilliAxc,
 			CreateSubnetTxFee:     1 * units.Axc,
 			CreateBlockchainTxFee: 1 * units.Axc,
 		},
