@@ -1,14 +1,14 @@
 PKG_ROOT=/tmp
 VERSION=$TAG
-AVALANCHE_ROOT=$PKG_ROOT/avalanchego-$VERSION
+AXIA_ROOT=$PKG_ROOT/axiago-$VERSION
 
-mkdir -p $AVALANCHE_ROOT
+mkdir -p $AXIA_ROOT
 
-OK=`cp ./build/avalanchego $AVALANCHE_ROOT`
+OK=`cp ./build/axiago $AXIA_ROOT`
 if [[ $OK -ne 0 ]]; then
   exit $OK;
 fi
-OK=`cp -r ./build/plugins $AVALANCHE_ROOT`
+OK=`cp -r ./build/plugins $AXIA_ROOT`
 if [[ $OK -ne 0 ]]; then
   exit $OK;
 fi
@@ -17,6 +17,6 @@ fi
 echo "Build tgz package..."
 cd $PKG_ROOT
 echo "Version: $VERSION"
-tar -czvf "avalanchego-linux-$ARCH-$VERSION.tar.gz" avalanchego-$VERSION
-aws s3 cp avalanchego-linux-$ARCH-$VERSION.tar.gz s3://$BUCKET/linux/binaries/ubuntu/$RELEASE/$ARCH/
-rm -rf $PKG_ROOT/avalanchego*
+tar -czvf "axiago-linux-$ARCH-$VERSION.tar.gz" axiago-$VERSION
+aws s3 cp axiago-linux-$ARCH-$VERSION.tar.gz s3://$BUCKET/linux/binaries/ubuntu/$RELEASE/$ARCH/
+rm -rf $PKG_ROOT/axiago*

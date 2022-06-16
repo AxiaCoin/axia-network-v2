@@ -2,7 +2,7 @@ module github.com/axiacoin/axia-network-v2
 
 // Changes to the minimum golang version must also be replicated in
 // scripts/ansible/roles/golang_base/defaults/main.yml
-// scripts/build_avalanche.sh
+// scripts/build_axia.sh
 // scripts/local.Dockerfile
 // Dockerfile
 // README.md

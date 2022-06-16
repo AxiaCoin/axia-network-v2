@@ -1,4 +1,4 @@
-# Avalanche gRPC
+# Axia gRPC
 ## buf
 
 Protobuf files are hosted at [https://buf.build/axiacoin/axia-network-v2](https://buf.build/axiacoin/axia-network-v2) and can be used as dependencies in other projects.

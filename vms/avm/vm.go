@@ -25,7 +25,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/snow"
 	"github.com/axiacoin/axia-network-v2/snow/choices"
 	"github.com/axiacoin/axia-network-v2/snow/consensus/snowstorm"
-	"github.com/axiacoin/axia-network-v2/snow/engine/avalanche/vertex"
+	"github.com/axiacoin/axia-network-v2/snow/engine/axia/vertex"
 	"github.com/axiacoin/axia-network-v2/snow/engine/common"
 	"github.com/axiacoin/axia-network-v2/utils/crypto"
 	"github.com/axiacoin/axia-network-v2/utils/json"
@@ -120,7 +120,7 @@ func (vm *VM) Disconnected(nodeID ids.NodeID) error {
 
 /*
  ******************************************************************************
- ******************************** Avalanche API *******************************
+ ******************************** Axia API *******************************
  ******************************************************************************
  */
 

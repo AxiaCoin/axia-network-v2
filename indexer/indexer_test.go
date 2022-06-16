@@ -19,14 +19,14 @@ import (
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow"
 	"github.com/axiacoin/axia-network-v2/snow/choices"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/avalanche"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/axia"
 	"github.com/axiacoin/axia-network-v2/snow/consensus/snowstorm"
 	"github.com/axiacoin/axia-network-v2/snow/engine/common"
 	"github.com/axiacoin/axia-network-v2/utils"
 	"github.com/axiacoin/axia-network-v2/utils/logging"
 
-	avengmocks "github.com/axiacoin/axia-network-v2/snow/engine/avalanche/mocks"
-	avvtxmocks "github.com/axiacoin/axia-network-v2/snow/engine/avalanche/vertex/mocks"
+	avengmocks "github.com/axiacoin/axia-network-v2/snow/engine/axia/mocks"
+	avvtxmocks "github.com/axiacoin/axia-network-v2/snow/engine/axia/vertex/mocks"
 	smblockmocks "github.com/axiacoin/axia-network-v2/snow/engine/snowman/block/mocks"
 	smengmocks "github.com/axiacoin/axia-network-v2/snow/engine/snowman/mocks"
 )
@@ -291,7 +291,7 @@ func TestIndexer(t *testing.T) {
 	}
 	// Mocked VM knows about this block now
 	dagEngine.On("GetVtx", vtxID).Return(
-		&avalanche.TestVertex{
+		&axia.TestVertex{
 			TestDecidable: choices.TestDecidable{
 				StatusV: choices.Accepted,
 				IDV:     vtxID,

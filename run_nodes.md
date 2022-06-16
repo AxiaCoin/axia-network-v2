@@ -1,4 +1,4 @@
-./build/avalanchego \
+./build/axiago \
 --genesis=./genesis/localhost_genesis.json \
 --http-host=127.0.0.1 \
 --http-port=9650 \
@@ -8,7 +8,7 @@
 --staking-tls-cert-file=$(pwd)/staking/local/staker1.crt \
 --staking-tls-key-file=$(pwd)/staking/local/staker1.key
 
-./build/avalanchego \
+./build/axiago \
 --genesis=./genesis/localhost_genesis.json \
 --http-host=127.0.0.1 \
 --http-port=9652 \
@@ -18,7 +18,7 @@
 --staking-tls-cert-file=$(pwd)/staking/local/staker2.crt \
 --staking-tls-key-file=$(pwd)/staking/local/staker2.key
 
-./build/avalanchego \
+./build/axiago \
 --genesis=./genesis/localhost_genesis.json \
 --http-host=127.0.0.1 \
 --http-port=9654 \
@@ -28,7 +28,7 @@
 --staking-tls-cert-file=$(pwd)/staking/local/staker3.crt \
 --staking-tls-key-file=$(pwd)/staking/local/staker3.key
 
-./build/avalanchego \
+./build/axiago \
 --genesis=./genesis/localhost_genesis.json \
 --http-host=127.0.0.1 \
 --http-port=9656 \

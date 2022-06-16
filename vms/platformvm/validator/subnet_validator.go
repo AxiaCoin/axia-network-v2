@@ -8,7 +8,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/utils/constants"
 )
 
-// SubnetValidator validates a subnet on the Avalanche network.
+// SubnetValidator validates a subnet on the Axia network.
 type SubnetValidator struct {
 	Validator `serialize:"true"`
 

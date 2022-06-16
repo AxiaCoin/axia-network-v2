@@ -1,10 +1,10 @@
 ---
-ava_user: avalanche
+ava_user: axia
 ava_group: admin
 network: mainnet
-db_dir: /data/avalanchego
-log_dir: /var/log/avalanchego
-config_dir: /etc/avalanchego
-plugin_dir: /usr/local/lib/avalanchego/plugins
+db_dir: /data/axiago
+log_dir: /var/log/axiago
+config_dir: /etc/axiago
+plugin_dir: /usr/local/lib/axiago/plugins
 repo_url: https://github.com/axiacoin/axia-network-v2
-repo_folder: /tmp/avalanchego
+repo_folder: /tmp/axiago

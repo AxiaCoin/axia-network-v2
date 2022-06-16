@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	"github.com/axiacoin/axia-network-v2/ids"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/avalanche"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/axia"
 	"github.com/axiacoin/axia-network-v2/snow/engine/common"
 	"github.com/axiacoin/axia-network-v2/snow/networking/sender"
 )
@@ -31,7 +31,7 @@ type SubnetConfig struct {
 
 	// ValidatorOnly indicates that this Subnet's Chains are available to only subnet validators.
 	ValidatorOnly       bool                 `json:"validatorOnly"`
-	ConsensusParameters avalanche.Parameters `json:"consensusParameters"`
+	ConsensusParameters axia.Parameters `json:"consensusParameters"`
 }
 
 type subnet struct {

@@ -24,8 +24,8 @@ import (
 	"github.com/axiacoin/axia-network-v2/network"
 	"github.com/axiacoin/axia-network-v2/snow"
 	"github.com/axiacoin/axia-network-v2/snow/consensus/snowball"
-	"github.com/axiacoin/axia-network-v2/snow/engine/avalanche/state"
-	"github.com/axiacoin/axia-network-v2/snow/engine/avalanche/vertex"
+	"github.com/axiacoin/axia-network-v2/snow/engine/axia/state"
+	"github.com/axiacoin/axia-network-v2/snow/engine/axia/vertex"
 	"github.com/axiacoin/axia-network-v2/snow/engine/common"
 	"github.com/axiacoin/axia-network-v2/snow/engine/common/queue"
 	"github.com/axiacoin/axia-network-v2/snow/engine/common/tracker"
@@ -46,10 +46,10 @@ import (
 	dbManager "github.com/axiacoin/axia-network-v2/database/manager"
 	timetracker "github.com/axiacoin/axia-network-v2/snow/networking/tracker"
 
-	avcon "github.com/axiacoin/axia-network-v2/snow/consensus/avalanche"
-	aveng "github.com/axiacoin/axia-network-v2/snow/engine/avalanche"
-	avbootstrap "github.com/axiacoin/axia-network-v2/snow/engine/avalanche/bootstrap"
-	avagetter "github.com/axiacoin/axia-network-v2/snow/engine/avalanche/getter"
+	avcon "github.com/axiacoin/axia-network-v2/snow/consensus/axia"
+	aveng "github.com/axiacoin/axia-network-v2/snow/engine/axia"
+	avbootstrap "github.com/axiacoin/axia-network-v2/snow/engine/axia/bootstrap"
+	avagetter "github.com/axiacoin/axia-network-v2/snow/engine/axia/getter"
 
 	smcon "github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
 	smeng "github.com/axiacoin/axia-network-v2/snow/engine/snowman"
@@ -61,7 +61,7 @@ const defaultChannelSize = 1
 
 var (
 	errUnknownChainID   = errors.New("unknown chain ID")
-	errUnknownVMType    = errors.New("the vm should have type avalanche.DAGVM or snowman.ChainVM")
+	errUnknownVMType    = errors.New("the vm should have type axia.DAGVM or snowman.ChainVM")
 	errCreatePlatformVM = errors.New("attempted to create a chain running the PlatformVM")
 	errNotBootstrapped  = errors.New("chains not bootstrapped")
 
@@ -455,7 +455,7 @@ func (m *manager) buildChain(chainParams ChainParameters, sb Subnet) (*chain, er
 	var chain *chain
 	switch vm := vm.(type) {
 	case vertex.DAGVM:
-		chain, err = m.createAvalancheChain(
+		chain, err = m.createAxiaChain(
 			ctx,
 			chainParams.GenesisData,
 			vdrs,
@@ -467,7 +467,7 @@ func (m *manager) buildChain(chainParams ChainParameters, sb Subnet) (*chain, er
 			sb,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("error while creating new avalanche vm %w", err)
+			return nil, fmt.Errorf("error while creating new axia vm %w", err)
 		}
 	case block.ChainVM:
 		chain, err = m.createSnowmanChain(
@@ -507,8 +507,8 @@ func (m *manager) unblockChains() {
 	}
 }
 
-// Create a DAG-based blockchain that uses Avalanche
-func (m *manager) createAvalancheChain(
+// Create a DAG-based blockchain that uses Axia
+func (m *manager) createAxiaChain(
 	ctx *snow.ConsensusContext,
 	genesisData []byte,
 	vdrs,
@@ -645,7 +645,7 @@ func (m *manager) createAvalancheChain(
 
 	avaGetHandler, err := avagetter.New(vtxManager, commonCfg)
 	if err != nil {
-		return nil, fmt.Errorf("couldn't initialize avalanche base message handler: %w", err)
+		return nil, fmt.Errorf("couldn't initialize axia base message handler: %w", err)
 	}
 
 	// create bootstrap gear
@@ -664,7 +664,7 @@ func (m *manager) createAvalancheChain(
 		},
 	)
 	if err != nil {
-		return nil, fmt.Errorf("error initializing avalanche bootstrapper: %w", err)
+		return nil, fmt.Errorf("error initializing axia bootstrapper: %w", err)
 	}
 	handler.SetBootstrapper(bootstrapper)
 
@@ -681,7 +681,7 @@ func (m *manager) createAvalancheChain(
 	}
 	engine, err := aveng.New(engineConfig)
 	if err != nil {
-		return nil, fmt.Errorf("error initializing avalanche engine: %w", err)
+		return nil, fmt.Errorf("error initializing axia engine: %w", err)
 	}
 	handler.SetConsensus(engine)
 

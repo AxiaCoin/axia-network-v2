@@ -49,15 +49,15 @@ func init() {
 
 	flag.StringVar(
 		&execPath,
-		"avalanchego-path",
+		"axiago-path",
 		"",
-		"avalanchego executable path",
+		"axiago executable path",
 	)
 	flag.StringVar(
 		&execPathToUpgrade,
-		"avalanchego-path-to-upgrade",
+		"axiago-path-to-upgrade",
 		"",
-		"avalanchego executable path (to upgrade to, only required for upgrade tests with local network-runner)",
+		"axiago executable path (to upgrade to, only required for upgrade tests with local network-runner)",
 	)
 }
 

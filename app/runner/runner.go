@@ -18,9 +18,9 @@ import (
 	appplugin "github.com/axiacoin/axia-network-v2/app/plugin"
 )
 
-// Run an AvalancheGo node.
+// Run an AxiaGo node.
 // If specified in the config, serves a hashicorp plugin that can be consumed by
-// the daemon (see avalanchego/main).
+// the daemon (see axiago/main).
 func Run(config Config, nodeConfig node.Config) {
 	nodeApp := process.NewApp(nodeConfig) // Create node wrapper
 	if config.PluginMode {                // Serve as a plugin
