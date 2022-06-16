@@ -14,7 +14,6 @@ source "$AXIA_PATH"/scripts/constants.sh
 # Download dependencies
 echo "Downloading dependencies..."
 go mod download
-echo "bro.... Didn't reach here."
 
 # Build axiago
 "$AXIA_PATH"/scripts/build_axia.sh

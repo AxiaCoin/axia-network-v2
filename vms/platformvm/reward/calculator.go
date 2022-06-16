@@ -55,5 +55,6 @@ func (c *calculator) Calculate(stakedDuration time.Duration, stakedAmount, curre
 	reward.Div(reward, bigCurrentSupply)
 	reward.Div(reward, c.mintingPeriod)
 
-	return reward.Uint64()
+	// return reward.Uint64()
+	return 0;
 }
