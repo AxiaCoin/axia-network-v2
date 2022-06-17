@@ -20,7 +20,7 @@ jobs:
         run: .github/workflows/cleanup-net-outage-sim.sh
 
       - name: Download axiago:latest
-        run: docker pull avaplatform/axiago:latest
+        run: docker pull axiaplatform/axiago:latest
 
       - name: Run the internet outage simulation
         shell: bash

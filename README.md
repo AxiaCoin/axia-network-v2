@@ -104,10 +104,10 @@ To check the built image, run:
 docker image ls
 ```
 
-The image should be tagged as `avaplatform/axiago:xxxxxxxx`, where `xxxxxxxx` is the shortened commit of the Axia source it was built from. To run the axia node, run:
+The image should be tagged as `axiaplatform/axiago:xxxxxxxx`, where `xxxxxxxx` is the shortened commit of the Axia source it was built from. To run the axia node, run:
 
 ```sh
-docker run -ti -p 9650:9650 -p 9651:9651 avaplatform/axiago:xxxxxxxx /axiago/build/axiago
+docker run -ti -p 9650:9650 -p 9651:9651 axiaplatform/axiago:xxxxxxxx /axiago/build/axiago
 ```
 
 ## Running Axia

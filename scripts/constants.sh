@@ -18,8 +18,8 @@ plugin_dir="$build_dir/plugins"
 evm_path="$plugin_dir/evm"
 
 # Avalabs docker hub
-# avaplatform/axiago - defaults to local as to avoid unintentional pushes
-# You should probably set it - export DOCKER_REPO='avaplatform/axiago'
+# axiaplatform/axiago - defaults to local as to avoid unintentional pushes
+# You should probably set it - export DOCKER_REPO='axiaplatform/axiago'
 axiago_dockerhub_repo=${DOCKER_REPO:-"axiago"}
 
 # Current branch

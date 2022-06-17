@@ -10,7 +10,7 @@ set -o pipefail
 
 SRC_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
-DOCKERHUB_REPO="avaplatform/axiago"
+DOCKERHUB_REPO="axiaplatform/axiago"
 REMOTE="https://github.com/axiacoin/axia-network-v2.git"
 BRANCH="master"
 

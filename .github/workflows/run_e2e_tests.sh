@@ -5,12 +5,12 @@ set -o nounset
 set -o pipefail
 
 # Testing specific variables
-axia_testing_repo="avaplatform/axia-testing"
-axiago_byzantine_repo="avaplatform/axia-byzantine"
+axia_testing_repo="axiaplatform/axia-testing"
+axiago_byzantine_repo="axiaplatform/axia-byzantine"
 
 # Define axia-testing and axia-byzantine versions to use
-axia_testing_image="avaplatform/axia-testing:master"
-axiago_byzantine_image="avaplatform/axia-byzantine:update-axiago-v1.7.0"
+axia_testing_image="axiaplatform/axia-testing:master"
+axiago_byzantine_image="axiaplatform/axia-byzantine:update-axiago-v1.7.0"
 
 # Fetch the images
 # If Docker Credentials are not available fail

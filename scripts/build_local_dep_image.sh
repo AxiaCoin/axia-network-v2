@@ -8,7 +8,7 @@ echo "Building docker image based off of most recent local commits of axiago and
 
 AXIA_REMOTE="git@github.com:axiacoin/axia-network-v2.git"
 CORETH_REMOTE="git@github.com:axiacoin/axia-network-v2-coreth.git"
-DOCKERHUB_REPO="avaplatform/axiago"
+DOCKERHUB_REPO="axiaplatform/axiago"
 
 DOCKER="${DOCKER:-docker}"
 SCRIPT_DIRPATH=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
