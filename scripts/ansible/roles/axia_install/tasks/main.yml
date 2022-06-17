@@ -62,8 +62,8 @@
     state: absent
   loop:
     - path: "{{ axia_daemon_lib_dir }}/evm"
-    - path: "{{ axia_daemon_lib_dir }}/axiago-preupgrade"
-    - path: "{{ axia_daemon_lib_dir }}/axiago-latest"
+    - path: "{{ axia_daemon_lib_dir }}/axia-preupgrade"
+    - path: "{{ axia_daemon_lib_dir }}/axia-latest"
   notify:
     - Restart Axia service
 

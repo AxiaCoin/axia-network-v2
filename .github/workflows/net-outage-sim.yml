@@ -19,8 +19,8 @@ jobs:
         shell: bash
         run: .github/workflows/cleanup-net-outage-sim.sh
 
-      - name: Download axiago:latest
-        run: docker pull axiaplatform/axiago:latest
+      - name: Download axia:latest
+        run: docker pull axiaplatform/axia:latest
 
       - name: Run the internet outage simulation
         shell: bash

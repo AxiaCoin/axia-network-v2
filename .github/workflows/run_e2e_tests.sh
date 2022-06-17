@@ -6,11 +6,11 @@ set -o pipefail
 
 # Testing specific variables
 axia_testing_repo="axiaplatform/axia-testing"
-axiago_byzantine_repo="axiaplatform/axia-byzantine"
+axia_byzantine_repo="axiaplatform/axia-byzantine"
 
 # Define axia-testing and axia-byzantine versions to use
 axia_testing_image="axiaplatform/axia-testing:master"
-axiago_byzantine_image="axiaplatform/axia-byzantine:update-axiago-v1.7.0"
+axia_byzantine_image="axiaplatform/axia-byzantine:update-axia-v1.7.0"
 
 # Fetch the images
 # If Docker Credentials are not available fail
@@ -39,31 +39,31 @@ echo "Running Test Batch: ${testBatch}"
 
 # pulling the axia-testing image
 docker pull $axia_testing_image
-docker pull $axiago_byzantine_image
+docker pull $axia_byzantine_image
 
 # Setting the build ID
 git_commit_id=$( git rev-list -1 HEAD )
 
-# Build current axiago
+# Build current axia
 source "$AXIA_PATH"/scripts/build_image.sh
 
 # Target built version to use in axia-testing
-axia_image="$axiago_dockerhub_repo:$current_branch"
+axia_image="$axia_dockerhub_repo:$current_branch"
 
 echo "Execution Summary:"
 echo ""
 echo "Running Axia Image: ${axia_image}"
 echo "Running Axia Image Tag: $current_branch"
 echo "Running Axia Testing Image: ${axia_testing_image}"
-echo "Running Axia Byzantine Image: ${axiago_byzantine_image}"
+echo "Running Axia Byzantine Image: ${axia_byzantine_image}"
 echo "Git Commit ID : ${git_commit_id}"
 echo ""
 
 # >>>>>>>> axia-testing custom parameters <<<<<<<<<<<<<
 custom_params_json="{
     \"isKurtosisCoreDevMode\": false,
-    \"axiagoImage\":\"${axia_image}\",
-    \"axiagoByzantineImage\":\"${axiago_byzantine_image}\",
+    \"axiaImage\":\"${axia_image}\",
+    \"axiaByzantineImage\":\"${axia_byzantine_image}\",
     \"testBatch\":\"${testBatch}\"
 }"
 # >>>>>>>> axia-testing custom parameters <<<<<<<<<<<<<

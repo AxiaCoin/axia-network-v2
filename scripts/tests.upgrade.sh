@@ -3,7 +3,7 @@ set -e
 
 # e.g.,
 # ./scripts/build.sh
-# ./scripts/tests.upgrade.sh 1.7.4 ./build/axiago
+# ./scripts/tests.upgrade.sh 1.7.4 ./build/axia
 if ! [[ "$0" =~ scripts/tests.upgrade.sh ]]; then
   echo "must be run from repository root"
   exit 255
@@ -24,32 +24,32 @@ if [[ -z "${NEW_BINARY}" ]]; then
 fi
 
 #################################
-# download axiago
+# download axia
 # https://github.com/axiacoin/axia-network-v2/releases
 GOARCH=$(go env GOARCH)
 GOOS=$(go env GOOS)
-DOWNLOAD_URL=https://github.com/axiacoin/axia-network-v2/releases/download/v${VERSION}/axiago-linux-${GOARCH}-v${VERSION}.tar.gz
-DOWNLOAD_PATH=/tmp/axiago.tar.gz
+DOWNLOAD_URL=https://github.com/axiacoin/axia-network-v2/releases/download/v${VERSION}/axia-linux-${GOARCH}-v${VERSION}.tar.gz
+DOWNLOAD_PATH=/tmp/axia.tar.gz
 if [[ ${GOOS} == "darwin" ]]; then
-  DOWNLOAD_URL=https://github.com/axiacoin/axia-network-v2/releases/download/v${VERSION}/axiago-macos-v${VERSION}.zip
-  DOWNLOAD_PATH=/tmp/axiago.zip
+  DOWNLOAD_URL=https://github.com/axiacoin/axia-network-v2/releases/download/v${VERSION}/axia-macos-v${VERSION}.zip
+  DOWNLOAD_PATH=/tmp/axia.zip
 fi
 
 rm -f ${DOWNLOAD_PATH}
-rm -rf /tmp/axiago-v${VERSION}
-rm -rf /tmp/axiago-build
+rm -rf /tmp/axia-v${VERSION}
+rm -rf /tmp/axia-build
 
-echo "downloading axiago ${VERSION} at ${DOWNLOAD_URL}"
+echo "downloading axia ${VERSION} at ${DOWNLOAD_URL}"
 curl -L ${DOWNLOAD_URL} -o ${DOWNLOAD_PATH}
 
-echo "extracting downloaded axiago"
+echo "extracting downloaded axia"
 if [[ ${GOOS} == "linux" ]]; then
   tar xzvf ${DOWNLOAD_PATH} -C /tmp
 elif [[ ${GOOS} == "darwin" ]]; then
-  unzip ${DOWNLOAD_PATH} -d /tmp/axiago-build
-  mv /tmp/axiago-build/build /tmp/axiago-v${VERSION}
+  unzip ${DOWNLOAD_PATH} -d /tmp/axia-build
+  mv /tmp/axia-build/build /tmp/axia-v${VERSION}
 fi
-find /tmp/axiago-v${VERSION}
+find /tmp/axia-v${VERSION}
 
 #################################
 # download axia-network-runner
@@ -96,8 +96,8 @@ echo "running upgrade tests against the local cluster with ${NEW_BINARY}"
 --ginkgo.v \
 --log-level debug \
 --network-runner-grpc-endpoint="0.0.0.0:12340" \
---axiago-path=/tmp/axiago-v${VERSION}/axiago \
---axiago-path-to-upgrade=${NEW_BINARY} || EXIT_CODE=$?
+--axia-path=/tmp/axia-v${VERSION}/axia \
+--axia-path-to-upgrade=${NEW_BINARY} || EXIT_CODE=$?
 
 kill ${PID}
 

@@ -58,7 +58,7 @@ try:
           'ChangeName': 'Update'
         },
       ],
-      ChangeSetName='AxiaGo Update ' + tag,
+      ChangeSetName='Axia Update ' + tag,
       ClientRequestToken=uid
   )
   print(response)
