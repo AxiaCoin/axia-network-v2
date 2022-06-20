@@ -4,5 +4,5 @@ Section: misc
 Priority: optional
 Architecture: arm64 
 Depends:
-Maintainer: Fabio Barone <fabio@avalabs.org>
+Maintainer: Fabio Barone <fabio@axiasystems.org>
 Description: The Axia platform binaries 

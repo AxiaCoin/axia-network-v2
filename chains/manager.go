@@ -49,7 +49,7 @@ import (
 	avcon "github.com/axiacoin/axia-network-v2/snow/consensus/axia"
 	aveng "github.com/axiacoin/axia-network-v2/snow/engine/axia"
 	avbootstrap "github.com/axiacoin/axia-network-v2/snow/engine/axia/bootstrap"
-	avagetter "github.com/axiacoin/axia-network-v2/snow/engine/axia/getter"
+	axiagetter "github.com/axiacoin/axia-network-v2/snow/engine/axia/getter"
 
 	smcon "github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
 	smeng "github.com/axiacoin/axia-network-v2/snow/engine/snowman"
@@ -643,7 +643,7 @@ func (m *manager) createAxiaChain(
 		SharedCfg:                      &common.SharedConfig{},
 	}
 
-	avaGetHandler, err := avagetter.New(vtxManager, commonCfg)
+	axiaGetHandler, err := axiagetter.New(vtxManager, commonCfg)
 	if err != nil {
 		return nil, fmt.Errorf("couldn't initialize axia base message handler: %w", err)
 	}
@@ -651,7 +651,7 @@ func (m *manager) createAxiaChain(
 	// create bootstrap gear
 	bootstrapperConfig := avbootstrap.Config{
 		Config:        commonCfg,
-		AllGetsServer: avaGetHandler,
+		AllGetsServer: axiaGetHandler,
 		VtxBlocked:    vtxBlocker,
 		TxBlocked:     txBlocker,
 		Manager:       vtxManager,
@@ -671,7 +671,7 @@ func (m *manager) createAxiaChain(
 	// create engine gear
 	engineConfig := aveng.Config{
 		Ctx:           bootstrapperConfig.Ctx,
-		AllGetsServer: avaGetHandler,
+		AllGetsServer: axiaGetHandler,
 		VM:            bootstrapperConfig.VM,
 		Manager:       vtxManager,
 		Sender:        bootstrapperConfig.Sender,

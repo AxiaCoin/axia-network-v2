@@ -42,15 +42,15 @@
 ------------------------------------------------------------------
 ## Production
 ```
-    ./build/avalanchego \
-    --genesis=genesis.json \
-    --public-ip=18.222.205.99 \ 
-    --http-host=0.0.0.0 \
-    --http-port=9650 \
-    --staking-port=9651 \
-    --db-dir=db/node1 \
-    --network-id=5678 \
-    --staking-tls-cert-file=$(pwd)/staking/local/staker1.crt \ --staking-tls-key-file=$(pwd)/staking/local/staker1.key
+./build/axia \
+--genesis=genesis.json \
+--public-ip=18.222.205.99 \ 
+--http-host=0.0.0.0 \
+--http-port=9650 \
+--staking-port=9651 \
+--db-dir=db/node1 \
+--network-id=5678 \
+--staking-tls-cert-file=$(pwd)/staking/local/staker1.crt \ --staking-tls-key-file=$(pwd)/staking/local/staker1.key
 ```
 #### Sample
 

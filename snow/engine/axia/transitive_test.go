@@ -28,7 +28,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/utils/wrappers"
 	"github.com/axiacoin/axia-network-v2/version"
 
-	avagetter "github.com/axiacoin/axia-network-v2/snow/engine/axia/getter"
+	axiagetter "github.com/axiacoin/axia-network-v2/snow/engine/axia/getter"
 )
 
 var (
@@ -1473,11 +1473,11 @@ func TestEngineGetVertex(t *testing.T) {
 	manager := vertex.NewTestManager(t)
 	manager.Default(true)
 	engCfg.Manager = manager
-	avaGetHandler, err := avagetter.New(manager, commonCfg)
+	axiaGetHandler, err := axiagetter.New(manager, commonCfg)
 	if err != nil {
 		t.Fatal(err)
 	}
-	engCfg.AllGetsServer = avaGetHandler
+	engCfg.AllGetsServer = axiaGetHandler
 
 	gVtx := &axia.TestVertex{TestDecidable: choices.TestDecidable{
 		IDV:     ids.GenerateTestID(),

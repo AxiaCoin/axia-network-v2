@@ -4,7 +4,7 @@ Name:           axia
 Version:        %{version}
 Release:        %{release}
 Summary:        The Axia platform binaries
-URL:            https://github.com/ava-labs/%{name}
+URL:            https://github.com/axia-systems/%{name}
 License:        BSD-3
 AutoReqProv:    no
 
@@ -17,6 +17,6 @@ Axia is an incredibly lightweight protocol, so the minimum computer requirements
 /usr/local/lib/axia/evm
 
 %changelog
-* Mon Oct 26 2020 Charlie Wyse <charlie@avalabs.org>
+* Mon Oct 26 2020 Charlie Wyse <charlie@axiasystems.org>
 - First creation of package
 

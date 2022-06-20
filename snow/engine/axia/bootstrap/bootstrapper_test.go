@@ -21,7 +21,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/snow/engine/common/tracker"
 	"github.com/axiacoin/axia-network-v2/snow/validators"
 
-	avagetter "github.com/axiacoin/axia-network-v2/snow/engine/axia/getter"
+	axiagetter "github.com/axiacoin/axia-network-v2/snow/engine/axia/getter"
 )
 
 var (
@@ -85,14 +85,14 @@ func newConfig(t *testing.T) (Config, ids.NodeID, *common.SenderTest, *vertex.Te
 		SharedCfg:                      &common.SharedConfig{},
 	}
 
-	avaGetHandler, err := avagetter.New(manager, commonConfig)
+	axiaGetHandler, err := axiagetter.New(manager, commonConfig)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	return Config{
 		Config:        commonConfig,
-		AllGetsServer: avaGetHandler,
+		AllGetsServer: axiaGetHandler,
 		VtxBlocked:    vtxBlocker,
 		TxBlocked:     txBlocker,
 		Manager:       manager,

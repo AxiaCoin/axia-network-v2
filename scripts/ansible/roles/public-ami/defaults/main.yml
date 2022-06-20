@@ -1,6 +1,6 @@
 ---
-ava_user: axia
-ava_group: admin
+axia_user: axia
+axia_group: admin
 network: mainnet
 db_dir: /data/axia
 log_dir: /var/log/axia

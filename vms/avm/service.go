@@ -1523,7 +1523,7 @@ func (service *Service) Import(_ *http.Request, args *ImportArgs, reply *api.JSO
 	return nil
 }
 
-// ExportArgs are arguments for passing into ExportAVA requests
+// ExportArgs are arguments for passing into ExportAXIA requests
 type ExportArgs struct {
 	// User, password, from addrs, change addr
 	api.JSONSpendHeader

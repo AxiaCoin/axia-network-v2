@@ -17,7 +17,7 @@ axia_path="$build_dir/axia"
 plugin_dir="$build_dir/plugins"
 evm_path="$plugin_dir/evm"
 
-# Avalabs docker hub
+# Axiasystems docker hub
 # axiaplatform/axia - defaults to local as to avoid unintentional pushes
 # You should probably set it - export DOCKER_REPO='axiaplatform/axia'
 axia_dockerhub_repo=${DOCKER_REPO:-"axia"}
