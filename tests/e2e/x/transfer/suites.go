@@ -26,7 +26,7 @@ import (
 
 var keyFactory crypto.FactorySECP256K1R
 
-var _ = e2e.DescribeXChain("[Virtuous Transfer Tx AXC]", func() {
+var _ = e2e.DescribeSwapChain("[Virtuous Transfer Tx AXC]", func() {
 	ginkgo.It("can issue a virtuous transfer tx for AXC asset", func() {
 		if e2e.GetEnableWhitelistTxTests() {
 			ginkgo.Skip("whitelist vtx tests are enabled; skipping")

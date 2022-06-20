@@ -614,7 +614,7 @@ func (n *Node) initChainManager(axcAssetID ids.ID) error {
 	if err != nil {
 		return err
 	}
-	xChainID := createAVMTx.ID()
+	swapChainID := createAVMTx.ID()
 
 	createEVMTx, err := genesis.VMGenesis(n.Config.GenesisBytes, constants.EVMID)
 	if err != nil {
@@ -626,7 +626,7 @@ func (n *Node) initChainManager(axcAssetID ids.ID) error {
 	criticalChains := ids.Set{}
 	criticalChains.Add(
 		constants.PlatformChainID,
-		xChainID,
+		swapChainID,
 		cChainID,
 	)
 
@@ -679,7 +679,7 @@ func (n *Node) initChainManager(axcAssetID ids.ID) error {
 		Keystore:                                n.keystore,
 		AtomicMemory:                            &n.sharedMemory,
 		AXCAssetID:                             axcAssetID,
-		XChainID:                                xChainID,
+		SwapChainID:                                swapChainID,
 		CriticalChains:                          criticalChains,
 		TimeoutManager:                          timeoutManager,
 		Health:                                  n.health,

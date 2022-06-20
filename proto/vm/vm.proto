@@ -64,7 +64,7 @@ message InitializeRequest {
   bytes allychain_id = 2;
   bytes chain_id = 3;
   bytes node_id = 4;
-  bytes x_chain_id = 5;
+  bytes swap_chain_id = 5;
   bytes axc_asset_id = 6;
   bytes genesis_bytes = 7;
   bytes upgrade_bytes = 8;

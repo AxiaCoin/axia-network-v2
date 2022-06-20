@@ -40,7 +40,7 @@ type Context struct {
 	ChainID   ids.ID
 	NodeID    ids.NodeID
 
-	XChainID    ids.ID
+	SwapChainID    ids.ID
 	AXCAssetID ids.ID
 
 	Log          logging.Logger
