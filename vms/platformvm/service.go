@@ -1298,7 +1298,7 @@ type ExportAXCArgs struct {
 	To string `json:"to"`
 }
 
-// ExportAXC exports AXC from the P-Chain to the SwapChain
+// ExportAXC exports AXC from the CoreChain to the SwapChain
 // It must be imported on the SwapChain to complete the transfer
 func (service *Service) ExportAXC(_ *http.Request, args *ExportAXCArgs, response *api.JSONTxIDChangeAddr) error {
 	service.vm.ctx.Log.Debug("Platform: ExportAXC called")

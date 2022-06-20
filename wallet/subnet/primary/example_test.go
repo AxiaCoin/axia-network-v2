@@ -30,7 +30,7 @@ func ExampleWallet() {
 	}
 	fmt.Printf("synced wallet in %s\n", time.Since(walletSyncStartTime))
 
-	// Get the P-chain and the Swapchain wallets
+	// Get the Corechain and the Swapchain wallets
 	pWallet := wallet.P()
 	xWallet := wallet.X()
 
@@ -44,7 +44,7 @@ func ExampleWallet() {
 		},
 	}
 
-	// Send 100 schmeckles to the P-chain.
+	// Send 100 schmeckles to the Corechain.
 	exportStartTime := time.Now()
 	exportTxID, err := xWallet.IssueExportTx(
 		constants.PlatformChainID,
@@ -66,7 +66,7 @@ func ExampleWallet() {
 	}
 	fmt.Printf("issued X->P export %s in %s\n", exportTxID, time.Since(exportStartTime))
 
-	// Import the 100 schmeckles from the Swapchain into the P-chain.
+	// Import the 100 schmeckles from the Swapchain into the Corechain.
 	importStartTime := time.Now()
 	importTxID, err := pWallet.IssueImportTx(xChainID, owner)
 	if err != nil {

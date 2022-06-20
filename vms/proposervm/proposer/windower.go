@@ -31,7 +31,7 @@ type Windower interface {
 	) (time.Duration, error)
 }
 
-// windower interfaces with P-Chain and it is responsible for calculating the
+// windower interfaces with CoreChain and it is responsible for calculating the
 // delay for the block submission window of a given validator
 type windower struct {
 	state       validators.State
@@ -55,7 +55,7 @@ func (w *windower) Delay(chainHeight, pChainHeight uint64, validatorID ids.NodeI
 		return MaxDelay, nil
 	}
 
-	// get the validator set by the p-chain height
+	// get the validator set by the corechain height
 	validatorsMap, err := w.state.GetValidatorSet(pChainHeight, w.subnetID)
 	if err != nil {
 		return 0, err

@@ -25,12 +25,12 @@ var (
 	errUnexpectedBlockType      = errors.New("unexpected proposer block type")
 	errInnerParentMismatch      = errors.New("inner parentID didn't match expected parent")
 	errTimeNotMonotonic         = errors.New("time must monotonically increase")
-	errPChainHeightNotMonotonic = errors.New("non monotonically increasing P-chain height")
-	errPChainHeightNotReached   = errors.New("block P-chain height larger than current P-chain height")
+	errPChainHeightNotMonotonic = errors.New("non monotonically increasing Corechain height")
+	errPChainHeightNotReached   = errors.New("block Corechain height larger than current Corechain height")
 	errTimeTooAdvanced          = errors.New("time is too far advanced")
 	errProposerWindowNotStarted = errors.New("proposer window hasn't started")
 	errProposersNotActivated    = errors.New("proposers haven't been activated yet")
-	errPChainHeightTooLow       = errors.New("block P-chain height is too low")
+	errPChainHeightTooLow       = errors.New("block Corechain height is too low")
 )
 
 type Block interface {
@@ -76,11 +76,11 @@ func (p *postForkCommonComponents) Height() uint64 {
 
 // Verify returns nil if:
 // 1) [p]'s inner block is not an oracle block
-// 2) [child]'s P-Chain height >= [parentPChainHeight]
+// 2) [child]'s CoreChain height >= [parentPChainHeight]
 // 3) [p]'s inner block is the parent of [c]'s inner block
 // 4) [child]'s timestamp isn't before [p]'s timestamp
 // 5) [child]'s timestamp is within the skew bound
-// 6) [childPChainHeight] <= the current P-Chain height
+// 6) [childPChainHeight] <= the current CoreChain height
 // 7) [child]'s timestamp is within its proposer's window
 // 8) [child] has a valid signature from its proposer
 // 9) [child]'s inner block is valid
@@ -110,13 +110,13 @@ func (p *postForkCommonComponents) Verify(parentTimestamp time.Time, parentPChai
 		return errTimeTooAdvanced
 	}
 
-	// If the node is currently syncing - we don't assume that the P-chain has
+	// If the node is currently syncing - we don't assume that the Corechain has
 	// been synced up to this point yet.
 	if p.vm.consensusState == snow.NormalOp {
 		childID := child.ID()
 		currentPChainHeight, err := p.vm.ctx.ValidatorState.GetCurrentHeight()
 		if err != nil {
-			p.vm.ctx.Log.Error("failed to get current P-Chain height while processing %s: %s",
+			p.vm.ctx.Log.Error("failed to get current CoreChain height while processing %s: %s",
 				childID, err)
 			return err
 		}
@@ -161,8 +161,8 @@ func (p *postForkCommonComponents) buildChild(
 		newTimestamp = parentTimestamp
 	}
 
-	// The child's P-Chain height is proposed as the optimal P-Chain height that
-	// is at least the parent's P-Chain height
+	// The child's CoreChain height is proposed as the optimal CoreChain height that
+	// is at least the parent's CoreChain height
 	pChainHeight, err := p.vm.optimalPChainHeight(parentPChainHeight)
 	if err != nil {
 		return nil, err

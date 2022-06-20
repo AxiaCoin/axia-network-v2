@@ -75,7 +75,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 - Fixed `coreth` metrics initialization
 - Fixed bootstrapping startup logic to correctly startup if initially connected to enough stake
 - Fixed `coreth` panic during metrics collection
-- Fixed panic on concurrent map read/write in P-chain wallet SDK
+- Fixed panic on concurrent map read/write in Corechain wallet SDK
 - Fixed `rpcchainvm` panic by sanitizing http response codes
 - Fixed incorrect JSON tag on `platformvm.BaseTx`
 - Fixed `AppRequest`, `AppResponse`, and `AppGossip` stringers used in logging
@@ -147,7 +147,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 
 ### PlatformVM
 
-- Introduced time based windowing of accepted P-chain block heights to ensure that local networks update the proposer list timely in the `proposervm`.
+- Introduced time based windowing of accepted Corechain block heights to ensure that local networks update the proposer list timely in the `proposervm`.
 - Improved selection of decision transactions from the mempool.
 
 ### RPCChainVM
@@ -219,7 +219,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 ### Miscellaneous
 
 - Fixed incorrect `BlockchainID` usage in the Swapchain `ImportTx` builder.
-- Fixed incorrect `OutputOwners` in the P-chain `ImportTx` builder.
+- Fixed incorrect `OutputOwners` in the Corechain `ImportTx` builder.
 - Improved FD limit error logging and warnings.
 - Rounded bootstrapping ETAs to the nearest second.
 - Added gossip config support to the subnet configs.
@@ -300,7 +300,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 ### Miscellaneous
 
 - Added the ability to load new VM plugins dynamically.
-- Implemented Swapchain + P-chain wallet that can be used to build and sign transactions. Without providing a full node private keys.
+- Implemented Swapchain + Corechain wallet that can be used to build and sign transactions. Without providing a full node private keys.
 - Integrated e2e testing to the repo to avoid maintaining multiple synced repos.
 - Fixed `proposervm` height indexing check to correctly mark the indexer as repaired.
 - Introduced message throttling overrides to be used in future improvements to reliably send messages.
@@ -471,7 +471,7 @@ This update is backwards compatible with [v1.7.0](https://github.com/axiacoin/ax
 
 ## [v1.7.0](https://github.com/axiacoin/axia-network-v2/releases/tag/v1.7.0)
 
-This upgrade adds support for issuing multiple atomic transactions into a single block and directly transferring assets between the P-chain and the C-chain.
+This upgrade adds support for issuing multiple atomic transactions into a single block and directly transferring assets between the Corechain and the C-chain.
 
 The changes in the upgrade go into effect at 1 PM EST, December 2nd 2021 on Mainnet. One should upgrade their node before the changes go into effect, otherwise they may experience loss of uptime.
 
@@ -490,7 +490,7 @@ The changes in the upgrade go into effect at 1 PM EST, December 2nd 2021 on Main
 ### Coreth
 
 - Enabled multiple `AtomicTx`s to be issued per block.
-- Added the ability to export/import AXC to/from the P-chain.
+- Added the ability to export/import AXC to/from the Corechain.
 - Updated dynamic fee calculations.
 
 ### ProposerVM

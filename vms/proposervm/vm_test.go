@@ -1714,7 +1714,7 @@ func TestTwoOptions_OneIsAccepted(t *testing.T) {
 	}
 }
 
-// Ensure that given the chance, built blocks will reference a lagged P-chain
+// Ensure that given the chance, built blocks will reference a lagged Corechain
 // height.
 func TestLaggedPChainHeight(t *testing.T) {
 	assert := assert.New(t)

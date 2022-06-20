@@ -26,7 +26,7 @@ type ChainUTXOs interface {
 	GetUTXO(ctx stdcontext.Context, sourceChainID, utxoID ids.ID) (*axc.UTXO, error)
 }
 
-// Backend defines the full interface required to support a P-chain wallet.
+// Backend defines the full interface required to support a Corechain wallet.
 type Backend interface {
 	ChainUTXOs
 	BuilderBackend

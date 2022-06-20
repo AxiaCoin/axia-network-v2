@@ -31,7 +31,7 @@ var (
 	_ Builder = &builder{}
 )
 
-// Builder provides a convenient interface for building unsigned P-chain
+// Builder provides a convenient interface for building unsigned Corechain
 // transactions.
 type Builder interface {
 	// GetBalance calculates the amount of each asset that this builder has
@@ -49,7 +49,7 @@ type Builder interface {
 		options ...common.Option,
 	) (map[ids.ID]uint64, error)
 
-	// NewBaseTx creates a new simple value transfer. Because the P-chain
+	// NewBaseTx creates a new simple value transfer. Because the Corechain
 	// doesn't intend for balance transfers to occur, this method is expensive
 	// and abuses the creation of subnets.
 	//
@@ -148,7 +148,7 @@ type Builder interface {
 }
 
 // BuilderBackend specifies the required information needed to build unsigned
-// P-chain transactions.
+// Corechain transactions.
 type BuilderBackend interface {
 	Context
 	UTXOs(ctx stdcontext.Context, sourceChainID ids.ID) ([]*axc.UTXO, error)
@@ -410,7 +410,7 @@ func (b *builder) NewImportTx(
 	// Iterate over the unlocked UTXOs
 	for _, utxo := range utxos {
 		if utxo.AssetID() != axcAssetID {
-			// Currently - only AXC is allowed to be imported to the P-chain
+			// Currently - only AXC is allowed to be imported to the Corechain
 			continue
 		}
 
