@@ -15,7 +15,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/components/verify"
 
-	pChainValidator "github.com/axiacoin/axia-network-v2/vms/platformvm/validator"
+	coreChainValidator "github.com/axiacoin/axia-network-v2/vms/platformvm/validator"
 )
 
 var (
@@ -30,7 +30,7 @@ type UnsignedAddAllychainValidatorTx struct {
 	// Metadata, inputs and outputs
 	BaseTx `serialize:"true"`
 	// The validator
-	Validator pChainValidator.AllychainValidator `serialize:"true" json:"validator"`
+	Validator coreChainValidator.AllychainValidator `serialize:"true" json:"validator"`
 	// Auth that will be allowing this validator into the network
 	AllychainAuth verify.Verifiable `serialize:"true" json:"allychainAuthorization"`
 }
@@ -280,8 +280,8 @@ func (vm *VM) newAddAllychainValidatorTx(
 			Ins:          ins,
 			Outs:         outs,
 		}},
-		Validator: pChainValidator.AllychainValidator{
-			Validator: pChainValidator.Validator{
+		Validator: coreChainValidator.AllychainValidator{
+			Validator: coreChainValidator.Validator{
 				NodeID: nodeID,
 				Start:  startTime,
 				End:    endTime,

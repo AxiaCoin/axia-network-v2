@@ -13,7 +13,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 	"github.com/axiacoin/axia-network-v2/wallet/allychain/primary/common"
 
-	pChainValidator "github.com/axiacoin/axia-network-v2/vms/platformvm/validator"
+	coreChainValidator "github.com/axiacoin/axia-network-v2/vms/platformvm/validator"
 )
 
 var (
@@ -53,7 +53,7 @@ type Wallet interface {
 	//   will take from delegation rewards. If 1,000,000 is provided, 100% of
 	//   the delegation reward will be sent to the validator's [rewardsOwner].
 	IssueAddValidatorTx(
-		validator *pChainValidator.Validator,
+		validator *coreChainValidator.Validator,
 		rewardsOwner *secp256k1fx.OutputOwners,
 		shares uint32,
 		options ...common.Option,
@@ -65,7 +65,7 @@ type Wallet interface {
 	// - [validator] specifies all the details of the validation period such as
 	//   the startTime, endTime, sampling weight, nodeID, and allychainID.
 	IssueAddAllychainValidatorTx(
-		validator *pChainValidator.AllychainValidator,
+		validator *coreChainValidator.AllychainValidator,
 		options ...common.Option,
 	) (ids.ID, error)
 
@@ -77,7 +77,7 @@ type Wallet interface {
 	// - [rewardsOwner] specifies the owner of all the rewards this nominator
 	//   may accrue at the end of its delegation period.
 	IssueAddNominatorTx(
-		validator *pChainValidator.Validator,
+		validator *coreChainValidator.Validator,
 		rewardsOwner *secp256k1fx.OutputOwners,
 		options ...common.Option,
 	) (ids.ID, error)
@@ -182,7 +182,7 @@ func (w *wallet) IssueBaseTx(
 }
 
 func (w *wallet) IssueAddValidatorTx(
-	validator *pChainValidator.Validator,
+	validator *coreChainValidator.Validator,
 	rewardsOwner *secp256k1fx.OutputOwners,
 	shares uint32,
 	options ...common.Option,
@@ -195,7 +195,7 @@ func (w *wallet) IssueAddValidatorTx(
 }
 
 func (w *wallet) IssueAddAllychainValidatorTx(
-	validator *pChainValidator.AllychainValidator,
+	validator *coreChainValidator.AllychainValidator,
 	options ...common.Option,
 ) (ids.ID, error) {
 	utx, err := w.builder.NewAddAllychainValidatorTx(validator, options...)
@@ -206,7 +206,7 @@ func (w *wallet) IssueAddAllychainValidatorTx(
 }
 
 func (w *wallet) IssueAddNominatorTx(
-	validator *pChainValidator.Validator,
+	validator *coreChainValidator.Validator,
 	rewardsOwner *secp256k1fx.OutputOwners,
 	options ...common.Option,
 ) (ids.ID, error) {

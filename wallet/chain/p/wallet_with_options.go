@@ -10,7 +10,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 	"github.com/axiacoin/axia-network-v2/wallet/allychain/primary/common"
 
-	pChainValidator "github.com/axiacoin/axia-network-v2/vms/platformvm/validator"
+	coreChainValidator "github.com/axiacoin/axia-network-v2/vms/platformvm/validator"
 )
 
 var _ Wallet = &walletWithOptions{}
@@ -48,7 +48,7 @@ func (w *walletWithOptions) IssueBaseTx(
 }
 
 func (w *walletWithOptions) IssueAddValidatorTx(
-	validator *pChainValidator.Validator,
+	validator *coreChainValidator.Validator,
 	rewardsOwner *secp256k1fx.OutputOwners,
 	shares uint32,
 	options ...common.Option,
@@ -62,7 +62,7 @@ func (w *walletWithOptions) IssueAddValidatorTx(
 }
 
 func (w *walletWithOptions) IssueAddAllychainValidatorTx(
-	validator *pChainValidator.AllychainValidator,
+	validator *coreChainValidator.AllychainValidator,
 	options ...common.Option,
 ) (ids.ID, error) {
 	return w.Wallet.IssueAddAllychainValidatorTx(
@@ -72,7 +72,7 @@ func (w *walletWithOptions) IssueAddAllychainValidatorTx(
 }
 
 func (w *walletWithOptions) IssueAddNominatorTx(
-	validator *pChainValidator.Validator,
+	validator *coreChainValidator.Validator,
 	rewardsOwner *secp256k1fx.OutputOwners,
 	options ...common.Option,
 ) (ids.ID, error) {

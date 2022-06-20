@@ -19,7 +19,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 
 	safemath "github.com/axiacoin/axia-network-v2/utils/math"
-	pChainValidator "github.com/axiacoin/axia-network-v2/vms/platformvm/validator"
+	coreChainValidator "github.com/axiacoin/axia-network-v2/vms/platformvm/validator"
 )
 
 var (
@@ -41,7 +41,7 @@ type UnsignedAddValidatorTx struct {
 	// Metadata, inputs and outputs
 	BaseTx `serialize:"true"`
 	// Describes the delegatee
-	Validator pChainValidator.Validator `serialize:"true" json:"validator"`
+	Validator coreChainValidator.Validator `serialize:"true" json:"validator"`
 	// Where to send staked tokens when done validating
 	Stake []*axc.TransferableOutput `serialize:"true" json:"stake"`
 	// Where to send staking rewards when done validating
@@ -283,7 +283,7 @@ func (vm *VM) newAddValidatorTx(
 			Ins:          ins,
 			Outs:         unlockedOuts,
 		}},
-		Validator: pChainValidator.Validator{
+		Validator: coreChainValidator.Validator{
 			NodeID: nodeID,
 			Start:  startTime,
 			End:    endTime,

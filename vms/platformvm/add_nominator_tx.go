@@ -19,7 +19,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/fx"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 
-	pChainValidator "github.com/axiacoin/axia-network-v2/vms/platformvm/validator"
+	coreChainValidator "github.com/axiacoin/axia-network-v2/vms/platformvm/validator"
 )
 
 var (
@@ -36,7 +36,7 @@ type UnsignedAddNominatorTx struct {
 	// Metadata, inputs and outputs
 	BaseTx `serialize:"true"`
 	// Describes the delegatee
-	Validator pChainValidator.Validator `serialize:"true" json:"validator"`
+	Validator coreChainValidator.Validator `serialize:"true" json:"validator"`
 	// Where to send staked tokens when done validating
 	Stake []*axc.TransferableOutput `serialize:"true" json:"stake"`
 	// Where to send staking rewards when done validating
@@ -310,7 +310,7 @@ func (vm *VM) newAddNominatorTx(
 			Ins:          ins,
 			Outs:         unlockedOuts,
 		}},
-		Validator: pChainValidator.Validator{
+		Validator: coreChainValidator.Validator{
 			NodeID: nodeID,
 			Start:  startTime,
 			End:    endTime,
@@ -373,7 +373,7 @@ func maxStakeAmount(
 ) (uint64, error) {
 	// Keep track of which nominators should be removed next so that we can
 	// efficiently remove nominators and keep the current stake updated.
-	toRemoveHeap := pChainValidator.EndTimeHeap{}
+	toRemoveHeap := coreChainValidator.EndTimeHeap{}
 	for _, currentNominator := range current {
 		toRemoveHeap.Add(&currentNominator.Validator)
 	}

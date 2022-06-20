@@ -10,7 +10,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 	"github.com/axiacoin/axia-network-v2/wallet/allychain/primary/common"
 
-	pChainValidator "github.com/axiacoin/axia-network-v2/vms/platformvm/validator"
+	coreChainValidator "github.com/axiacoin/axia-network-v2/vms/platformvm/validator"
 )
 
 var _ Builder = &builderWithOptions{}
@@ -53,7 +53,7 @@ func (b *builderWithOptions) GetImportableBalance(
 }
 
 func (b *builderWithOptions) NewAddValidatorTx(
-	validator *pChainValidator.Validator,
+	validator *coreChainValidator.Validator,
 	rewardsOwner *secp256k1fx.OutputOwners,
 	shares uint32,
 	options ...common.Option,
@@ -67,7 +67,7 @@ func (b *builderWithOptions) NewAddValidatorTx(
 }
 
 func (b *builderWithOptions) NewAddAllychainValidatorTx(
-	validator *pChainValidator.AllychainValidator,
+	validator *coreChainValidator.AllychainValidator,
 	options ...common.Option,
 ) (*platformvm.UnsignedAddAllychainValidatorTx, error) {
 	return b.Builder.NewAddAllychainValidatorTx(
@@ -77,7 +77,7 @@ func (b *builderWithOptions) NewAddAllychainValidatorTx(
 }
 
 func (b *builderWithOptions) NewAddNominatorTx(
-	validator *pChainValidator.Validator,
+	validator *coreChainValidator.Validator,
 	rewardsOwner *secp256k1fx.OutputOwners,
 	options ...common.Option,
 ) (*platformvm.UnsignedAddNominatorTx, error) {
