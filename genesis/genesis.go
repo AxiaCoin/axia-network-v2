@@ -34,7 +34,7 @@ var (
 	errNoSupply               = errors.New("initial supply must be > 0")
 	errNoStakeDuration        = errors.New("initial stake duration must be > 0")
 	errNoStakers              = errors.New("initial stakers must be > 0")
-	errNoCChainGenesis        = errors.New("C-Chain genesis cannot be empty")
+	errNoCChainGenesis        = errors.New("AXChain genesis cannot be empty")
 	errNoTxs                  = errors.New("genesis creates no transactions")
 )
 
@@ -434,7 +434,7 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 			GenesisData: genesisStr,
 			SubnetID:    constants.PrimaryNetworkID,
 			VMID:        constants.EVMID,
-			Name:        "C-Chain",
+			Name:        "AXChain",
 		},
 	}
 

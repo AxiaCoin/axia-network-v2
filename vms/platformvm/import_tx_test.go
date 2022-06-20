@@ -112,7 +112,7 @@ func TestNewImportTx(t *testing.T) {
 			shouldVerify:  true,
 		},
 		{
-			description:   "attempting to import from C-chain",
+			description:   "attempting to import from Axchain",
 			sourceChainID: cChainID,
 			sharedMemory:  fundedSharedMemory(cChainID, vm.TxFee),
 			sourceKeys:    []*crypto.PrivateKeySECP256K1R{sourceKey},
