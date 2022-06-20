@@ -16,7 +16,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/vms/platformvm"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/stakeable"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
-	"github.com/axiacoin/axia-network-v2/wallet/allychain/primary/common"
+	"github.com/axiacoin/axia-network-v2/axiawallet/allychain/primary/common"
 
 	coreChainValidator "github.com/axiacoin/axia-network-v2/vms/platformvm/validator"
 )

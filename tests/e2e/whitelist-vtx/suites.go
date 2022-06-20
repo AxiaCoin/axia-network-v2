@@ -22,8 +22,8 @@ import (
 	"github.com/axiacoin/axia-network-v2/vms/avm"
 	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
-	"github.com/axiacoin/axia-network-v2/wallet/allychain/primary"
-	"github.com/axiacoin/axia-network-v2/wallet/allychain/primary/common"
+	"github.com/axiacoin/axia-network-v2/axiawallet/allychain/primary"
+	"github.com/axiacoin/axia-network-v2/axiawallet/allychain/primary/common"
 )
 
 var keyFactory crypto.FactorySECP256K1R
@@ -46,14 +46,14 @@ var _ = e2e.DescribeSwapChain("[WhitelistTx]", func() {
 			genesis.EWOQKey,
 			randomKey,
 		)
-		var wallet primary.Wallet
+		var axiawallet primary.AXIAWallet
 		ginkgo.By("collect whitelist vtx metrics", func() {
-			walletURI := uris[0]
+			axiawalletURI := uris[0]
 
-			// 5-second is enough to fetch initial UTXOs for test cluster in "primary.NewWallet"
-			ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultWalletCreationTimeout)
+			// 5-second is enough to fetch initial UTXOs for test cluster in "primary.NewAXIAWallet"
+			ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultAXIAWalletCreationTimeout)
 			var err error
-			wallet, err = primary.NewWalletFromURI(ctx, walletURI, keys)
+			axiawallet, err = primary.NewAXIAWalletFromURI(ctx, axiawalletURI, keys)
 			cancel()
 			gomega.Expect(err).Should(gomega.BeNil())
 		})
@@ -87,38 +87,38 @@ var _ = e2e.DescribeSwapChain("[WhitelistTx]", func() {
 			}
 		})
 
-		ewoqWallet := primary.NewWalletWithOptions(
-			wallet,
+		ewoqAXIAWallet := primary.NewAXIAWalletWithOptions(
+			axiawallet,
 			common.WithCustomAddresses(ids.ShortSet{
 				genesis.EWOQKey.PublicKey().Address(): struct{}{},
 			}),
 		)
-		randWallet := primary.NewWalletWithOptions(
-			wallet,
+		randAXIAWallet := primary.NewAXIAWalletWithOptions(
+			axiawallet,
 			common.WithCustomAddresses(ids.ShortSet{
 				randomKey.PublicKey().Address(): struct{}{},
 			}),
 		)
 		ginkgo.By("issue regular, virtuous SwapChain tx, before whitelist vtx, should succeed", func() {
-			balances, err := ewoqWallet.X().Builder().GetFTBalance()
+			balances, err := ewoqAXIAWallet.X().Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
 
-			axcAssetID := wallet.X().AXCAssetID()
+			axcAssetID := axiawallet.X().AXCAssetID()
 			ewoqPrevBalX := balances[axcAssetID]
-			tests.Outf("{{green}}ewoq wallet balance:{{/}} %d\n", ewoqPrevBalX)
+			tests.Outf("{{green}}ewoq axiawallet balance:{{/}} %d\n", ewoqPrevBalX)
 
-			balances, err = randWallet.X().Builder().GetFTBalance()
+			balances, err = randAXIAWallet.X().Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
 
 			randPrevBalX := balances[axcAssetID]
-			tests.Outf("{{green}}rand wallet balance:{{/}} %d\n", randPrevBalX)
+			tests.Outf("{{green}}rand axiawallet balance:{{/}} %d\n", randPrevBalX)
 
 			amount := genRandUint64(ewoqPrevBalX)
 			tests.Outf("{{green}}amount to transfer:{{/}} %d\n", amount)
 
 			tests.Outf("{{blue}}issuing regular, virtuous transaction at %q{{/}}\n", uris[0])
 			ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
-			_, err = ewoqWallet.X().IssueBaseTx(
+			_, err = ewoqAXIAWallet.X().IssueBaseTx(
 				[]*axc.TransferableOutput{{
 					Asset: axc.Asset{
 						ID: axcAssetID,
@@ -138,17 +138,17 @@ var _ = e2e.DescribeSwapChain("[WhitelistTx]", func() {
 
 			time.Sleep(3 * time.Second)
 
-			balances, err = ewoqWallet.X().Builder().GetFTBalance()
+			balances, err = ewoqAXIAWallet.X().Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
 			ewoqCurBalX := balances[axcAssetID]
-			tests.Outf("{{green}}ewoq wallet balance:{{/}} %d\n", ewoqCurBalX)
+			tests.Outf("{{green}}ewoq axiawallet balance:{{/}} %d\n", ewoqCurBalX)
 
-			balances, err = randWallet.X().Builder().GetFTBalance()
+			balances, err = randAXIAWallet.X().Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
 			randCurBalX := balances[axcAssetID]
-			tests.Outf("{{green}}ewoq wallet balance:{{/}} %d\n", randCurBalX)
+			tests.Outf("{{green}}ewoq axiawallet balance:{{/}} %d\n", randCurBalX)
 
-			gomega.Expect(ewoqCurBalX).Should(gomega.Equal(ewoqPrevBalX - amount - wallet.X().BaseTxFee()))
+			gomega.Expect(ewoqCurBalX).Should(gomega.Equal(ewoqPrevBalX - amount - axiawallet.X().BaseTxFee()))
 			gomega.Expect(randCurBalX).Should(gomega.Equal(randPrevBalX + amount))
 		})
 
@@ -241,17 +241,17 @@ var _ = e2e.DescribeSwapChain("[WhitelistTx]", func() {
 		})
 
 		ginkgo.By("issue regular, virtuous SwapChain tx, after whitelist vtx, should fail", func() {
-			balances, err := ewoqWallet.X().Builder().GetFTBalance()
+			balances, err := ewoqAXIAWallet.X().Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
 
-			axcAssetID := wallet.X().AXCAssetID()
+			axcAssetID := axiawallet.X().AXCAssetID()
 			ewoqPrevBalX := balances[axcAssetID]
-			tests.Outf("{{green}}ewoq wallet balance:{{/}} %d\n", ewoqPrevBalX)
+			tests.Outf("{{green}}ewoq axiawallet balance:{{/}} %d\n", ewoqPrevBalX)
 
 			amount := genRandUint64(ewoqPrevBalX)
 			tests.Outf("{{blue}}issuing regular, virtuous transaction at %q{{/}}\n", uris[0])
 			ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
-			_, err = ewoqWallet.X().IssueBaseTx(
+			_, err = ewoqAXIAWallet.X().IssueBaseTx(
 				[]*axc.TransferableOutput{{
 					Asset: axc.Asset{
 						ID: axcAssetID,

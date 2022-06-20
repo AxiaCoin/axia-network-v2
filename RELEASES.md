@@ -75,7 +75,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 - Fixed `coreth` metrics initialization
 - Fixed bootstrapping startup logic to correctly startup if initially connected to enough stake
 - Fixed `coreth` panic during metrics collection
-- Fixed panic on concurrent map read/write in Corechain wallet SDK
+- Fixed panic on concurrent map read/write in Corechain axiawallet SDK
 - Fixed `rpcchainvm` panic by sanitizing http response codes
 - Fixed incorrect JSON tag on `platformvm.BaseTx`
 - Fixed `AppRequest`, `AppResponse`, and `AppGossip` stringers used in logging
@@ -300,7 +300,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 ### Miscellaneous
 
 - Added the ability to load new VM plugins dynamically.
-- Implemented Swapchain + Corechain wallet that can be used to build and sign transactions. Without providing a full node private keys.
+- Implemented Swapchain + Corechain axiawallet that can be used to build and sign transactions. Without providing a full node private keys.
 - Integrated e2e testing to the repo to avoid maintaining multiple synced repos.
 - Fixed `proposervm` height indexing check to correctly mark the indexer as repaired.
 - Introduced message throttling overrides to be used in future improvements to reliably send messages.

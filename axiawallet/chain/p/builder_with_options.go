@@ -1,15 +1,16 @@
 // Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-package x
+package p
 
 import (
 	"github.com/axiacoin/axia-network-v2/ids"
-	"github.com/axiacoin/axia-network-v2/vms/avm/txs"
 	"github.com/axiacoin/axia-network-v2/vms/components/axc"
-	"github.com/axiacoin/axia-network-v2/vms/components/verify"
+	"github.com/axiacoin/axia-network-v2/vms/platformvm"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
-	"github.com/axiacoin/axia-network-v2/wallet/allychain/primary/common"
+	"github.com/axiacoin/axia-network-v2/axiawallet/allychain/primary/common"
+
+	coreChainValidator "github.com/axiacoin/axia-network-v2/vms/platformvm/validator"
 )
 
 var _ Builder = &builderWithOptions{}
@@ -33,10 +34,10 @@ func NewBuilderWithOptions(builder Builder, options ...common.Option) Builder {
 	}
 }
 
-func (b *builderWithOptions) GetFTBalance(
+func (b *builderWithOptions) GetBalance(
 	options ...common.Option,
 ) (map[ids.ID]uint64, error) {
-	return b.Builder.GetFTBalance(
+	return b.Builder.GetBalance(
 		common.UnionOptions(b.options, options)...,
 	)
 }
@@ -51,95 +52,77 @@ func (b *builderWithOptions) GetImportableBalance(
 	)
 }
 
-func (b *builderWithOptions) NewBaseTx(
-	outputs []*axc.TransferableOutput,
+func (b *builderWithOptions) NewAddValidatorTx(
+	validator *coreChainValidator.Validator,
+	rewardsOwner *secp256k1fx.OutputOwners,
+	shares uint32,
 	options ...common.Option,
-) (*txs.BaseTx, error) {
-	return b.Builder.NewBaseTx(
-		outputs,
+) (*platformvm.UnsignedAddValidatorTx, error) {
+	return b.Builder.NewAddValidatorTx(
+		validator,
+		rewardsOwner,
+		shares,
 		common.UnionOptions(b.options, options)...,
 	)
 }
 
-func (b *builderWithOptions) NewCreateAssetTx(
-	name string,
-	symbol string,
-	denomination byte,
-	initialState map[uint32][]verify.State,
+func (b *builderWithOptions) NewAddAllychainValidatorTx(
+	validator *coreChainValidator.AllychainValidator,
 	options ...common.Option,
-) (*txs.CreateAssetTx, error) {
-	return b.Builder.NewCreateAssetTx(
-		name,
-		symbol,
-		denomination,
-		initialState,
+) (*platformvm.UnsignedAddAllychainValidatorTx, error) {
+	return b.Builder.NewAddAllychainValidatorTx(
+		validator,
 		common.UnionOptions(b.options, options)...,
 	)
 }
 
-func (b *builderWithOptions) NewOperationTx(
-	operations []*txs.Operation,
+func (b *builderWithOptions) NewAddNominatorTx(
+	validator *coreChainValidator.Validator,
+	rewardsOwner *secp256k1fx.OutputOwners,
 	options ...common.Option,
-) (*txs.OperationTx, error) {
-	return b.Builder.NewOperationTx(
-		operations,
+) (*platformvm.UnsignedAddNominatorTx, error) {
+	return b.Builder.NewAddNominatorTx(
+		validator,
+		rewardsOwner,
 		common.UnionOptions(b.options, options)...,
 	)
 }
 
-func (b *builderWithOptions) NewOperationTxMintFT(
-	outputs map[ids.ID]*secp256k1fx.TransferOutput,
+func (b *builderWithOptions) NewCreateChainTx(
+	allychainID ids.ID,
+	genesis []byte,
+	vmID ids.ID,
+	fxIDs []ids.ID,
+	chainName string,
 	options ...common.Option,
-) (*txs.OperationTx, error) {
-	return b.Builder.NewOperationTxMintFT(
-		outputs,
+) (*platformvm.UnsignedCreateChainTx, error) {
+	return b.Builder.NewCreateChainTx(
+		allychainID,
+		genesis,
+		vmID,
+		fxIDs,
+		chainName,
 		common.UnionOptions(b.options, options)...,
 	)
 }
 
-func (b *builderWithOptions) NewOperationTxMintNFT(
-	assetID ids.ID,
-	payload []byte,
-	owners []*secp256k1fx.OutputOwners,
-	options ...common.Option,
-) (*txs.OperationTx, error) {
-	return b.Builder.NewOperationTxMintNFT(
-		assetID,
-		payload,
-		owners,
-		common.UnionOptions(b.options, options)...,
-	)
-}
-
-func (b *builderWithOptions) NewOperationTxMintProperty(
-	assetID ids.ID,
+func (b *builderWithOptions) NewCreateAllychainTx(
 	owner *secp256k1fx.OutputOwners,
 	options ...common.Option,
-) (*txs.OperationTx, error) {
-	return b.Builder.NewOperationTxMintProperty(
-		assetID,
+) (*platformvm.UnsignedCreateAllychainTx, error) {
+	return b.Builder.NewCreateAllychainTx(
 		owner,
 		common.UnionOptions(b.options, options)...,
 	)
 }
 
-func (b *builderWithOptions) NewOperationTxBurnProperty(
-	assetID ids.ID,
-	options ...common.Option,
-) (*txs.OperationTx, error) {
-	return b.Builder.NewOperationTxBurnProperty(
-		assetID,
-		common.UnionOptions(b.options, options)...,
-	)
-}
-
 func (b *builderWithOptions) NewImportTx(
-	chainID ids.ID,
+	sourceChainID ids.ID,
 	to *secp256k1fx.OutputOwners,
 	options ...common.Option,
-) (*txs.ImportTx, error) {
+) (*platformvm.UnsignedImportTx, error) {
 	return b.Builder.NewImportTx(
-		chainID,
+		sourceChainID,
 		to,
 		common.UnionOptions(b.options, options)...,
 	)
@@ -149,7 +132,7 @@ func (b *builderWithOptions) NewExportTx(
 	chainID ids.ID,
 	outputs []*axc.TransferableOutput,
 	options ...common.Option,
-) (*txs.ExportTx, error) {
+) (*platformvm.UnsignedExportTx, error) {
 	return b.Builder.NewExportTx(
 		chainID,
 		outputs,
