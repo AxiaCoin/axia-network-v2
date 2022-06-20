@@ -27,7 +27,7 @@ var (
 	_ Builder = &builder{}
 )
 
-// Builder provides a convenient interface for building unsigned X-chain
+// Builder provides a convenient interface for building unsigned Swapchain
 // transactions.
 type Builder interface {
 	// GetFTBalance calculates the amount of each fungible asset that this
@@ -147,7 +147,7 @@ type Builder interface {
 }
 
 // BuilderBackend specifies the required information needed to build unsigned
-// X-chain transactions.
+// Swapchain transactions.
 type BuilderBackend interface {
 	Context
 

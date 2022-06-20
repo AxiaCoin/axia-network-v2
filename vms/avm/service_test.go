@@ -1929,7 +1929,7 @@ func TestServiceGetUTXOs(t *testing.T) {
 			args:      &api.GetUTXOsArgs{},
 		},
 		{
-			label: "get all X-chain UTXOs",
+			label: "get all Swapchain UTXOs",
 			count: numUTXOs,
 			args: &api.GetUTXOsArgs{
 				Addresses: []string{
@@ -1938,7 +1938,7 @@ func TestServiceGetUTXOs(t *testing.T) {
 			},
 		},
 		{
-			label: "get one X-chain UTXO",
+			label: "get one Swapchain UTXO",
 			count: 1,
 			args: &api.GetUTXOsArgs{
 				Addresses: []string{

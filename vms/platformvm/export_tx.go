@@ -206,7 +206,7 @@ func (vm *VM) newExportTx(
 			Outs:         outs, // Non-exported outputs
 		}},
 		DestinationChain: chainID,
-		ExportedOutputs: []*axc.TransferableOutput{{ // Exported to X-Chain
+		ExportedOutputs: []*axc.TransferableOutput{{ // Exported to SwapChain
 			Asset: axc.Asset{ID: vm.ctx.AXCAssetID},
 			Out: &secp256k1fx.TransferOutput{
 				Amt: amount,

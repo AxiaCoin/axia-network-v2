@@ -1,7 +1,7 @@
 // Copyright (C) 2019-2022, Axia Systems, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-// Implements X-Chain whitelist vtx (stop vertex) tests.
+// Implements SwapChain whitelist vtx (stop vertex) tests.
 package whitelistvtx
 
 import (
@@ -99,7 +99,7 @@ var _ = e2e.DescribeXChain("[WhitelistTx]", func() {
 				randomKey.PublicKey().Address(): struct{}{},
 			}),
 		)
-		ginkgo.By("issue regular, virtuous X-Chain tx, before whitelist vtx, should succeed", func() {
+		ginkgo.By("issue regular, virtuous SwapChain tx, before whitelist vtx, should succeed", func() {
 			balances, err := ewoqWallet.X().Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
 
@@ -240,7 +240,7 @@ var _ = e2e.DescribeXChain("[WhitelistTx]", func() {
 			}
 		})
 
-		ginkgo.By("issue regular, virtuous X-Chain tx, after whitelist vtx, should fail", func() {
+		ginkgo.By("issue regular, virtuous SwapChain tx, after whitelist vtx, should fail", func() {
 			balances, err := ewoqWallet.X().Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
 

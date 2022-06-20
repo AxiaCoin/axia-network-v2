@@ -1298,8 +1298,8 @@ type ExportAXCArgs struct {
 	To string `json:"to"`
 }
 
-// ExportAXC exports AXC from the P-Chain to the X-Chain
-// It must be imported on the X-Chain to complete the transfer
+// ExportAXC exports AXC from the P-Chain to the SwapChain
+// It must be imported on the SwapChain to complete the transfer
 func (service *Service) ExportAXC(_ *http.Request, args *ExportAXCArgs, response *api.JSONTxIDChangeAddr) error {
 	service.vm.ctx.Log.Debug("Platform: ExportAXC called")
 
@@ -1386,8 +1386,8 @@ type ImportAXCArgs struct {
 	To string `json:"to"`
 }
 
-// ImportAXC issues a transaction to import AXC from the X-chain. The AXC
-// must have already been exported from the X-Chain.
+// ImportAXC issues a transaction to import AXC from the Swapchain. The AXC
+// must have already been exported from the SwapChain.
 func (service *Service) ImportAXC(_ *http.Request, args *ImportAXCArgs, response *api.JSONTxIDChangeAddr) error {
 	service.vm.ctx.Log.Debug("Platform: ImportAXC called")
 

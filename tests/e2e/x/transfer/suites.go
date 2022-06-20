@@ -67,7 +67,7 @@ var _ = e2e.DescribeXChain("[Virtuous Transfer Tx AXC]", func() {
 
 		// URI -> "metric name" -> "metric value"
 		curMetrics := make(map[string]map[string]float64)
-		ginkgo.By("collect x-chain metrics", func() {
+		ginkgo.By("collect swapchain metrics", func() {
 			for _, u := range uris {
 				ep := u + "/ext/metrics"
 
@@ -97,7 +97,7 @@ var _ = e2e.DescribeXChain("[Virtuous Transfer Tx AXC]", func() {
 			}),
 		)
 		var txID ids.ID
-		ginkgo.By("issue regular, virtuous X-Chain tx should succeed", func() {
+		ginkgo.By("issue regular, virtuous SwapChain tx should succeed", func() {
 			balances, err := ewoqWallet.X().Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
 
@@ -152,7 +152,7 @@ var _ = e2e.DescribeXChain("[Virtuous Transfer Tx AXC]", func() {
 			gomega.Expect(randCurBalX).Should(gomega.Equal(randPrevBalX + amount))
 		})
 
-		ginkgo.By("accept x-chain tx in all nodes", func() {
+		ginkgo.By("accept swapchain tx in all nodes", func() {
 			tests.Outf("{{blue}}waiting before querying metrics{{/}}\n")
 
 			for _, u := range uris {
@@ -169,13 +169,13 @@ var _ = e2e.DescribeXChain("[Virtuous Transfer Tx AXC]", func() {
 
 				prev := curMetrics[u]
 
-				// +0 since x-chain tx must have been processed and accepted by now
+				// +0 since swapchain tx must have been processed and accepted by now
 				gomega.Expect(mm["axia_X_vtx_processing"]).Should(gomega.Equal(prev["axia_X_vtx_processing"]))
 
-				// +1 since x-chain tx must have been accepted by now
+				// +1 since swapchain tx must have been accepted by now
 				gomega.Expect(mm["axia_X_vtx_accepted_count"]).Should(gomega.Equal(prev["axia_X_vtx_accepted_count"] + 1))
 
-				// +0 since virtuous x-chain tx must not be rejected
+				// +0 since virtuous swapchain tx must not be rejected
 				gomega.Expect(mm["axia_X_vtx_rejected_count"]).Should(gomega.Equal(prev["axia_X_vtx_rejected_count"]))
 
 				curMetrics[u] = mm

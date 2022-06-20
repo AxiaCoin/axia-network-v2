@@ -428,7 +428,7 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 				nftfx.ID,
 				propertyfx.ID,
 			},
-			Name: "X-Chain",
+			Name: "SwapChain",
 		},
 		{
 			GenesisData: genesisStr,
@@ -467,7 +467,7 @@ func splitAllocations(allocations []Allocation, numSplits int) [][]Allocation {
 	currentNodeAmount := uint64(0)
 	for _, allocation := range allocations {
 		currentAllocation := allocation
-		// Already added to the X-chain
+		// Already added to the Swapchain
 		currentAllocation.InitialAmount = 0
 		// Going to be added until the correct amount is reached
 		currentAllocation.UnlockSchedule = nil
@@ -490,7 +490,7 @@ func splitAllocations(allocations []Allocation, numSplits int) [][]Allocation {
 				currentNodeAmount = 0
 
 				currentAllocation = allocation
-				// Already added to the X-chain
+				// Already added to the Swapchain
 				currentAllocation.InitialAmount = 0
 				// Going to be added until the correct amount is reached
 				currentAllocation.UnlockSchedule = nil
