@@ -55,13 +55,13 @@ func Aliases(genesisBytes []byte) (map[string][]string, map[ids.ID][]string, err
 				path.Join(constants.ChainAliasPrefix, "C"),
 				path.Join(constants.ChainAliasPrefix, "evm"),
 			}
-			chainAliases[chainID] = GetCChainAliases()
+			chainAliases[chainID] = GetAXChainAliases()
 		}
 	}
 	return apiAliases, chainAliases, nil
 }
 
-func GetCChainAliases() []string {
+func GetAXChainAliases() []string {
 	return []string{"C", "evm"}
 }
 

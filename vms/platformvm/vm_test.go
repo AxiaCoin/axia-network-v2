@@ -102,7 +102,7 @@ var (
 	testAllychain1ControlKeys = keys[0:3]
 
 	swapChainID = ids.Empty.Prefix(0)
-	cChainID = ids.Empty.Prefix(1)
+	axChainID = ids.Empty.Prefix(1)
 
 	// Used to create and use keys.
 	testKeyfactory crypto.FactorySECP256K1R
@@ -143,8 +143,8 @@ func defaultContext() *snow.Context {
 		aliaser.Alias(constants.PlatformChainID, constants.PlatformChainID.String()),
 		aliaser.Alias(swapChainID, "X"),
 		aliaser.Alias(swapChainID, swapChainID.String()),
-		aliaser.Alias(cChainID, "C"),
-		aliaser.Alias(cChainID, cChainID.String()),
+		aliaser.Alias(axChainID, "C"),
+		aliaser.Alias(axChainID, axChainID.String()),
 	)
 	if errs.Errored() {
 		panic(errs.Err)
@@ -155,7 +155,7 @@ func defaultContext() *snow.Context {
 		chainsToAllychain: map[ids.ID]ids.ID{
 			constants.PlatformChainID: constants.PrimaryNetworkID,
 			swapChainID:                  constants.PrimaryNetworkID,
-			cChainID:                  constants.PrimaryNetworkID,
+			axChainID:                  constants.PrimaryNetworkID,
 		},
 	}
 	return ctx
