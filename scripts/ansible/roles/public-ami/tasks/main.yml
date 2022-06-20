@@ -34,44 +34,44 @@
 
 - name: Create axia user
   user:
-    name: "{{ ava_user }}"
+    name: "{{ axia_user }}"
     shell: /bin/bash
     uid: 114
-    group: "{{ ava_group }}"
+    group: "{{ axia_group }}"
 
 - name: Create axia config dir
   file:
     path: /etc/axia
-    owner: "{{ ava_user }}"
-    group: "{{ ava_group }}"
+    owner: "{{ axia_user }}"
+    group: "{{ axia_group }}"
     state: directory
 
 - name: Create axia C config dir
   file:
     path: /etc/axia/C
-    owner: "{{ ava_user }}"
-    group: "{{ ava_group }}"
+    owner: "{{ axia_user }}"
+    group: "{{ axia_group }}"
     state: directory
 
 - name: Create axia log dir
   file:
     path: "{{ log_dir }}"
-    owner: "{{ ava_user }}"
-    group: "{{ ava_group }}"
+    owner: "{{ axia_user }}"
+    group: "{{ axia_group }}"
     state: directory
 
 - name: Create axia database dir
   file:
     path: "{{ db_dir }}"
-    owner: "{{ ava_user }}"
-    group: "{{ ava_group }}"
+    owner: "{{ axia_user }}"
+    group: "{{ axia_group }}"
     state: directory
 
 - name: Create axia plugins directory
   file:
     path: "{{ plugin_dir }}"
-    owner: "{{ ava_user }}"
-    group: "{{ ava_group }}"
+    owner: "{{ axia_user }}"
+    group: "{{ axia_group }}"
     state: directory
     recurse: yes
 

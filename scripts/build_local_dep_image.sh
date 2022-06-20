@@ -14,11 +14,11 @@ DOCKER="${DOCKER:-docker}"
 SCRIPT_DIRPATH=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
 ROOT_DIRPATH="$(dirname "${SCRIPT_DIRPATH}")"
 
-AVA_LABS_RELATIVE_PATH="src/github.com/ava-labs"
+AXIA_SYSTEMS_RELATIVE_PATH="src/github.com/axiacoin"
 EXISTING_GOPATH="$GOPATH"
 
 export GOPATH="$SCRIPT_DIRPATH/.build_image_gopath"
-WORKPREFIX="$GOPATH/src/github.com/ava-labs"
+WORKPREFIX="$GOPATH/src/github.com/axiacoin"
 
 # Clone the remotes and checkout the desired branch/commits
 AXIA_CLONE="$WORKPREFIX/axia"
@@ -29,8 +29,8 @@ rm -rf "$WORKPREFIX"
 mkdir -p "$WORKPREFIX"
 
 
-AXIA_COMMIT_HASH="$(git -C "$EXISTING_GOPATH/$AVA_LABS_RELATIVE_PATH/axia" rev-parse --short HEAD)"
-CORETH_COMMIT_HASH="$(git -C "$EXISTING_GOPATH/$AVA_LABS_RELATIVE_PATH/coreth" rev-parse --short HEAD)"
+AXIA_COMMIT_HASH="$(git -C "$EXISTING_GOPATH/$AXIA_SYSTEMS_RELATIVE_PATH/axia" rev-parse --short HEAD)"
+CORETH_COMMIT_HASH="$(git -C "$EXISTING_GOPATH/$AXIA_SYSTEMS_RELATIVE_PATH/coreth" rev-parse --short HEAD)"
 
 git config --global credential.helper cache
 

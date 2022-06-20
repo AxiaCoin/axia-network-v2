@@ -57,7 +57,7 @@ func TestCompatibility(t *testing.T) {
 			wontMask:    true,
 		},
 		{
-			peer:        NewDefaultApplication("ava", 1, 5, 0),
+			peer:        NewDefaultApplication("axia", 1, 5, 0),
 			time:        minCompatableTime,
 			connectable: false,
 			compatible:  false,
