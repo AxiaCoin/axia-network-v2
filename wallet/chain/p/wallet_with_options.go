@@ -8,7 +8,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
-	"github.com/axiacoin/axia-network-v2/wallet/subnet/primary/common"
+	"github.com/axiacoin/axia-network-v2/wallet/allychain/primary/common"
 
 	pChainValidator "github.com/axiacoin/axia-network-v2/vms/platformvm/validator"
 )
@@ -61,11 +61,11 @@ func (w *walletWithOptions) IssueAddValidatorTx(
 	)
 }
 
-func (w *walletWithOptions) IssueAddSubnetValidatorTx(
-	validator *pChainValidator.SubnetValidator,
+func (w *walletWithOptions) IssueAddAllychainValidatorTx(
+	validator *pChainValidator.AllychainValidator,
 	options ...common.Option,
 ) (ids.ID, error) {
-	return w.Wallet.IssueAddSubnetValidatorTx(
+	return w.Wallet.IssueAddAllychainValidatorTx(
 		validator,
 		common.UnionOptions(w.options, options)...,
 	)
@@ -84,7 +84,7 @@ func (w *walletWithOptions) IssueAddNominatorTx(
 }
 
 func (w *walletWithOptions) IssueCreateChainTx(
-	subnetID ids.ID,
+	allychainID ids.ID,
 	genesis []byte,
 	vmID ids.ID,
 	fxIDs []ids.ID,
@@ -92,7 +92,7 @@ func (w *walletWithOptions) IssueCreateChainTx(
 	options ...common.Option,
 ) (ids.ID, error) {
 	return w.Wallet.IssueCreateChainTx(
-		subnetID,
+		allychainID,
 		genesis,
 		vmID,
 		fxIDs,
@@ -101,11 +101,11 @@ func (w *walletWithOptions) IssueCreateChainTx(
 	)
 }
 
-func (w *walletWithOptions) IssueCreateSubnetTx(
+func (w *walletWithOptions) IssueCreateAllychainTx(
 	owner *secp256k1fx.OutputOwners,
 	options ...common.Option,
 ) (ids.ID, error) {
-	return w.Wallet.IssueCreateSubnetTx(
+	return w.Wallet.IssueCreateAllychainTx(
 		owner,
 		common.UnionOptions(w.options, options)...,
 	)

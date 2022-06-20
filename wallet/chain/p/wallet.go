@@ -11,7 +11,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/vms/platformvm"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/status"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
-	"github.com/axiacoin/axia-network-v2/wallet/subnet/primary/common"
+	"github.com/axiacoin/axia-network-v2/wallet/allychain/primary/common"
 
 	pChainValidator "github.com/axiacoin/axia-network-v2/vms/platformvm/validator"
 )
@@ -33,7 +33,7 @@ type Wallet interface {
 
 	// IssueBaseTx creates, signs, and issues a new simple value transfer.
 	// Because the Corechain doesn't intend for balance transfers to occur, this
-	// method is expensive and abuses the creation of subnets.
+	// method is expensive and abuses the creation of allychains.
 	//
 	// - [outputs] specifies all the recipients and amounts that should be sent
 	//   from this transaction.
@@ -59,13 +59,13 @@ type Wallet interface {
 		options ...common.Option,
 	) (ids.ID, error)
 
-	// IssueAddSubnetValidatorTx creates, signs, and issues a new validator of a
-	// subnet.
+	// IssueAddAllychainValidatorTx creates, signs, and issues a new validator of a
+	// allychain.
 	//
 	// - [validator] specifies all the details of the validation period such as
-	//   the startTime, endTime, sampling weight, nodeID, and subnetID.
-	IssueAddSubnetValidatorTx(
-		validator *pChainValidator.SubnetValidator,
+	//   the startTime, endTime, sampling weight, nodeID, and allychainID.
+	IssueAddAllychainValidatorTx(
+		validator *pChainValidator.AllychainValidator,
 		options ...common.Option,
 	) (ids.ID, error)
 
@@ -83,16 +83,16 @@ type Wallet interface {
 	) (ids.ID, error)
 
 	// IssueCreateChainTx creates, signs, and issues a new chain in the named
-	// subnet.
+	// allychain.
 	//
-	// - [subnetID] specifies the subnet to launch the chain in.
+	// - [allychainID] specifies the allychain to launch the chain in.
 	// - [genesis] specifies the initial state of the new chain.
 	// - [vmID] specifies the vm that the new chain will run.
 	// - [fxIDs] specifies all the feature extensions that the vm should be
 	//   running with.
 	// - [chainName] specifies a human readable name for the chain.
 	IssueCreateChainTx(
-		subnetID ids.ID,
+		allychainID ids.ID,
 		genesis []byte,
 		vmID ids.ID,
 		fxIDs []ids.ID,
@@ -100,12 +100,12 @@ type Wallet interface {
 		options ...common.Option,
 	) (ids.ID, error)
 
-	// IssueCreateSubnetTx creates, signs, and issues a new subnet with the
+	// IssueCreateAllychainTx creates, signs, and issues a new allychain with the
 	// specified owner.
 	//
 	// - [owner] specifies who has the ability to create new chains and add new
-	//   validators to the subnet.
-	IssueCreateSubnetTx(
+	//   validators to the allychain.
+	IssueCreateAllychainTx(
 		owner *secp256k1fx.OutputOwners,
 		options ...common.Option,
 	) (ids.ID, error)
@@ -194,11 +194,11 @@ func (w *wallet) IssueAddValidatorTx(
 	return w.IssueUnsignedTx(utx, options...)
 }
 
-func (w *wallet) IssueAddSubnetValidatorTx(
-	validator *pChainValidator.SubnetValidator,
+func (w *wallet) IssueAddAllychainValidatorTx(
+	validator *pChainValidator.AllychainValidator,
 	options ...common.Option,
 ) (ids.ID, error) {
-	utx, err := w.builder.NewAddSubnetValidatorTx(validator, options...)
+	utx, err := w.builder.NewAddAllychainValidatorTx(validator, options...)
 	if err != nil {
 		return ids.Empty, err
 	}
@@ -218,25 +218,25 @@ func (w *wallet) IssueAddNominatorTx(
 }
 
 func (w *wallet) IssueCreateChainTx(
-	subnetID ids.ID,
+	allychainID ids.ID,
 	genesis []byte,
 	vmID ids.ID,
 	fxIDs []ids.ID,
 	chainName string,
 	options ...common.Option,
 ) (ids.ID, error) {
-	utx, err := w.builder.NewCreateChainTx(subnetID, genesis, vmID, fxIDs, chainName, options...)
+	utx, err := w.builder.NewCreateChainTx(allychainID, genesis, vmID, fxIDs, chainName, options...)
 	if err != nil {
 		return ids.Empty, err
 	}
 	return w.IssueUnsignedTx(utx, options...)
 }
 
-func (w *wallet) IssueCreateSubnetTx(
+func (w *wallet) IssueCreateAllychainTx(
 	owner *secp256k1fx.OutputOwners,
 	options ...common.Option,
 ) (ids.ID, error) {
-	utx, err := w.builder.NewCreateSubnetTx(owner, options...)
+	utx, err := w.builder.NewCreateAllychainTx(owner, options...)
 	if err != nil {
 		return ids.Empty, err
 	}
