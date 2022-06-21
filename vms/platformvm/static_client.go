@@ -25,8 +25,8 @@ type staticClient struct {
 // NewClient returns a platformvm client for interacting with the platformvm static api
 func NewStaticClient(uri string) StaticClient {
 	return &staticClient{requester: rpc.NewEndpointRequester(
-		uri+"/ext/vm/platform",
-		"platform",
+		uri+"/ext/vm/core",
+		"core",
 	)}
 }
 

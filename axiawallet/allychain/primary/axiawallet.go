@@ -11,7 +11,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/vms/avm"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
-	"github.com/axiacoin/axia-network-v2/axiawallet/chain/p"
+	"github.com/axiacoin/axia-network-v2/axiawallet/c"
 	"github.com/axiacoin/axia-network-v2/axiawallet/chain/x"
 	"github.com/axiacoin/axia-network-v2/axiawallet/allychain/primary/common"
 )
@@ -20,16 +20,16 @@ var _ AXIAWallet = &axiawallet{}
 
 // AXIAWallet provides chain axiawallets for the primary network.
 type AXIAWallet interface {
-	P() p.AXIAWallet
+	C() c.AXIAWallet
 	X() x.AXIAWallet
 }
 
 type axiawallet struct {
-	p p.AXIAWallet
+	c c.AXIAWallet
 	x x.AXIAWallet
 }
 
-func (w *axiawallet) P() p.AXIAWallet { return w.p }
+func (w *axiawallet) C() c.AXIAWallet { return w.c }
 func (w *axiawallet) X() x.AXIAWallet { return w.x }
 
 // NewAXIAWalletFromURI returns a axiawallet that supports issuing transactions to the
@@ -51,16 +51,16 @@ func NewAXIAWalletFromURI(ctx context.Context, uri string, kc *secp256k1fx.Keych
 
 func NewAXIAWalletWithState(
 	uri string,
-	pCTX p.Context,
+	pCTX c.Context,
 	xCTX x.Context,
 	utxos UTXOs,
 	kc *secp256k1fx.Keychain,
 ) AXIAWallet {
 	pUTXOs := NewChainUTXOs(constants.CoreChainID, utxos)
 	pTXs := make(map[ids.ID]*platformvm.Tx)
-	pBackend := p.NewBackend(pCTX, pUTXOs, pTXs)
-	pBuilder := p.NewBuilder(kc.Addrs, pBackend)
-	pSigner := p.NewSigner(kc, pBackend)
+	pBackend := c.NewBackend(pCTX, pUTXOs, pTXs)
+	pBuilder := c.NewBuilder(kc.Addrs, pBackend)
+	pSigner := c.NewSigner(kc, pBackend)
 	pClient := platformvm.NewClient(uri)
 
 	swapChainID := xCTX.BlockchainID()
@@ -71,21 +71,21 @@ func NewAXIAWalletWithState(
 	xClient := avm.NewClient(uri, "X")
 
 	return NewAXIAWallet(
-		p.NewAXIAWallet(pBuilder, pSigner, pClient, pBackend),
+		c.NewAXIAWallet(pBuilder, pSigner, pClient, pBackend),
 		x.NewAXIAWallet(xBuilder, xSigner, xClient, xBackend),
 	)
 }
 
 func NewAXIAWalletWithOptions(w AXIAWallet, options ...common.Option) AXIAWallet {
 	return NewAXIAWallet(
-		p.NewAXIAWalletWithOptions(w.P(), options...),
+		c.NewAXIAWalletWithOptions(w.C(), options...),
 		x.NewAXIAWalletWithOptions(w.X(), options...),
 	)
 }
 
-func NewAXIAWallet(p p.AXIAWallet, x x.AXIAWallet) AXIAWallet {
+func NewAXIAWallet(c c.AXIAWallet, x x.AXIAWallet) AXIAWallet {
 	return &axiawallet{
-		p: p,
+		c: c,
 		x: x,
 	}
 }

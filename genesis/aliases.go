@@ -18,14 +18,14 @@ import (
 func Aliases(genesisBytes []byte) (map[string][]string, map[ids.ID][]string, error) {
 	apiAliases := map[string][]string{
 		path.Join(constants.ChainAliasPrefix, constants.CoreChainID.String()): {
-			"P",
-			"platform",
-			path.Join(constants.ChainAliasPrefix, "P"),
-			path.Join(constants.ChainAliasPrefix, "platform"),
+			"C",
+			"core",
+			path.Join(constants.ChainAliasPrefix, "C"),
+			path.Join(constants.ChainAliasPrefix, "core"),
 		},
 	}
 	chainAliases := map[ids.ID][]string{
-		constants.CoreChainID: {"P", "platform"},
+		constants.CoreChainID: {"C", "core"},
 	}
 	genesis := &platformvm.Genesis{} // TODO let's not re-create genesis to do aliasing
 	if _, err := platformvm.GenesisCodec.Unmarshal(genesisBytes, genesis); err != nil {
@@ -71,7 +71,7 @@ func GetSwapChainAliases() []string {
 
 func GetVMAliases() map[ids.ID][]string {
 	return map[ids.ID][]string{
-		constants.PlatformVMID: {"platform"},
+		constants.PlatformVMID: {"core"},
 		constants.AVMID:        {"avm"},
 		constants.EVMID:        {"evm"},
 		secp256k1fx.ID:         {"secp256k1fx"},
