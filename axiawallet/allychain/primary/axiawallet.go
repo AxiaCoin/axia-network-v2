@@ -11,7 +11,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/vms/avm"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
-	"github.com/axiacoin/axia-network-v2/axiawallet/c"
+	"github.com/axiacoin/axia-network-v2/axiawallet/chain/c"
 	"github.com/axiacoin/axia-network-v2/axiawallet/chain/s"
 	"github.com/axiacoin/axia-network-v2/axiawallet/allychain/primary/common"
 )
