@@ -15,7 +15,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm"
 	"github.com/axiacoin/axia-network-v2/axiawallet/chain/c"
-	"github.com/axiacoin/axia-network-v2/axiawallet/chain/x"
+	"github.com/axiacoin/axia-network-v2/axiawallet/chain/s"
 )
 
 const (
@@ -47,7 +47,7 @@ type UTXOClient interface {
 
 func FetchState(ctx context.Context, uri string, addrs ids.ShortSet) (c.Context, x.Context, UTXOs, error) {
 	infoClient := info.NewClient(uri)
-	xClient := avm.NewClient(uri, "X")
+	xClient := avm.NewClient(uri, "S")
 
 	pCTX, err := c.NewContextFromClients(ctx, infoClient, xClient)
 	if err != nil {
