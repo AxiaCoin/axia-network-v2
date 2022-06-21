@@ -177,7 +177,7 @@ func (b *builder) GetBalance(
 	options ...common.Option,
 ) (map[ids.ID]uint64, error) {
 	ops := common.NewOptions(options)
-	return b.getBalance(constants.PlatformChainID, ops)
+	return b.getBalance(constants.CoreChainID, ops)
 }
 
 func (b *builder) GetImportableBalance(
@@ -216,7 +216,7 @@ func (b *builder) NewBaseTx(
 	return &platformvm.UnsignedCreateAllychainTx{
 		BaseTx: platformvm.BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    b.backend.NetworkID(),
-			BlockchainID: constants.PlatformChainID,
+			BlockchainID: constants.CoreChainID,
 			Ins:          inputs,
 			Outs:         outputs,
 			Memo:         ops.Memo(),
@@ -245,7 +245,7 @@ func (b *builder) NewAddValidatorTx(
 	return &platformvm.UnsignedAddValidatorTx{
 		BaseTx: platformvm.BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    b.backend.NetworkID(),
-			BlockchainID: constants.PlatformChainID,
+			BlockchainID: constants.CoreChainID,
 			Ins:          inputs,
 			Outs:         baseOutputs,
 			Memo:         ops.Memo(),
@@ -279,7 +279,7 @@ func (b *builder) NewAddAllychainValidatorTx(
 	return &platformvm.UnsignedAddAllychainValidatorTx{
 		BaseTx: platformvm.BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    b.backend.NetworkID(),
-			BlockchainID: constants.PlatformChainID,
+			BlockchainID: constants.CoreChainID,
 			Ins:          inputs,
 			Outs:         outputs,
 			Memo:         ops.Memo(),
@@ -308,7 +308,7 @@ func (b *builder) NewAddNominatorTx(
 	return &platformvm.UnsignedAddNominatorTx{
 		BaseTx: platformvm.BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    b.backend.NetworkID(),
-			BlockchainID: constants.PlatformChainID,
+			BlockchainID: constants.CoreChainID,
 			Ins:          inputs,
 			Outs:         baseOutputs,
 			Memo:         ops.Memo(),
@@ -346,7 +346,7 @@ func (b *builder) NewCreateChainTx(
 	return &platformvm.UnsignedCreateChainTx{
 		BaseTx: platformvm.BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    b.backend.NetworkID(),
-			BlockchainID: constants.PlatformChainID,
+			BlockchainID: constants.CoreChainID,
 			Ins:          inputs,
 			Outs:         outputs,
 			Memo:         ops.Memo(),
@@ -378,7 +378,7 @@ func (b *builder) NewCreateAllychainTx(
 	return &platformvm.UnsignedCreateAllychainTx{
 		BaseTx: platformvm.BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    b.backend.NetworkID(),
-			BlockchainID: constants.PlatformChainID,
+			BlockchainID: constants.CoreChainID,
 			Ins:          inputs,
 			Outs:         outputs,
 			Memo:         ops.Memo(),
@@ -477,7 +477,7 @@ func (b *builder) NewImportTx(
 	return &platformvm.UnsignedImportTx{
 		BaseTx: platformvm.BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    b.backend.NetworkID(),
-			BlockchainID: constants.PlatformChainID,
+			BlockchainID: constants.CoreChainID,
 			Ins:          inputs,
 			Outs:         outputs,
 			Memo:         ops.Memo(),
@@ -515,7 +515,7 @@ func (b *builder) NewExportTx(
 	return &platformvm.UnsignedExportTx{
 		BaseTx: platformvm.BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    b.backend.NetworkID(),
-			BlockchainID: constants.PlatformChainID,
+			BlockchainID: constants.CoreChainID,
 			Ins:          inputs,
 			Outs:         changeOutputs,
 			Memo:         ops.Memo(),
@@ -594,7 +594,7 @@ func (b *builder) spend(
 	stakeOutputs []*axc.TransferableOutput,
 	err error,
 ) {
-	utxos, err := b.backend.UTXOs(options.Context(), constants.PlatformChainID)
+	utxos, err := b.backend.UTXOs(options.Context(), constants.CoreChainID)
 	if err != nil {
 		return nil, nil, nil, err
 	}

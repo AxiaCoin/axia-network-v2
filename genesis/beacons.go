@@ -38,7 +38,7 @@ func getIPs(networkID uint32) []string {
 			"52.47.181.114:9651",
 			"15.188.9.42:9651",
 		}
-	case constants.FujiID:
+	case constants.TestID:
 		return []string{
 			"18.222.205.99:9651",
 			"18.116.59.71:9651",
@@ -87,7 +87,7 @@ func getNodeIDs(networkID uint32) []string {
 			"NodeID-HCw7S2TVbFPDWNBo1GnFWqJ47f9rDJtt1",
 			"NodeID-FYv1Lb29SqMpywYXH7yNkcFAzRF2jvm3K",
 		}
-	case constants.FujiID:
+	case constants.TestID:
 		return []string{
 			"NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg",
 			"NodeID-MFrZFVCXPv5iCn6M9K6XduxGTYp891xXZ",

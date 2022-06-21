@@ -17,7 +17,7 @@ import (
 // Aliases returns the default aliases based on the network ID
 func Aliases(genesisBytes []byte) (map[string][]string, map[ids.ID][]string, error) {
 	apiAliases := map[string][]string{
-		path.Join(constants.ChainAliasPrefix, constants.PlatformChainID.String()): {
+		path.Join(constants.ChainAliasPrefix, constants.CoreChainID.String()): {
 			"P",
 			"platform",
 			path.Join(constants.ChainAliasPrefix, "P"),
@@ -25,7 +25,7 @@ func Aliases(genesisBytes []byte) (map[string][]string, map[ids.ID][]string, err
 		},
 	}
 	chainAliases := map[ids.ID][]string{
-		constants.PlatformChainID: {"P", "platform"},
+		constants.CoreChainID: {"P", "platform"},
 	}
 	genesis := &platformvm.Genesis{} // TODO let's not re-create genesis to do aliasing
 	if _, err := platformvm.GenesisCodec.Unmarshal(genesisBytes, genesis); err != nil {

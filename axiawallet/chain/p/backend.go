@@ -99,13 +99,13 @@ func (b *backend) AcceptTx(ctx stdcontext.Context, tx *platformvm.Tx) error {
 	}
 
 	consumedUTXOIDs := baseTx.InputIDs()
-	err := b.removeUTXOs(ctx, constants.PlatformChainID, consumedUTXOIDs)
+	err := b.removeUTXOs(ctx, constants.CoreChainID, consumedUTXOIDs)
 	if err != nil {
 		return err
 	}
 
 	producedUTXOSlice := baseTx.UTXOs()
-	err = b.addUTXOs(ctx, constants.PlatformChainID, producedUTXOSlice)
+	err = b.addUTXOs(ctx, constants.CoreChainID, producedUTXOSlice)
 	if err != nil {
 		return err
 	}

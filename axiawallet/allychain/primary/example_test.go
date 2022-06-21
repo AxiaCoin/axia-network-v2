@@ -47,7 +47,7 @@ func ExampleAXIAWallet() {
 	// Send 100 schmeckles to the Corechain.
 	exportStartTime := time.Now()
 	exportTxID, err := xAXIAWallet.IssueExportTx(
-		constants.PlatformChainID,
+		constants.CoreChainID,
 		[]*axc.TransferableOutput{
 			{
 				Asset: axc.Asset{

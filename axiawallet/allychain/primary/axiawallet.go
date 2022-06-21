@@ -56,7 +56,7 @@ func NewAXIAWalletWithState(
 	utxos UTXOs,
 	kc *secp256k1fx.Keychain,
 ) AXIAWallet {
-	pUTXOs := NewChainUTXOs(constants.PlatformChainID, utxos)
+	pUTXOs := NewChainUTXOs(constants.CoreChainID, utxos)
 	pTXs := make(map[ids.ID]*platformvm.Tx)
 	pBackend := p.NewBackend(pCTX, pUTXOs, pTXs)
 	pBuilder := p.NewBuilder(kc.Addrs, pBackend)

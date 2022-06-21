@@ -314,7 +314,7 @@ func (m *manager) ForceCreateChain(chainParams ChainParameters) {
 	// Note: Registering this after the chain has been tracked prevents a race
 	//       condition between the health check and adding the first chain to
 	//       the manager.
-	if chainParams.ID == constants.PlatformChainID {
+	if chainParams.ID == constants.CoreChainID {
 		if err := m.registerBootstrappedHealthChecks(); err != nil {
 			chain.Handler.StopWithError(err)
 		}
@@ -332,7 +332,7 @@ func (m *manager) buildChain(chainParams ChainParameters, sb Allychain) (*chain,
 		return nil, fmt.Errorf("error while looking up VM: %w", err)
 	}
 
-	if chainParams.ID != constants.PlatformChainID && vmID == constants.PlatformVMID {
+	if chainParams.ID != constants.CoreChainID && vmID == constants.PlatformVMID {
 		return nil, errCreatePlatformVM
 	}
 	primaryAlias := m.PrimaryAliasOrDefault(chainParams.ID)

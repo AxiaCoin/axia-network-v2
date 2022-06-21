@@ -85,7 +85,7 @@ func (s *signer) Sign(ctx stdcontext.Context, tx *platformvm.Tx) error {
 }
 
 func (s *signer) signAddValidatorTx(ctx stdcontext.Context, tx *platformvm.Tx, utx *platformvm.UnsignedAddValidatorTx) error {
-	txSigners, err := s.getSigners(ctx, constants.PlatformChainID, utx.Ins)
+	txSigners, err := s.getSigners(ctx, constants.CoreChainID, utx.Ins)
 	if err != nil {
 		return err
 	}
@@ -93,7 +93,7 @@ func (s *signer) signAddValidatorTx(ctx stdcontext.Context, tx *platformvm.Tx, u
 }
 
 func (s *signer) signAddAllychainValidatorTx(ctx stdcontext.Context, tx *platformvm.Tx, utx *platformvm.UnsignedAddAllychainValidatorTx) error {
-	txSigners, err := s.getSigners(ctx, constants.PlatformChainID, utx.Ins)
+	txSigners, err := s.getSigners(ctx, constants.CoreChainID, utx.Ins)
 	if err != nil {
 		return err
 	}
@@ -106,7 +106,7 @@ func (s *signer) signAddAllychainValidatorTx(ctx stdcontext.Context, tx *platfor
 }
 
 func (s *signer) signAddNominatorTx(ctx stdcontext.Context, tx *platformvm.Tx, utx *platformvm.UnsignedAddNominatorTx) error {
-	txSigners, err := s.getSigners(ctx, constants.PlatformChainID, utx.Ins)
+	txSigners, err := s.getSigners(ctx, constants.CoreChainID, utx.Ins)
 	if err != nil {
 		return err
 	}
@@ -114,7 +114,7 @@ func (s *signer) signAddNominatorTx(ctx stdcontext.Context, tx *platformvm.Tx, u
 }
 
 func (s *signer) signCreateChainTx(ctx stdcontext.Context, tx *platformvm.Tx, utx *platformvm.UnsignedCreateChainTx) error {
-	txSigners, err := s.getSigners(ctx, constants.PlatformChainID, utx.Ins)
+	txSigners, err := s.getSigners(ctx, constants.CoreChainID, utx.Ins)
 	if err != nil {
 		return err
 	}
@@ -127,7 +127,7 @@ func (s *signer) signCreateChainTx(ctx stdcontext.Context, tx *platformvm.Tx, ut
 }
 
 func (s *signer) signCreateAllychainTx(ctx stdcontext.Context, tx *platformvm.Tx, utx *platformvm.UnsignedCreateAllychainTx) error {
-	txSigners, err := s.getSigners(ctx, constants.PlatformChainID, utx.Ins)
+	txSigners, err := s.getSigners(ctx, constants.CoreChainID, utx.Ins)
 	if err != nil {
 		return err
 	}
@@ -135,7 +135,7 @@ func (s *signer) signCreateAllychainTx(ctx stdcontext.Context, tx *platformvm.Tx
 }
 
 func (s *signer) signImportTx(ctx stdcontext.Context, tx *platformvm.Tx, utx *platformvm.UnsignedImportTx) error {
-	txSigners, err := s.getSigners(ctx, constants.PlatformChainID, utx.Ins)
+	txSigners, err := s.getSigners(ctx, constants.CoreChainID, utx.Ins)
 	if err != nil {
 		return err
 	}
@@ -148,7 +148,7 @@ func (s *signer) signImportTx(ctx stdcontext.Context, tx *platformvm.Tx, utx *pl
 }
 
 func (s *signer) signExportTx(ctx stdcontext.Context, tx *platformvm.Tx, utx *platformvm.UnsignedExportTx) error {
-	txSigners, err := s.getSigners(ctx, constants.PlatformChainID, utx.Ins)
+	txSigners, err := s.getSigners(ctx, constants.CoreChainID, utx.Ins)
 	if err != nil {
 		return err
 	}

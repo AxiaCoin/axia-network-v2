@@ -139,8 +139,8 @@ func defaultContext() *snow.Context {
 
 	errs := wrappers.Errs{}
 	errs.Add(
-		aliaser.Alias(constants.PlatformChainID, "P"),
-		aliaser.Alias(constants.PlatformChainID, constants.PlatformChainID.String()),
+		aliaser.Alias(constants.CoreChainID, "P"),
+		aliaser.Alias(constants.CoreChainID, constants.CoreChainID.String()),
 		aliaser.Alias(swapChainID, "X"),
 		aliaser.Alias(swapChainID, swapChainID.String()),
 		aliaser.Alias(axChainID, "C"),
@@ -153,7 +153,7 @@ func defaultContext() *snow.Context {
 
 	ctx.SNLookup = &snLookup{
 		chainsToAllychain: map[ids.ID]ids.ID{
-			constants.PlatformChainID: constants.PrimaryNetworkID,
+			constants.CoreChainID: constants.PrimaryNetworkID,
 			swapChainID:                  constants.PrimaryNetworkID,
 			axChainID:                  constants.PrimaryNetworkID,
 		},

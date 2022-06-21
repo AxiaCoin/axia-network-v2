@@ -97,7 +97,7 @@ func (t *txSemanticVerify) ExportTx(tx *txs.ExportTx) error {
 		}
 
 		assetID := out.AssetID()
-		if assetID != t.vm.ctx.AXCAssetID && tx.DestinationChain == constants.PlatformChainID {
+		if assetID != t.vm.ctx.AXCAssetID && tx.DestinationChain == constants.CoreChainID {
 			return errWrongAssetID
 		}
 

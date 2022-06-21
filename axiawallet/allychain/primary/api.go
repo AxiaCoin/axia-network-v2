@@ -20,7 +20,7 @@ import (
 
 const (
 	MainnetAPIURI = "https://api.axc.network"
-	FujiAPIURI    = "https://api.axc-test.network"
+	TestAPIURI    = "https://api.axc-test.network"
 	LocalAPIURI   = "http://localhost:9650"
 
 	fetchLimit = 1024
@@ -67,7 +67,7 @@ func FetchState(ctx context.Context, uri string, addrs ids.ShortSet) (p.Context,
 		codec  codec.Manager
 	}{
 		{
-			id:     constants.PlatformChainID,
+			id:     constants.CoreChainID,
 			client: platformvm.NewClient(uri),
 			codec:  platformvm.Codec,
 		},

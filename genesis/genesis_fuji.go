@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	fujiGenesisConfigJSON = `{
+	testGenesisConfigJSON = `{
 		"networkID": 5,
 		"allocations": [
 			{
@@ -197,8 +197,8 @@ var (
 		"message": "hi mom"
 	}`
 
-	// FujiParams are the params used for the fuji testnet
-	FujiParams = Params{
+	// TestParams are the params used for the test testnet
+	TestParams = Params{
 		TxFeeConfig: TxFeeConfig{
 			TxFee:                 units.MilliAxc,
 			CreateAssetTxFee:      10 * units.MilliAxc,

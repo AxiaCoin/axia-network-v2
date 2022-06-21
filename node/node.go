@@ -536,7 +536,7 @@ func (n *Node) initChains(genesisBytes []byte) {
 
 	// Create the Platform Chain
 	n.chainManager.ForceCreateChain(chains.ChainParameters{
-		ID:            constants.PlatformChainID,
+		ID:            constants.CoreChainID,
 		AllychainID:      constants.PrimaryNetworkID,
 		GenesisData:   genesisBytes, // Specifies other chains to create
 		VMAlias:       constants.PlatformVMID.String(),
@@ -625,7 +625,7 @@ func (n *Node) initChainManager(axcAssetID ids.ID) error {
 	// If any of these chains die, the node shuts down
 	criticalChains := ids.Set{}
 	criticalChains.Add(
-		constants.PlatformChainID,
+		constants.CoreChainID,
 		swapChainID,
 		axChainID,
 	)
