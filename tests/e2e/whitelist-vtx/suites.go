@@ -100,14 +100,14 @@ var _ = e2e.DescribeSwapChain("[WhitelistTx]", func() {
 			}),
 		)
 		ginkgo.By("issue regular, virtuous SwapChain tx, before whitelist vtx, should succeed", func() {
-			balances, err := ewoqAXIAWallet.X().Builder().GetFTBalance()
+			balances, err := ewoqAXIAWallet.Swap().Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
 
-			axcAssetID := axiawallet.X().AXCAssetID()
+			axcAssetID := axiawallet.Swap().AXCAssetID()
 			ewoqPrevBalX := balances[axcAssetID]
 			tests.Outf("{{green}}ewoq axiawallet balance:{{/}} %d\n", ewoqPrevBalX)
 
-			balances, err = randAXIAWallet.X().Builder().GetFTBalance()
+			balances, err = randAXIAWallet.Swap().Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
 
 			randPrevBalX := balances[axcAssetID]
@@ -118,7 +118,7 @@ var _ = e2e.DescribeSwapChain("[WhitelistTx]", func() {
 
 			tests.Outf("{{blue}}issuing regular, virtuous transaction at %q{{/}}\n", uris[0])
 			ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
-			_, err = ewoqAXIAWallet.X().IssueBaseTx(
+			_, err = ewoqAXIAWallet.Swap().IssueBaseTx(
 				[]*axc.TransferableOutput{{
 					Asset: axc.Asset{
 						ID: axcAssetID,
@@ -138,17 +138,17 @@ var _ = e2e.DescribeSwapChain("[WhitelistTx]", func() {
 
 			time.Sleep(3 * time.Second)
 
-			balances, err = ewoqAXIAWallet.X().Builder().GetFTBalance()
+			balances, err = ewoqAXIAWallet.Swap().Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
 			ewoqCurBalX := balances[axcAssetID]
 			tests.Outf("{{green}}ewoq axiawallet balance:{{/}} %d\n", ewoqCurBalX)
 
-			balances, err = randAXIAWallet.X().Builder().GetFTBalance()
+			balances, err = randAXIAWallet.Swap().Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
 			randCurBalX := balances[axcAssetID]
 			tests.Outf("{{green}}ewoq axiawallet balance:{{/}} %d\n", randCurBalX)
 
-			gomega.Expect(ewoqCurBalX).Should(gomega.Equal(ewoqPrevBalX - amount - axiawallet.X().BaseTxFee()))
+			gomega.Expect(ewoqCurBalX).Should(gomega.Equal(ewoqPrevBalX - amount - axiawallet.Swap().BaseTxFee()))
 			gomega.Expect(randCurBalX).Should(gomega.Equal(randPrevBalX + amount))
 		})
 
@@ -158,7 +158,7 @@ var _ = e2e.DescribeSwapChain("[WhitelistTx]", func() {
 		// SO THIS SHOULD SUCCEED WITH NO ERROR
 		ginkgo.By("issue whitelist vtx to the first node", func() {
 			tests.Outf("{{blue}}{{bold}}issuing whitelist vtx at URI %q at the very first time{{/}}\n", uris[0])
-			client := avm.NewClient(uris[0], "S")
+			client := avm.NewClient(uris[0], "Swap")
 			ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 			err := client.IssueStopVertex(ctx)
 			cancel()
@@ -204,7 +204,7 @@ var _ = e2e.DescribeSwapChain("[WhitelistTx]", func() {
 		ginkgo.By("whitelist vtx can't be issued twice in all nodes", func() {
 			for _, u := range uris {
 				tests.Outf("{{red}}issuing second whitelist vtx to URI %q{{/}}\n", u)
-				client := avm.NewClient(u, "S")
+				client := avm.NewClient(u, "Swap")
 				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 				err := client.IssueStopVertex(ctx)
 				cancel()
@@ -241,17 +241,17 @@ var _ = e2e.DescribeSwapChain("[WhitelistTx]", func() {
 		})
 
 		ginkgo.By("issue regular, virtuous SwapChain tx, after whitelist vtx, should fail", func() {
-			balances, err := ewoqAXIAWallet.X().Builder().GetFTBalance()
+			balances, err := ewoqAXIAWallet.Swap().Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
 
-			axcAssetID := axiawallet.X().AXCAssetID()
+			axcAssetID := axiawallet.Swap().AXCAssetID()
 			ewoqPrevBalX := balances[axcAssetID]
 			tests.Outf("{{green}}ewoq axiawallet balance:{{/}} %d\n", ewoqPrevBalX)
 
 			amount := genRandUint64(ewoqPrevBalX)
 			tests.Outf("{{blue}}issuing regular, virtuous transaction at %q{{/}}\n", uris[0])
 			ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
-			_, err = ewoqAXIAWallet.X().IssueBaseTx(
+			_, err = ewoqAXIAWallet.Swap().IssueBaseTx(
 				[]*axc.TransferableOutput{{
 					Asset: axc.Asset{
 						ID: axcAssetID,

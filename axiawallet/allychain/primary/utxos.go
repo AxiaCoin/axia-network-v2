@@ -10,8 +10,8 @@ import (
 	"github.com/axiacoin/axia-network-v2/database"
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/vms/components/axc"
-	"github.com/axiacoin/axia-network-v2/axiawallet/chain/c"
-	"github.com/axiacoin/axia-network-v2/axiawallet/chain/s"
+	"github.com/axiacoin/axia-network-v2/axiawallet/chain/core"
+	"github.com/axiacoin/axia-network-v2/axiawallet/chain/swap"
 )
 
 var (
@@ -20,8 +20,8 @@ var (
 
 	// TODO: refactor ChainUTXOs definition to allow the client implementations
 	//       to perform their own assertions.
-	_ ChainUTXOs = c.ChainUTXOs(nil)
-	_ ChainUTXOs = s.ChainUTXOs(nil)
+	_ ChainUTXOs = core.ChainUTXOs(nil)
+	_ ChainUTXOs = swap.ChainUTXOs(nil)
 )
 
 type UTXOs interface {

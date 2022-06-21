@@ -206,7 +206,7 @@ func TestExportTxSyntacticVerify(t *testing.T) {
 				},
 			}},
 		}},
-		DestinationChain: platformChainID,
+		DestinationChain: coreChainID,
 		ExportedOuts: []*axc.TransferableOutput{{
 			Asset: axc.Asset{ID: assetID},
 			Out: &secp256k1fx.TransferOutput{
@@ -263,7 +263,7 @@ func TestExportTxSyntacticVerifyWrongNetworkID(t *testing.T) {
 				},
 			}},
 		}},
-		DestinationChain: platformChainID,
+		DestinationChain: coreChainID,
 		ExportedOuts: []*axc.TransferableOutput{{
 			Asset: axc.Asset{ID: assetID},
 			Out: &secp256k1fx.TransferOutput{
@@ -314,7 +314,7 @@ func TestExportTxSyntacticVerifyWrongBlockchainID(t *testing.T) {
 				},
 			}},
 		}},
-		DestinationChain: platformChainID,
+		DestinationChain: coreChainID,
 		ExportedOuts: []*axc.TransferableOutput{{
 			Asset: axc.Asset{ID: assetID},
 			Out: &secp256k1fx.TransferOutput{
@@ -361,7 +361,7 @@ func TestExportTxSyntacticVerifyInvalidMemo(t *testing.T) {
 			}},
 			Memo: make([]byte, axc.MaxMemoSize+1),
 		}},
-		DestinationChain: platformChainID,
+		DestinationChain: coreChainID,
 		ExportedOuts: []*axc.TransferableOutput{{
 			Asset: axc.Asset{ID: assetID},
 			Out: &secp256k1fx.TransferOutput{
@@ -417,7 +417,7 @@ func TestExportTxSyntacticVerifyInvalidBaseOutput(t *testing.T) {
 				},
 			}},
 		}},
-		DestinationChain: platformChainID,
+		DestinationChain: coreChainID,
 		ExportedOuts: []*axc.TransferableOutput{{
 			Asset: axc.Asset{ID: assetID},
 			Out: &secp256k1fx.TransferOutput{
@@ -485,7 +485,7 @@ func TestExportTxSyntacticVerifyUnsortedBaseOutputs(t *testing.T) {
 				},
 			},
 		}},
-		DestinationChain: platformChainID,
+		DestinationChain: coreChainID,
 		ExportedOuts: []*axc.TransferableOutput{{
 			Asset: axc.Asset{ID: assetID},
 			Out: &secp256k1fx.TransferOutput{
@@ -531,7 +531,7 @@ func TestExportTxSyntacticVerifyInvalidOutput(t *testing.T) {
 				},
 			}},
 		}},
-		DestinationChain: platformChainID,
+		DestinationChain: coreChainID,
 		ExportedOuts: []*axc.TransferableOutput{{
 			Asset: axc.Asset{ID: assetID},
 			Out: &secp256k1fx.TransferOutput{
@@ -577,7 +577,7 @@ func TestExportTxSyntacticVerifyUnsortedOutputs(t *testing.T) {
 				},
 			}},
 		}},
-		DestinationChain: platformChainID,
+		DestinationChain: coreChainID,
 		ExportedOuts: []*axc.TransferableOutput{
 			{
 				Asset: axc.Asset{ID: assetID},
@@ -655,7 +655,7 @@ func TestExportTxSyntacticVerifyInvalidInput(t *testing.T) {
 				},
 			},
 		}},
-		DestinationChain: platformChainID,
+		DestinationChain: coreChainID,
 		ExportedOuts: []*axc.TransferableOutput{{
 			Asset: axc.Asset{ID: assetID},
 			Out: &secp256k1fx.TransferOutput{
@@ -721,7 +721,7 @@ func TestExportTxSyntacticVerifyUnsortedInputs(t *testing.T) {
 				},
 			},
 		}},
-		DestinationChain: platformChainID,
+		DestinationChain: coreChainID,
 		ExportedOuts: []*axc.TransferableOutput{{
 			Asset: axc.Asset{ID: assetID},
 			Out: &secp256k1fx.TransferOutput{
@@ -767,7 +767,7 @@ func TestExportTxSyntacticVerifyInvalidFlowCheck(t *testing.T) {
 				},
 			}},
 		}},
-		DestinationChain: platformChainID,
+		DestinationChain: coreChainID,
 		ExportedOuts: []*axc.TransferableOutput{{
 			Asset: axc.Asset{ID: assetID},
 			Out: &secp256k1fx.TransferOutput{

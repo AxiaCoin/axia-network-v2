@@ -12,7 +12,7 @@ import (
 var _ Fx = &secp256k1fx.Fx{}
 
 // Fx is the interface a feature extension must implement to support the
-// Platform Chain.
+// Core Chain.
 type Fx interface {
 	// Initialize this feature extension to be running under this VM. Should
 	// return an error if the VM is incompatible.

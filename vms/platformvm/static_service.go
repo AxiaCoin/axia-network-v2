@@ -22,10 +22,10 @@ import (
 	coreChainValidator "github.com/axiacoin/axia-network-v2/vms/platformvm/validator"
 )
 
-// Note that since an Axia network has exactly one Platform Chain,
-// and the Platform Chain defines the genesis state of the network
+// Note that since an Axia network has exactly one Core Chain,
+// and the Core Chain defines the genesis state of the network
 // (who is staking, which chains exist, etc.), defining the genesis
-// state of the Platform Chain is the same as defining the genesis
+// state of the Core Chain is the same as defining the genesis
 // state of the network.
 
 var (
@@ -37,7 +37,7 @@ var (
 // StaticService defines the static API methods exposed by the platform VM
 type StaticService struct{}
 
-// APIUTXO is a UTXO on the Platform Chain that exists at the chain's genesis.
+// APIUTXO is a UTXO on the Core Chain that exists at the chain's genesis.
 type APIUTXO struct {
 	Locktime json.Uint64 `json:"locktime"`
 	Amount   json.Uint64 `json:"amount"`
@@ -125,12 +125,12 @@ type APIChain struct {
 }
 
 // BuildGenesisArgs are the arguments used to create
-// the genesis data of the Platform Chain.
+// the genesis data of the Core Chain.
 // [NetworkID] is the ID of the network
-// [UTXOs] are the UTXOs on the Platform Chain that exist at genesis.
+// [UTXOs] are the UTXOs on the Core Chain that exist at genesis.
 // [Validators] are the validators of the primary network at genesis.
 // [Chains] are the chains that exist at genesis.
-// [Time] is the Platform Chain's time at network genesis.
+// [Time] is the Core Chain's time at network genesis.
 type BuildGenesisArgs struct {
 	AxcAssetID   ids.ID                `json:"axcAssetID"`
 	NetworkID     json.Uint32           `json:"networkID"`
@@ -155,7 +155,7 @@ type GenesisUTXO struct {
 	Message   []byte `serialize:"true" json:"message"`
 }
 
-// Genesis represents a genesis state of the platform chain
+// Genesis represents a genesis state of the core chain
 type Genesis struct {
 	UTXOs         []*GenesisUTXO `serialize:"true"`
 	Validators    []*Tx          `serialize:"true"`
@@ -188,7 +188,7 @@ func bech32ToID(addrStr string) (ids.ShortID, error) {
 	return ids.ToShortID(addrBytes)
 }
 
-// BuildGenesis build the genesis state of the Platform Chain (and thereby the Axia network.)
+// BuildGenesis build the genesis state of the Core Chain (and thereby the Axia network.)
 func (ss *StaticService) BuildGenesis(_ *http.Request, args *BuildGenesisArgs, reply *BuildGenesisReply) error {
 	// Specify the UTXOs on the Platform chain that exist at genesis.
 	utxos := make([]*GenesisUTXO, 0, len(args.UTXOs))

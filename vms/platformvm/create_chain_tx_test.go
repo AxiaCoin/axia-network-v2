@@ -75,7 +75,7 @@ func TestUnsignedCreateChainTxVerify(t *testing.T) {
 			setup:       func(tx *UnsignedCreateChainTx) *UnsignedCreateChainTx { tx.AllychainID = ids.ID{}; return tx },
 		},
 		{
-			description: "allychain ID is platform chain's ID",
+			description: "allychain ID is core chain's ID",
 			shouldErr:   true,
 			allychainID:    testAllychain1.ID(),
 			genesisData: nil,

@@ -23,7 +23,7 @@ import (
 var (
 	networkID       uint32 = 10
 	chainID                = ids.ID{5, 4, 3, 2, 1}
-	platformChainID        = ids.Empty.Prefix(0)
+	coreChainID        = ids.Empty.Prefix(0)
 
 	keys  []*crypto.PrivateKeySECP256K1R
 	addrs []ids.ShortID // addrs[i] corresponds to keys[i]
@@ -83,10 +83,10 @@ func NewContext(tb testing.TB) *snow.Context {
 
 	errs := wrappers.Errs{}
 	errs.Add(
-		aliaser.Alias(chainID, "S"),
+		aliaser.Alias(chainID, "Swap"),
 		aliaser.Alias(chainID, chainID.String()),
-		aliaser.Alias(platformChainID, "P"),
-		aliaser.Alias(platformChainID, platformChainID.String()),
+		aliaser.Alias(coreChainID, "Core"),
+		aliaser.Alias(coreChainID, coreChainID.String()),
 	)
 	if errs.Errored() {
 		tb.Fatal(errs.Err)

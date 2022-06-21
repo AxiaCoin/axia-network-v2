@@ -11,8 +11,8 @@ import (
 	"github.com/axiacoin/axia-network-v2/vms/avm"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
-	"github.com/axiacoin/axia-network-v2/axiawallet/chain/c"
-	"github.com/axiacoin/axia-network-v2/axiawallet/chain/s"
+	"github.com/axiacoin/axia-network-v2/axiawallet/chain/core"
+	"github.com/axiacoin/axia-network-v2/axiawallet/chain/swap"
 	"github.com/axiacoin/axia-network-v2/axiawallet/allychain/primary/common"
 )
 
@@ -20,17 +20,17 @@ var _ AXIAWallet = &axiawallet{}
 
 // AXIAWallet provides chain axiawallets for the primary network.
 type AXIAWallet interface {
-	C() c.AXIAWallet
-	S() s.AXIAWallet
+	Core() core.AXIAWallet
+	Swap() swap.AXIAWallet
 }
 
 type axiawallet struct {
-	c c.AXIAWallet
-	s s.AXIAWallet
+	core core.AXIAWallet
+	swap swap.AXIAWallet
 }
 
-func (w *axiawallet) C() c.AXIAWallet { return w.c }
-func (w *axiawallet) S() s.AXIAWallet { return w.s }
+func (w *axiawallet) Core() core.AXIAWallet { return w.core }
+func (w *axiawallet) Swap() swap.AXIAWallet { return w.swap }
 
 // NewAXIAWalletFromURI returns a axiawallet that supports issuing transactions to the
 // chains living in the primary network to a provided [uri].
@@ -51,41 +51,41 @@ func NewAXIAWalletFromURI(ctx context.Context, uri string, kc *secp256k1fx.Keych
 
 func NewAXIAWalletWithState(
 	uri string,
-	pCTX c.Context,
-	xCTX s.Context,
+	pCTX core.Context,
+	xCTX swap.Context,
 	utxos UTXOs,
 	kc *secp256k1fx.Keychain,
 ) AXIAWallet {
 	pUTXOs := NewChainUTXOs(constants.CoreChainID, utxos)
 	pTXs := make(map[ids.ID]*platformvm.Tx)
-	pBackend := c.NewBackend(pCTX, pUTXOs, pTXs)
-	pBuilder := c.NewBuilder(kc.Addrs, pBackend)
-	pSigner := c.NewSigner(kc, pBackend)
+	pBackend := core.NewBackend(pCTX, pUTXOs, pTXs)
+	pBuilder := core.NewBuilder(kc.Addrs, pBackend)
+	pSigner := core.NewSigner(kc, pBackend)
 	pClient := platformvm.NewClient(uri)
 
 	swapChainID := xCTX.BlockchainID()
 	xUTXOs := NewChainUTXOs(swapChainID, utxos)
-	xBackend := s.NewBackend(xCTX, swapChainID, xUTXOs)
-	xBuilder := s.NewBuilder(kc.Addrs, xBackend)
-	xSigner := s.NewSigner(kc, xBackend)
-	xClient := avm.NewClient(uri, "S")
+	xBackend := swap.NewBackend(xCTX, swapChainID, xUTXOs)
+	xBuilder := swap.NewBuilder(kc.Addrs, xBackend)
+	xSigner := swap.NewSigner(kc, xBackend)
+	xClient := avm.NewClient(uri, "Swap")
 
 	return NewAXIAWallet(
-		c.NewAXIAWallet(pBuilder, pSigner, pClient, pBackend),
-		s.NewAXIAWallet(xBuilder, xSigner, xClient, xBackend),
+		core.NewAXIAWallet(pBuilder, pSigner, pClient, pBackend),
+		swap.NewAXIAWallet(xBuilder, xSigner, xClient, xBackend),
 	)
 }
 
 func NewAXIAWalletWithOptions(w AXIAWallet, options ...common.Option) AXIAWallet {
 	return NewAXIAWallet(
-		c.NewAXIAWalletWithOptions(w.C(), options...),
-		s.NewAXIAWalletWithOptions(w.X(), options...),
+		core.NewAXIAWalletWithOptions(w.Core(), options...),
+		swap.NewAXIAWalletWithOptions(w.Swap(), options...),
 	)
 }
 
-func NewAXIAWallet(c c.AXIAWallet, s s.AXIAWallet) AXIAWallet {
+func NewAXIAWallet(core core.AXIAWallet, swap swap.AXIAWallet) AXIAWallet {
 	return &axiawallet{
-		c: c,
-		s: s,
+		core: core,
+		swap: swap,
 	}
 }

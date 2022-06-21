@@ -38,7 +38,7 @@ func (a Allocation) Unparse(networkID uint32) (UnparsedAllocation, error) {
 		ETHAddr:        "0x" + hex.EncodeToString(a.ETHAddr.Bytes()),
 	}
 	axcAddr, err := address.Format(
-		"S",
+		"Swap",
 		constants.GetHRP(networkID),
 		a.AXCAddr.Bytes(),
 	)
@@ -54,7 +54,7 @@ type Staker struct {
 
 func (s Staker) Unparse(networkID uint32) (UnparsedStaker, error) {
 	axcAddr, err := address.Format(
-		"S",
+		"Swap",
 		constants.GetHRP(networkID),
 		s.RewardAddress.Bytes(),
 	)
@@ -103,7 +103,7 @@ func (c Config) Unparse() (UnparsedConfig, error) {
 	}
 	for i, isa := range c.InitialStakedFunds {
 		axcAddr, err := address.Format(
-			"S",
+			"Swap",
 			constants.GetHRP(uc.NetworkID),
 			isa.Bytes(),
 		)

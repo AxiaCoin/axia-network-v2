@@ -198,7 +198,7 @@ func TestImportTxSyntacticVerify(t *testing.T) {
 				},
 			}},
 		}},
-		SourceChain: platformChainID,
+		SourceChain: coreChainID,
 		ImportedIns: []*axc.TransferableInput{{
 			UTXOID: axc.UTXOID{
 				TxID: ids.ID{
@@ -245,7 +245,7 @@ func TestImportTxSyntacticVerifyInvalidMemo(t *testing.T) {
 			}},
 			Memo: make([]byte, axc.MaxMemoSize+1),
 		}},
-		SourceChain: platformChainID,
+		SourceChain: coreChainID,
 		ImportedIns: []*axc.TransferableInput{{
 			UTXOID: axc.UTXOID{
 				TxID: ids.ID{

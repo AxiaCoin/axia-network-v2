@@ -1066,7 +1066,7 @@ func TestExportTxSemanticVerify(t *testing.T) {
 				},
 			}},
 		}},
-		DestinationChain: platformChainID,
+		DestinationChain: coreChainID,
 		ExportedOuts: []*axc.TransferableOutput{{
 			Asset: axc.Asset{ID: axcID},
 			Out: &secp256k1fx.TransferOutput{
@@ -1130,7 +1130,7 @@ func TestExportTxSemanticVerifyUnknownCredFx(t *testing.T) {
 				},
 			}},
 		}},
-		DestinationChain: platformChainID,
+		DestinationChain: coreChainID,
 		ExportedOuts: []*axc.TransferableOutput{{
 			Asset: axc.Asset{ID: axcID},
 			Out: &secp256k1fx.TransferOutput{
@@ -1195,7 +1195,7 @@ func TestExportTxSemanticVerifyMissingUTXO(t *testing.T) {
 				},
 			}},
 		}},
-		DestinationChain: platformChainID,
+		DestinationChain: coreChainID,
 		ExportedOuts: []*axc.TransferableOutput{{
 			Asset: axc.Asset{ID: axcID},
 			Out: &secp256k1fx.TransferOutput{
@@ -1276,7 +1276,7 @@ func TestExportTxSemanticVerifyInvalidAssetID(t *testing.T) {
 				},
 			},
 		}},
-		DestinationChain: platformChainID,
+		DestinationChain: coreChainID,
 		ExportedOuts: []*axc.TransferableOutput{{
 			Asset: axc.Asset{ID: assetID},
 			Out: &secp256k1fx.TransferOutput{
@@ -1409,7 +1409,7 @@ func TestExportTxSemanticVerifyInvalidFx(t *testing.T) {
 				},
 			}},
 		}},
-		DestinationChain: platformChainID,
+		DestinationChain: coreChainID,
 		ExportedOuts: []*axc.TransferableOutput{{
 			Asset: axc.Asset{ID: axcID},
 			Out: &secp256k1fx.TransferOutput{
@@ -1474,7 +1474,7 @@ func TestExportTxSemanticVerifyInvalidTransfer(t *testing.T) {
 				},
 			}},
 		}},
-		DestinationChain: platformChainID,
+		DestinationChain: coreChainID,
 		ExportedOuts: []*axc.TransferableOutput{{
 			Asset: axc.Asset{ID: axcID},
 			Out: &secp256k1fx.TransferOutput{

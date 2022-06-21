@@ -43,7 +43,7 @@ import (
 var (
 	networkID       uint32 = 10
 	chainID                = ids.ID{5, 4, 3, 2, 1}
-	platformChainID        = ids.Empty.Prefix(0)
+	coreChainID        = ids.Empty.Prefix(0)
 	testTxFee              = uint64(1000)
 	startBalance           = uint64(50000)
 
@@ -98,10 +98,10 @@ func NewContext(tb testing.TB) *snow.Context {
 
 	errs := wrappers.Errs{}
 	errs.Add(
-		aliaser.Alias(chainID, "S"),
+		aliaser.Alias(chainID, "Swap"),
 		aliaser.Alias(chainID, chainID.String()),
-		aliaser.Alias(platformChainID, "P"),
-		aliaser.Alias(platformChainID, platformChainID.String()),
+		aliaser.Alias(coreChainID, "Core"),
+		aliaser.Alias(coreChainID, coreChainID.String()),
 	)
 	if errs.Errored() {
 		tb.Fatal(errs.Err)
@@ -111,7 +111,7 @@ func NewContext(tb testing.TB) *snow.Context {
 		chainsToAllychain: make(map[ids.ID]ids.ID),
 	}
 	sn.chainsToAllychain[chainID] = ctx.AllychainID
-	sn.chainsToAllychain[platformChainID] = ctx.AllychainID
+	sn.chainsToAllychain[coreChainID] = ctx.AllychainID
 	ctx.SNLookup = sn
 	return ctx
 }
@@ -1480,7 +1480,7 @@ func TestIssueImportTx(t *testing.T) {
 
 	ctx := NewContext(t)
 	ctx.SharedMemory = m.NewSharedMemory(chainID)
-	peerSharedMemory := m.NewSharedMemory(platformChainID)
+	peerSharedMemory := m.NewSharedMemory(coreChainID)
 
 	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 
@@ -1550,7 +1550,7 @@ func TestIssueImportTx(t *testing.T) {
 				},
 			}},
 		}},
-		SourceChain: platformChainID,
+		SourceChain: coreChainID,
 		ImportedIns: []*axc.TransferableInput{{
 			UTXOID: utxoID,
 			Asset:  txAssetID,
@@ -1713,7 +1713,7 @@ func TestForceAcceptImportTx(t *testing.T) {
 			NetworkID:    networkID,
 			BlockchainID: chainID,
 		}},
-		SourceChain: platformChainID,
+		SourceChain: coreChainID,
 		ImportedIns: []*axc.TransferableInput{{
 			UTXOID: utxoID,
 			Asset:  axc.Asset{ID: genesisTx.ID()},
@@ -1818,7 +1818,7 @@ func TestIssueExportTx(t *testing.T) {
 				},
 			}},
 		}},
-		DestinationChain: platformChainID,
+		DestinationChain: coreChainID,
 		ExportedOuts: []*axc.TransferableOutput{{
 			Asset: axc.Asset{ID: axcID},
 			Out: &secp256k1fx.TransferOutput{
@@ -1865,7 +1865,7 @@ func TestIssueExportTx(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	peerSharedMemory := m.NewSharedMemory(platformChainID)
+	peerSharedMemory := m.NewSharedMemory(coreChainID)
 	utxoBytes, _, _, err := peerSharedMemory.Indexed(
 		vm.ctx.ChainID,
 		[][]byte{
@@ -1957,7 +1957,7 @@ func TestClearForceAcceptedExportTx(t *testing.T) {
 				},
 			}},
 		}},
-		DestinationChain: platformChainID,
+		DestinationChain: coreChainID,
 		ExportedOuts: []*axc.TransferableOutput{{
 			Asset: assetID,
 			Out: &secp256k1fx.TransferOutput{

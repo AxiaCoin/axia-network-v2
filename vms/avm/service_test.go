@@ -1593,7 +1593,7 @@ func buildExportTx(axcTx *txs.Tx, vm *VM, key *crypto.PrivateKeySECP256K1R) *txs
 				}},
 			},
 		},
-		DestinationChain: platformChainID,
+		DestinationChain: coreChainID,
 		ExportedOuts: []*axc.TransferableOutput{{
 			Asset: axc.Asset{ID: axcTx.ID()},
 			Out: &secp256k1fx.TransferOutput{
@@ -1813,7 +1813,7 @@ func TestServiceGetUTXOs(t *testing.T) {
 		}
 	}
 
-	sm := m.NewSharedMemory(platformChainID)
+	sm := m.NewSharedMemory(coreChainID)
 
 	elems := make([]*atomic.Element, numUTXOs)
 	codec := vm.parser.Codec()
@@ -1855,7 +1855,7 @@ func TestServiceGetUTXOs(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	pAddr, err := vm.FormatAddress(platformChainID, rawAddr)
+	pAddr, err := vm.FormatAddress(coreChainID, rawAddr)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1983,7 +1983,7 @@ func TestServiceGetUTXOs(t *testing.T) {
 				Addresses: []string{
 					xAddr,
 				},
-				SourceChain: "P",
+				SourceChain: "Core",
 			},
 		},
 		{
@@ -2004,7 +2004,7 @@ func TestServiceGetUTXOs(t *testing.T) {
 				Addresses: []string{
 					xAddr,
 				},
-				SourceChain: "P",
+				SourceChain: "Core",
 			},
 		},
 		{
@@ -2698,7 +2698,7 @@ func TestImport(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			peerSharedMemory := m.NewSharedMemory(platformChainID)
+			peerSharedMemory := m.NewSharedMemory(coreChainID)
 			utxoID := utxo.InputID()
 			if err := peerSharedMemory.Apply(map[ids.ID]*atomic.Requests{vm.ctx.ChainID: {PutRequests: []*atomic.Element{{
 				Key:   utxoID[:],
@@ -2719,7 +2719,7 @@ func TestImport(t *testing.T) {
 					Username: username,
 					Password: password,
 				},
-				SourceChain: "P",
+				SourceChain: "Core",
 				To:          addrStr,
 			}
 			reply := &api.JSONTxID{}

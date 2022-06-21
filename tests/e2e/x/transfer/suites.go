@@ -98,14 +98,14 @@ var _ = e2e.DescribeSwapChain("[Virtuous Transfer Tx AXC]", func() {
 		)
 		var txID ids.ID
 		ginkgo.By("issue regular, virtuous SwapChain tx should succeed", func() {
-			balances, err := ewoqAXIAWallet.X().Builder().GetFTBalance()
+			balances, err := ewoqAXIAWallet.Swap().Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
 
-			axcAssetID := baseAXIAWallet.X().AXCAssetID()
+			axcAssetID := baseAXIAWallet.Swap().AXCAssetID()
 			ewoqPrevBalX := balances[axcAssetID]
 			tests.Outf("{{green}}ewoq axiawallet balance:{{/}} %d\n", ewoqPrevBalX)
 
-			balances, err = randAXIAWallet.X().Builder().GetFTBalance()
+			balances, err = randAXIAWallet.Swap().Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
 
 			randPrevBalX := balances[axcAssetID]
@@ -120,7 +120,7 @@ var _ = e2e.DescribeSwapChain("[Virtuous Transfer Tx AXC]", func() {
 			// transfer "amount" from "ewoq" to "random"
 			tests.Outf("{{blue}}transferring %d from 'ewoq' to 'random' at %q{{/}}\n", amount, uris[0])
 			ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
-			txID, err = ewoqAXIAWallet.X().IssueBaseTx(
+			txID, err = ewoqAXIAWallet.Swap().IssueBaseTx(
 				[]*axc.TransferableOutput{{
 					Asset: axc.Asset{
 						ID: axcAssetID,
@@ -138,17 +138,17 @@ var _ = e2e.DescribeSwapChain("[Virtuous Transfer Tx AXC]", func() {
 			cancel()
 			gomega.Expect(err).Should(gomega.BeNil())
 
-			balances, err = ewoqAXIAWallet.X().Builder().GetFTBalance()
+			balances, err = ewoqAXIAWallet.Swap().Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
 			ewoqCurBalX := balances[axcAssetID]
 			tests.Outf("{{green}}ewoq axiawallet balance:{{/}} %d\n", ewoqCurBalX)
 
-			balances, err = randAXIAWallet.X().Builder().GetFTBalance()
+			balances, err = randAXIAWallet.Swap().Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
 			randCurBalX := balances[axcAssetID]
 			tests.Outf("{{green}}ewoq axiawallet balance:{{/}} %d\n", randCurBalX)
 
-			gomega.Expect(ewoqCurBalX).Should(gomega.Equal(ewoqPrevBalX - amount - baseAXIAWallet.X().BaseTxFee()))
+			gomega.Expect(ewoqCurBalX).Should(gomega.Equal(ewoqPrevBalX - amount - baseAXIAWallet.Swap().BaseTxFee()))
 			gomega.Expect(randCurBalX).Should(gomega.Equal(randPrevBalX + amount))
 		})
 
@@ -156,7 +156,7 @@ var _ = e2e.DescribeSwapChain("[Virtuous Transfer Tx AXC]", func() {
 			tests.Outf("{{blue}}waiting before querying metrics{{/}}\n")
 
 			for _, u := range uris {
-				xc := avm.NewClient(u, "S")
+				xc := avm.NewClient(u, "Swap")
 				ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
 				status, err := xc.ConfirmTx(ctx, txID, 2*time.Second)
 				cancel()

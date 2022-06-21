@@ -139,9 +139,9 @@ func defaultContext() *snow.Context {
 
 	errs := wrappers.Errs{}
 	errs.Add(
-		aliaser.Alias(constants.CoreChainID, "P"),
+		aliaser.Alias(constants.CoreChainID, "Core"),
 		aliaser.Alias(constants.CoreChainID, constants.CoreChainID.String()),
-		aliaser.Alias(swapChainID, "S"),
+		aliaser.Alias(swapChainID, "Swap"),
 		aliaser.Alias(swapChainID, swapChainID.String()),
 		aliaser.Alias(axChainID, "A"),
 		aliaser.Alias(axChainID, axChainID.String()),
@@ -218,7 +218,7 @@ func defaultGenesis() (*BuildGenesisArgs, []byte) {
 	buildGenesisResponse := BuildGenesisReply{}
 	platformvmSS := StaticService{}
 	if err := platformvmSS.BuildGenesis(nil, &buildGenesisArgs, &buildGenesisResponse); err != nil {
-		panic(fmt.Errorf("problem while building platform chain's genesis state: %w", err))
+		panic(fmt.Errorf("problem while building core chain's genesis state: %w", err))
 	}
 
 	genesisBytes, err := formatting.Decode(buildGenesisResponse.Encoding, buildGenesisResponse.Bytes)
@@ -297,7 +297,7 @@ func BuildGenesisTestWithArgs(t *testing.T, args *BuildGenesisArgs) (*BuildGenes
 	buildGenesisResponse := BuildGenesisReply{}
 	platformvmSS := StaticService{}
 	if err := platformvmSS.BuildGenesis(nil, &buildGenesisArgs, &buildGenesisResponse); err != nil {
-		t.Fatalf("problem while building platform chain's genesis state: %v", err)
+		t.Fatalf("problem while building core chain's genesis state: %v", err)
 	}
 
 	genesisBytes, err := formatting.Decode(buildGenesisResponse.Encoding, buildGenesisResponse.Bytes)

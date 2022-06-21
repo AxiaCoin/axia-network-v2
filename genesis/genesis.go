@@ -26,7 +26,7 @@ import (
 
 const (
 	defaultEncoding    = formatting.Hex
-	configChainIDAlias = "S"
+	configChainIDAlias = "Swap"
 )
 
 var (
@@ -161,11 +161,11 @@ func validateConfig(networkID uint32, config *Config) error {
 	return nil
 }
 
-// FromFile returns the genesis data of the Platform Chain.
+// FromFile returns the genesis data of the Core Chain.
 //
-// Since an Axia network has exactly one Platform Chain, and the Platform
+// Since an Axia network has exactly one Core Chain, and the Platform
 // Chain defines the genesis state of the network (who is staking, which chains
-// exist, etc.), defining the genesis state of the Platform Chain is the same as
+// exist, etc.), defining the genesis state of the Core Chain is the same as
 // defining the genesis state of the network.
 //
 // FromFile accepts:
@@ -177,7 +177,7 @@ func validateConfig(networkID uint32, config *Config) error {
 // loads the network genesis data from the config at [filepath].
 //
 // FromFile returns:
-// 1) The byte representation of the genesis state of the platform chain
+// 1) The byte representation of the genesis state of the core chain
 //    (ie the genesis state of the network)
 // 2) The asset ID of AXC
 func FromFile(networkID uint32, filepath string) ([]byte, ids.ID, error) {
@@ -202,11 +202,11 @@ func FromFile(networkID uint32, filepath string) ([]byte, ids.ID, error) {
 	return FromConfig(config)
 }
 
-// FromFlag returns the genesis data of the Platform Chain.
+// FromFlag returns the genesis data of the Core Chain.
 //
-// Since an Axia network has exactly one Platform Chain, and the Platform
+// Since an Axia network has exactly one Core Chain, and the Platform
 // Chain defines the genesis state of the network (who is staking, which chains
-// exist, etc.), defining the genesis state of the Platform Chain is the same as
+// exist, etc.), defining the genesis state of the Core Chain is the same as
 // defining the genesis state of the network.
 //
 // FromFlag accepts:
@@ -218,7 +218,7 @@ func FromFile(networkID uint32, filepath string) ([]byte, ids.ID, error) {
 // loads the network genesis data from [genesisContent].
 //
 // FromFlag returns:
-// 1) The byte representation of the genesis state of the platform chain
+// 1) The byte representation of the genesis state of the core chain
 //    (ie the genesis state of the network)
 // 2) The asset ID of AXC
 func FromFlag(networkID uint32, genesisContent string) ([]byte, ids.ID, error) {
@@ -244,7 +244,7 @@ func FromFlag(networkID uint32, genesisContent string) ([]byte, ids.ID, error) {
 }
 
 // FromConfig returns:
-// 1) The byte representation of the genesis state of the platform chain
+// 1) The byte representation of the genesis state of the core chain
 //    (ie the genesis state of the network)
 // 2) The asset ID of AXC
 func FromConfig(config *Config) ([]byte, ids.ID, error) {
@@ -323,7 +323,7 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 	initiallyStaked.Add(config.InitialStakedFunds...)
 	skippedAllocations := []Allocation(nil)
 
-	// Specify the initial state of the Platform Chain
+	// Specify the initial state of the Core Chain
 	platformvmArgs := platformvm.BuildGenesisArgs{
 		AxcAssetID:   axcAssetID,
 		NetworkID:     json.Uint32(config.NetworkID),
@@ -441,7 +441,7 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 	platformvmReply := platformvm.BuildGenesisReply{}
 	platformvmSS := platformvm.StaticService{}
 	if err := platformvmSS.BuildGenesis(nil, &platformvmArgs, &platformvmReply); err != nil {
-		return nil, ids.ID{}, fmt.Errorf("problem while building platform chain's genesis state: %w", err)
+		return nil, ids.ID{}, fmt.Errorf("problem while building core chain's genesis state: %w", err)
 	}
 
 	genesisBytes, err := formatting.Decode(platformvmReply.Encoding, platformvmReply.Bytes)

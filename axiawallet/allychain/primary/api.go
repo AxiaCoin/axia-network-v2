@@ -14,8 +14,8 @@ import (
 	"github.com/axiacoin/axia-network-v2/vms/avm"
 	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm"
-	"github.com/axiacoin/axia-network-v2/axiawallet/chain/c"
-	"github.com/axiacoin/axia-network-v2/axiawallet/chain/s"
+	"github.com/axiacoin/axia-network-v2/axiawallet/chain/core"
+	"github.com/axiacoin/axia-network-v2/axiawallet/chain/swap"
 )
 
 const (
@@ -45,16 +45,16 @@ type UTXOClient interface {
 	) ([][]byte, ids.ShortID, ids.ID, error)
 }
 
-func FetchState(ctx context.Context, uri string, addrs ids.ShortSet) (c.Context, x.Context, UTXOs, error) {
+func FetchState(ctx context.Context, uri string, addrs ids.ShortSet) (core.Context, swap.Context, UTXOs, error) {
 	infoClient := info.NewClient(uri)
-	xClient := avm.NewClient(uri, "S")
+	xClient := avm.NewClient(uri, "Swap")
 
-	pCTX, err := c.NewContextFromClients(ctx, infoClient, xClient)
+	pCTX, err := core.NewContextFromClients(ctx, infoClient, xClient)
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
-	xCTX, err := x.NewContextFromClients(ctx, infoClient, xClient)
+	xCTX, err := swap.NewContextFromClients(ctx, infoClient, xClient)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -74,7 +74,7 @@ func FetchState(ctx context.Context, uri string, addrs ids.ShortSet) (c.Context,
 		{
 			id:     xCTX.BlockchainID(),
 			client: xClient,
-			codec:  x.Parser.Codec(),
+			codec:  swap.Parser.Codec(),
 		},
 	}
 	for _, destinationChain := range chains {

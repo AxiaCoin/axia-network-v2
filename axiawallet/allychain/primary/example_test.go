@@ -31,8 +31,8 @@ func ExampleAXIAWallet() {
 	fmt.Printf("synced axiawallet in %s\n", time.Since(axiawalletSyncStartTime))
 
 	// Get the Corechain and the Swapchain axiawallets
-	pAXIAWallet := axiawallet.P()
-	xAXIAWallet := axiawallet.X()
+	pAXIAWallet := axiawallet.Core()
+	xAXIAWallet := axiawallet.Swap()
 
 	// Pull out useful constants to use when issuing transactions.
 	swapChainID := xAXIAWallet.BlockchainID()

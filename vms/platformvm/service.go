@@ -67,7 +67,7 @@ var (
 	errMissingPrivateKey          = errors.New("argument 'privateKey' not given")
 )
 
-// Service defines the API calls that can be made to the platform chain
+// Service defines the API calls that can be made to the core chain
 type Service struct{ vm *VM }
 
 type GetHeightResponse struct {

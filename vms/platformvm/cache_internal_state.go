@@ -388,7 +388,7 @@ func (st *internalStateImpl) sync(genesis []byte) error {
 		)
 	}
 
-	// If the database is empty, create the platform chain anew using the
+	// If the database is empty, create the core chain anew using the
 	// provided genesis state
 	if shouldInit {
 		if err := st.init(genesis); err != nil {
@@ -1544,7 +1544,7 @@ func (st *internalStateImpl) init(genesisBytes []byte) error {
 		st.AddUTXO(&utxo.UTXO)
 	}
 
-	// Persist the platform chain's timestamp at genesis
+	// Persist the core chain's timestamp at genesis
 	genesisTime := time.Unix(int64(genesis.Timestamp), 0)
 	st.SetTimestamp(genesisTime)
 	st.SetCurrentSupply(genesis.InitialSupply)

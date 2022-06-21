@@ -534,7 +534,7 @@ func (n *Node) initIndexer() error {
 func (n *Node) initChains(genesisBytes []byte) {
 	n.Log.Info("initializing chains")
 
-	// Create the Platform Chain
+	// Create the Core Chain
 	n.chainManager.ForceCreateChain(chains.ChainParameters{
 		ID:            constants.CoreChainID,
 		AllychainID:      constants.PrimaryNetworkID,
@@ -715,7 +715,7 @@ func (n *Node) initVMs() error {
 	vdrs := n.vdrs
 
 	// If staking is disabled, ignore updates to Allychains' validator sets
-	// Instead of updating node's validator manager, platform chain makes changes
+	// Instead of updating node's validator manager, core chain makes changes
 	// to its own local validator manager (which isn't used for sampling)
 	if !n.Config.EnableStaking {
 		vdrs = validators.NewManager()

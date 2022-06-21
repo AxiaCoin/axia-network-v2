@@ -11,12 +11,12 @@ import (
 
 var _ vms.Factory = &Factory{}
 
-// Factory can create new instances of the Platform Chain
+// Factory can create new instances of the Core Chain
 type Factory struct {
 	config.Config
 }
 
-// New returns a new instance of the Platform Chain
+// New returns a new instance of the Core Chain
 func (f *Factory) New(*snow.Context) (interface{}, error) {
 	return &VM{Factory: *f}, nil
 }
