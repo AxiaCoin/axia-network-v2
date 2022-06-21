@@ -28,7 +28,7 @@ func BuildViper(fs *flag.FlagSet, args []string) (*viper.Viper, error) {
 	v := viper.New()
 	v.AutomaticEnv()
 	v.SetEnvKeyReplacer(strings.NewReplacer("-", "_"))
-	v.SetEnvPrefix("axiago")
+	v.SetEnvPrefix("axia")
 	if err := v.BindPFlags(pfs); err != nil {
 		return nil, err
 	}
