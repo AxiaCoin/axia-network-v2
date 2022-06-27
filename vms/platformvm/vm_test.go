@@ -143,7 +143,7 @@ func (sn *snLookup) AllychainID(chainID ids.ID) (ids.ID, error) {
 func defaultContext() *snow.Context {
 	ctx := snow.DefaultContextTest()
 	ctx.NetworkID = testNetworkID
-	ctx.XChainID = swapChainID
+	ctx.SwapChainID = swapChainID
 	ctx.AXCAssetID = axcAssetID
 	aliaser := ids.NewAliaser()
 
@@ -1564,10 +1564,10 @@ func TestAtomicImport(t *testing.T) {
 	}
 	vm.ctx.SharedMemory = m.NewSharedMemory(vm.ctx.ChainID)
 	vm.AtomicUTXOManager = axc.NewAtomicUTXOManager(vm.ctx.SharedMemory, Codec)
-	peerSharedMemory := m.NewSharedMemory(vm.ctx.XChainID)
+	peerSharedMemory := m.NewSharedMemory(vm.ctx.SwapChainID)
 
 	if _, err := vm.newImportTx(
-		vm.ctx.XChainID,
+		vm.ctx.SwapChainID,
 		recipientKey.PublicKey().Address(),
 		[]*crypto.PrivateKeySECP256K1R{keys[0]},
 		ids.ShortEmpty, // change addr
@@ -1604,7 +1604,7 @@ func TestAtomicImport(t *testing.T) {
 	}
 
 	tx, err := vm.newImportTx(
-		vm.ctx.XChainID,
+		vm.ctx.SwapChainID,
 		recipientKey.PublicKey().Address(),
 		[]*crypto.PrivateKeySECP256K1R{recipientKey},
 		ids.ShortEmpty, // change addr
@@ -1627,7 +1627,7 @@ func TestAtomicImport(t *testing.T) {
 		t.Fatalf("status should be Committed but is %s", txStatus)
 	}
 	inputID = utxoID.InputID()
-	if _, err := vm.ctx.SharedMemory.Get(vm.ctx.XChainID, [][]byte{inputID[:]}); err == nil {
+	if _, err := vm.ctx.SharedMemory.Get(vm.ctx.SwapChainID, [][]byte{inputID[:]}); err == nil {
 		t.Fatalf("shouldn't have been able to read the utxo")
 	}
 }
@@ -1648,7 +1648,7 @@ func TestOptimisticAtomicImport(t *testing.T) {
 			NetworkID:    vm.ctx.NetworkID,
 			BlockchainID: vm.ctx.ChainID,
 		}},
-		SourceChain: vm.ctx.XChainID,
+		SourceChain: vm.ctx.SwapChainID,
 		ImportedInputs: []*axc.TransferableInput{{
 			UTXOID: axc.UTXOID{
 				TxID:        ids.Empty.Prefix(1),
@@ -2558,7 +2558,7 @@ func TestRejectedStateRegressionInvalidValidatorTimestamp(t *testing.T) {
 			NetworkID:    vm.ctx.NetworkID,
 			BlockchainID: vm.ctx.ChainID,
 		}},
-		SourceChain: vm.ctx.XChainID,
+		SourceChain: vm.ctx.SwapChainID,
 		ImportedInputs: []*axc.TransferableInput{
 			{
 				UTXOID: utxo.UTXOID,
@@ -2600,7 +2600,7 @@ func TestRejectedStateRegressionInvalidValidatorTimestamp(t *testing.T) {
 
 	vm.ctx.SharedMemory = m.NewSharedMemory(vm.ctx.ChainID)
 	vm.AtomicUTXOManager = axc.NewAtomicUTXOManager(vm.ctx.SharedMemory, Codec)
-	peerSharedMemory := m.NewSharedMemory(vm.ctx.XChainID)
+	peerSharedMemory := m.NewSharedMemory(vm.ctx.SwapChainID)
 
 	utxoBytes, err := Codec.Marshal(CodecVersion, utxo)
 	assert.NoError(err)
@@ -2830,7 +2830,7 @@ func TestRejectedStateRegressionInvalidValidatorReward(t *testing.T) {
 			NetworkID:    vm.ctx.NetworkID,
 			BlockchainID: vm.ctx.ChainID,
 		}},
-		SourceChain: vm.ctx.XChainID,
+		SourceChain: vm.ctx.SwapChainID,
 		ImportedInputs: []*axc.TransferableInput{
 			{
 				UTXOID: utxo.UTXOID,
@@ -2872,7 +2872,7 @@ func TestRejectedStateRegressionInvalidValidatorReward(t *testing.T) {
 
 	vm.ctx.SharedMemory = m.NewSharedMemory(vm.ctx.ChainID)
 	vm.AtomicUTXOManager = axc.NewAtomicUTXOManager(vm.ctx.SharedMemory, Codec)
-	peerSharedMemory := m.NewSharedMemory(vm.ctx.XChainID)
+	peerSharedMemory := m.NewSharedMemory(vm.ctx.SwapChainID)
 
 	utxoBytes, err := Codec.Marshal(CodecVersion, utxo)
 	assert.NoError(err)

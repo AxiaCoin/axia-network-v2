@@ -13,8 +13,8 @@ func DescribeLocal(text string, body func()) bool {
 	return ginkgo.Describe("[Local] "+text, body)
 }
 
-// DescribeXChain annotates the tests for Swap-Chain.
+// DescribeSwapChain annotates the tests for Swap-Chain.
 // Can run with any type of cluster (e.g., local, test, mainnet).
-func DescribeXChain(text string, body func()) bool {
+func DescribeSwapChain(text string, body func()) bool {
 	return ginkgo.Describe("[Swap-Chain] "+text, body)
 }

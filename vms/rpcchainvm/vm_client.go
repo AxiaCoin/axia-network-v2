@@ -182,7 +182,7 @@ func (vm *VMClient) Initialize(
 		AllychainId:     ctx.AllychainID[:],
 		ChainId:      ctx.ChainID[:],
 		NodeId:       ctx.NodeID.Bytes(),
-		XChainId:     ctx.XChainID[:],
+		CoreChainId:     ctx.SwapChainID[:],
 		AxcAssetId:  ctx.AXCAssetID[:],
 		GenesisBytes: genesisBytes,
 		UpgradeBytes: upgradeBytes,

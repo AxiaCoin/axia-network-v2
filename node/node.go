@@ -616,7 +616,7 @@ func (n *Node) initChainManager(axcAssetID ids.ID) error {
 		Keystore:                                n.keystore,
 		AtomicMemory:                            &n.sharedMemory,
 		AXCAssetID:                             axcAssetID,
-		XChainID:                                swapChainID,
+		SwapChainID:                                swapChainID,
 		CriticalChains:                          criticalChains,
 		TimeoutManager:                          timeoutManager,
 		Health:                                  n.health,

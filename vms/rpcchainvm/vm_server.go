@@ -83,7 +83,7 @@ func (vm *VMServer) Initialize(_ context.Context, req *vmpb.InitializeRequest) (
 	if err != nil {
 		return nil, err
 	}
-	swapChainID, err := ids.ToID(req.XChainId)
+	swapChainID, err := ids.ToID(req.CoreChainId)
 	if err != nil {
 		return nil, err
 	}
@@ -162,7 +162,7 @@ func (vm *VMServer) Initialize(_ context.Context, req *vmpb.InitializeRequest) (
 		ChainID:   chainID,
 		NodeID:    nodeID,
 
-		XChainID:    swapChainID,
+		SwapChainID:    swapChainID,
 		AXCAssetID: axcAssetID,
 
 		Log:          logging.NoLog{},

@@ -44,7 +44,7 @@ func TestAtomicTxImports(t *testing.T) {
 	}
 	vm.ctx.SharedMemory = m.NewSharedMemory(vm.ctx.ChainID)
 	vm.AtomicUTXOManager = axc.NewAtomicUTXOManager(vm.ctx.SharedMemory, Codec)
-	peerSharedMemory := m.NewSharedMemory(vm.ctx.XChainID)
+	peerSharedMemory := m.NewSharedMemory(vm.ctx.SwapChainID)
 	utxo := &axc.UTXO{
 		UTXOID: utxoID,
 		Asset:  axc.Asset{ID: axcAssetID},
@@ -72,7 +72,7 @@ func TestAtomicTxImports(t *testing.T) {
 	}
 
 	tx, err := vm.newImportTx(
-		vm.ctx.XChainID,
+		vm.ctx.SwapChainID,
 		recipientKey.PublicKey().Address(),
 		[]*crypto.PrivateKeySECP256K1R{recipientKey},
 		ids.ShortEmpty, // change addr

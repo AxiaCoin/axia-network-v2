@@ -345,7 +345,7 @@ func TestGetTx(t *testing.T) {
 			func(service *Service) (*Tx, error) {
 				return service.vm.newExportTx( // Test GetTx works for proposal blocks
 					100,
-					service.vm.ctx.XChainID,
+					service.vm.ctx.SwapChainID,
 					ids.GenerateTestShortID(),
 					[]*crypto.PrivateKeySECP256K1R{keys[0]},
 					keys[0].PublicKey().Address(), // change addr
