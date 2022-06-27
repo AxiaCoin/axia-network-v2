@@ -20,7 +20,7 @@ The minimum recommended hardware specification for nodes connected to Mainnet is
 - OS: Ubuntu 18.04/20.04 or macOS >= 10.15 (Catalina)
 - Network: Reliable IPv4 or IPv6 network connection, with an open public port.
 
-If you plan to build AxiaGo from source, you will also need the following software:
+If you plan to build Axia from source, you will also need the following software:
 
 - [Go](https://golang.org/doc/install) version >= 1.17.9
 - [gcc](https://gcc.gnu.org/)
@@ -28,7 +28,7 @@ If you plan to build AxiaGo from source, you will also need the following softwa
 
 ### Native Install
 
-Clone the AxiaGo repository:
+Clone the Axia repository:
 
 ```sh
 git clone git@github.com:axiacoin/axia.git
@@ -49,7 +49,7 @@ The Axia binary, named `axia`, is in the `build` directory.
 
 ### Binary Repository
 
-Install AxiaGo using an `apt` repository.
+Install Axia using an `apt` repository.
 
 #### Adding the APT Repository
 
@@ -191,7 +191,7 @@ docker run -t -i -v $(pwd):/opt/axia -w/opt/axia axia:protobuf_codegen bash -c "
 
 ## Supported Platforms
 
-AxiaGo can run on different platforms, with different support tiers:
+Axia can run on different platforms, with different support tiers:
 
 - **Tier 1**: Fully supported by the maintainers, guaranteed to pass all tests including e2e and stress tests.
 - **Tier 2**: Passes all unit and integration tests but not necessarily e2e tests.
@@ -199,7 +199,7 @@ AxiaGo can run on different platforms, with different support tiers:
 - **Not supported**: May not build and not tested, considered _unsafe_. To be supported in the future.
 
 The following table lists currently supported platforms and their corresponding
-AxiaGo support tiers:
+Axia support tiers:
 
 | Architecture | Operating system | Support tier  |
 | :----------: | :--------------: | :-----------: |
@@ -213,7 +213,7 @@ AxiaGo support tiers:
 
 To officially support a new platform, one must satisfy the following requirements:
 
-| AxiaGo continuous integration | Tier 1  | Tier 2  | Tier 3  |
+| Axia continuous integration | Tier 1  | Tier 2  | Tier 3  |
 | ---------------------------------- | :-----: | :-----: | :-----: |
 | Build passes                       | &check; | &check; | &check; |
 | Unit and integration tests pass    | &check; | &check; |         |

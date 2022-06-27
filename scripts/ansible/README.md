@@ -1,7 +1,7 @@
-# Ansible for AxiaGo
+# Ansible for Axia
 
 [Ansible](https://ansible.com) playbooks, roles, & inventories to install
-[AxiaGo](https://github.com/axiacoin/axia-network-v2) as a systemd service.
+[Axia](https://github.com/axiacoin/axia-network-v2) as a systemd service.
 Target(s) can be
 
 - localhost
@@ -13,10 +13,10 @@ Target(s) can be
 
 ## Using
 
-To create an AxiaGo service on localhost
+To create an Axia service on localhost
 
 1. Check you have Ansible 2.9+ (see [Installing](#installing))
-2. Clone the AxiaGo git repository
+2. Clone the Axia git repository
     ```
     $ git clone https://github.com/axiacoin/axia-network-v2
     ```
@@ -47,7 +47,7 @@ To create an AxiaGo service on localhost
 
     The output should look similar to
     ```
-    ● axia.service - AxiaGo node for Axia consensus network
+    ● axia.service - Axia node for Axia consensus network
     Loaded: loaded (/etc/systemd/system/axia.service; enabled; vendor preset: enabled)
     Active: active (running) since Wed 2020-10-21 10:00:00 UTC; 32s ago
     ...

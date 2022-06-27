@@ -32,7 +32,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 
 - Fixed a bug where a deadlock on shutdown caused historical re-generation on restart.
 - Added an API endpoint to fetch the current VM Config.
-- Added AxiaGo custom log formatting to the logs.
+- Added Axia custom log formatting to the logs.
 - Removed support for the JS Tracer.
 
 ### Logging
@@ -293,7 +293,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 
 - Notified VMs of peer versions on `Connected`.
 - Fixed acceptance broadcasting over IPC.
-- Fixed 32-bit architecture builds for AxiaGo (not Coreth).
+- Fixed 32-bit architecture builds for Axia (not Coreth).
 
 ## [v1.7.2](https://github.com/axiacoin/axia-network-v2/releases/tag/v1.7.2)
 

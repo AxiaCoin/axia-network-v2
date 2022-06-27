@@ -11,7 +11,7 @@ AXIA_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )"; cd .. && pwd ) # Directory a
 GOPATH="$(go env GOPATH)"
 coreth_path="$GOPATH/pkg/mod/github.com/axiacoin/axia-network-v2-coreth@$coreth_version"
 
-# Where AxiaGo binary goes
+# Where Axia binary goes
 build_dir="$AXIA_PATH/build"
 axia_path="$build_dir/axia"
 plugin_dir="$build_dir/plugins"
@@ -26,7 +26,7 @@ axia_dockerhub_repo=${DOCKER_REPO:-"axia"}
 # TODO: fix "fatal: No names found, cannot describe anything" in github CI
 current_branch=$(git symbolic-ref -q --short HEAD || git describe --tags --exact-match || true)
 
-git_commit=${AXIAGO_COMMIT:-$( git rev-list -1 HEAD )}
+git_commit=${AXIA_COMMIT:-$( git rev-list -1 HEAD )}
 
 # Static compilation
 static_ld_flags=''

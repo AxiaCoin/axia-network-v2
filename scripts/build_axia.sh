@@ -30,7 +30,7 @@ version_lt() {
 }
 
 if version_lt "$(go_version)" "$go_version_minimum"; then
-    echo "AxiaGo requires Go >= $go_version_minimum, Go $(go_version) found." >&2
+    echo "Axia requires Go >= $go_version_minimum, Go $(go_version) found." >&2
     exit 1
 fi
 
@@ -43,9 +43,9 @@ source "$AXIA_PATH"/scripts/constants.sh
 
 # Build with rocksdb allowed only if the environment variable ROCKSDBALLOWED is set
 if [ -z ${ROCKSDBALLOWED+x} ]; then
-    echo "Building AxiaGo..."
+    echo "Building Axia..."
     go build -ldflags "-X github.com/axiacoin/axia-network-v2/version.GitCommit=$git_commit $static_ld_flags" -o "$axia_path" "$AXIA_PATH/main/"*.go
 else
-    echo "Building AxiaGo with rocksdb enabled..."
+    echo "Building Axia with rocksdb enabled..."
     go build -tags rocksdballowed -ldflags "-X github.com/axiacoin/axia-network-v2/version.GitCommit=$git_commit $static_ld_flags" -o "$axia_path" "$AXIA_PATH/main/"*.go
 fi

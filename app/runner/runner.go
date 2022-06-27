@@ -18,7 +18,7 @@ import (
 	appplugin "github.com/axiacoin/axia-network-v2/app/plugin"
 )
 
-// Run an AxiaGo node.
+// Run an Axia node.
 // If specified in the config, serves a hashicorp plugin that can be consumed by
 // the daemon (see axia/main).
 func Run(config Config, nodeConfig node.Config) {
