@@ -1,0 +1,10 @@
+---
+ava_user: axia
+ava_group: admin
+network: mainnet
+db_dir: /data/axia
+log_dir: /var/log/axia
+config_dir: /etc/axia
+plugin_dir: /usr/local/lib/axia/plugins
+repo_url: https://github.com/axiacoin/axia-network-v2
+repo_folder: /tmp/axia
