@@ -95,8 +95,8 @@ var (
 	testAllychain1            *UnsignedCreateAllychainTx
 	testAllychain1ControlKeys []*crypto.PrivateKeySECP256K1R
 
-	xChainID = ids.Empty.Prefix(0)
-	cChainID = ids.Empty.Prefix(1)
+	swapChainID = ids.Empty.Prefix(0)
+	axcChainID = ids.Empty.Prefix(1)
 )
 
 var (
@@ -143,18 +143,18 @@ func (sn *snLookup) AllychainID(chainID ids.ID) (ids.ID, error) {
 func defaultContext() *snow.Context {
 	ctx := snow.DefaultContextTest()
 	ctx.NetworkID = testNetworkID
-	ctx.XChainID = xChainID
+	ctx.XChainID = swapChainID
 	ctx.AXCAssetID = axcAssetID
 	aliaser := ids.NewAliaser()
 
 	errs := wrappers.Errs{}
 	errs.Add(
-		aliaser.Alias(constants.PlatformChainID, "P"),
+		aliaser.Alias(constants.PlatformChainID, "Core"),
 		aliaser.Alias(constants.PlatformChainID, constants.PlatformChainID.String()),
-		aliaser.Alias(xChainID, "Swap"),
-		aliaser.Alias(xChainID, xChainID.String()),
-		aliaser.Alias(cChainID, "C"),
-		aliaser.Alias(cChainID, cChainID.String()),
+		aliaser.Alias(swapChainID, "Swap"),
+		aliaser.Alias(swapChainID, swapChainID.String()),
+		aliaser.Alias(axcChainID, "AXC"),
+		aliaser.Alias(axcChainID, axcChainID.String()),
 	)
 	if errs.Errored() {
 		panic(errs.Err)
@@ -164,8 +164,8 @@ func defaultContext() *snow.Context {
 	ctx.SNLookup = &snLookup{
 		chainsToAllychain: map[ids.ID]ids.ID{
 			constants.PlatformChainID: constants.PrimaryNetworkID,
-			xChainID:                  constants.PrimaryNetworkID,
-			cChainID:                  constants.PrimaryNetworkID,
+			swapChainID:                  constants.PrimaryNetworkID,
+			axcChainID:                  constants.PrimaryNetworkID,
 		},
 	}
 	return ctx

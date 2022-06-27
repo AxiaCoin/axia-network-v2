@@ -1977,7 +1977,7 @@ func TestServiceGetUTXOs(t *testing.T) {
 				Addresses: []string{
 					xAddr,
 				},
-				SourceChain: "P",
+				SourceChain: "Core",
 			},
 		},
 		{
@@ -1998,7 +1998,7 @@ func TestServiceGetUTXOs(t *testing.T) {
 				Addresses: []string{
 					xAddr,
 				},
-				SourceChain: "P",
+				SourceChain: "Core",
 			},
 		},
 		{
@@ -2729,7 +2729,7 @@ func TestImport(t *testing.T) {
 					Username: username,
 					Password: password,
 				},
-				SourceChain: "P",
+				SourceChain: "Core",
 				To:          addrStr,
 			}
 			reply := &api.JSONTxID{}

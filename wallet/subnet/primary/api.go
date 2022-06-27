@@ -55,7 +55,7 @@ func FetchState(ctx context.Context, uri string, addrs ids.ShortSet) (p.Context,
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	pAddrs, err := FormatAddresses("P", pCTX.HRP(), addrs)
+	pAddrs, err := FormatAddresses("Core", pCTX.HRP(), addrs)
 	if err != nil {
 		return nil, nil, nil, err
 	}

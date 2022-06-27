@@ -202,7 +202,7 @@ func TestGetTxStatus(t *testing.T) {
 	}
 
 	sm := m.NewSharedMemory(service.vm.ctx.ChainID)
-	peerSharedMemory := m.NewSharedMemory(xChainID)
+	peerSharedMemory := m.NewSharedMemory(swapChainID)
 
 	// #nosec G404
 	utxo := &axc.UTXO{
@@ -239,7 +239,7 @@ func TestGetTxStatus(t *testing.T) {
 	newAtomicUTXOManager := axc.NewAtomicUTXOManager(sm, Codec)
 
 	service.vm.AtomicUTXOManager = newAtomicUTXOManager
-	tx, err := service.vm.newImportTx(xChainID, ids.ShortEmpty, []*crypto.PrivateKeySECP256K1R{recipientKey}, ids.ShortEmpty)
+	tx, err := service.vm.newImportTx(swapChainID, ids.ShortEmpty, []*crypto.PrivateKeySECP256K1R{recipientKey}, ids.ShortEmpty)
 	if err != nil {
 		t.Fatal(err)
 	}
