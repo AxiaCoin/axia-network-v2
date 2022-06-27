@@ -178,7 +178,7 @@ type ManagerConfig struct {
 	BootstrapAncestorsMaxContainersReceived int
 
 	ApricotPhase4Time            time.Time
-	ApricotPhase4MinPChainHeight uint64
+	ApricotPhase4MinCoreChainHeight uint64
 
 	ResetProposerVMHeightIndex bool
 }
@@ -791,7 +791,7 @@ func (m *manager) createSnowmanChain(
 	}
 
 	// enable ProposerVM on this VM
-	vm = proposervm.New(vm, m.ApricotPhase4Time, m.ApricotPhase4MinPChainHeight, m.ResetProposerVMHeightIndex)
+	vm = proposervm.New(vm, m.ApricotPhase4Time, m.ApricotPhase4MinCoreChainHeight, m.ResetProposerVMHeightIndex)
 
 	if m.MeterVMEnabled {
 		vm = metervm.NewBlockVM(vm)

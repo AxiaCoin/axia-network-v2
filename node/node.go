@@ -634,7 +634,7 @@ func (n *Node) initChainManager(axcAssetID ids.ID) error {
 		BootstrapAncestorsMaxContainersSent:     n.Config.BootstrapAncestorsMaxContainersSent,
 		BootstrapAncestorsMaxContainersReceived: n.Config.BootstrapAncestorsMaxContainersReceived,
 		ApricotPhase4Time:                       version.GetApricotPhase4Time(n.Config.NetworkID),
-		ApricotPhase4MinPChainHeight:            version.GetApricotPhase4MinPChainHeight(n.Config.NetworkID),
+		ApricotPhase4MinCoreChainHeight:            version.GetApricotPhase4MinCoreChainHeight(n.Config.NetworkID),
 		ResetProposerVMHeightIndex:              n.Config.ResetProposerVMHeightIndex,
 	})
 

@@ -26,7 +26,7 @@ var _ Windower = &windower{}
 type Windower interface {
 	Delay(
 		chainHeight,
-		pChainHeight uint64,
+		coreChainHeight uint64,
 		validatorID ids.ShortID,
 	) (time.Duration, error)
 }
@@ -50,13 +50,13 @@ func New(state validators.State, allychainID, chainID ids.ID) Windower {
 	}
 }
 
-func (w *windower) Delay(chainHeight, pChainHeight uint64, validatorID ids.ShortID) (time.Duration, error) {
+func (w *windower) Delay(chainHeight, coreChainHeight uint64, validatorID ids.ShortID) (time.Duration, error) {
 	if validatorID == ids.ShortEmpty {
 		return MaxDelay, nil
 	}
 
 	// get the validator set by the core-chain height
-	validatorsMap, err := w.state.GetValidatorSet(pChainHeight, w.allychainID)
+	validatorsMap, err := w.state.GetValidatorSet(coreChainHeight, w.allychainID)
 	if err != nil {
 		return 0, err
 	}

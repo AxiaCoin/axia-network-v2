@@ -36,7 +36,7 @@ var (
 	genesisUnixTimestamp int64 = 1000
 	genesisTimestamp           = time.Unix(genesisUnixTimestamp, 0)
 
-	defaultPChainHeight uint64 = 2000
+	defaultCoreChainHeight uint64 = 2000
 
 	errUnknownBlock      = errors.New("unknown block")
 	errUnverifiedBlock   = errors.New("unverified block")
@@ -54,7 +54,7 @@ func init() {
 func initTestProposerVM(
 	t *testing.T,
 	proBlkStartTime time.Time,
-	minPChainHeight uint64,
+	minCoreChainHeight uint64,
 ) (
 	*block.TestVM,
 	*validators.TestState,
@@ -102,13 +102,13 @@ func initTestProposerVM(
 		}
 	}
 
-	proVM := New(coreVM, proBlkStartTime, minPChainHeight, false)
+	proVM := New(coreVM, proBlkStartTime, minCoreChainHeight, false)
 
 	valState := &validators.TestState{
 		T: t,
 	}
 	valState.GetMinimumHeightF = func() (uint64, error) { return coreGenBlk.HeightV, nil }
-	valState.GetCurrentHeightF = func() (uint64, error) { return defaultPChainHeight, nil }
+	valState.GetCurrentHeightF = func() (uint64, error) { return defaultCoreChainHeight, nil }
 	valState.GetValidatorSetF = func(height uint64, allychainID ids.ID) (map[ids.ShortID]uint64, error) {
 		res := make(map[ids.ShortID]uint64)
 		res[proVM.ctx.NodeID] = uint64(10)
@@ -452,7 +452,7 @@ func TestCoreBlockFailureCauseProposerBlockParseFailure(t *testing.T) {
 	slb, err := statelessblock.Build(
 		proVM.preferred,
 		innerBlk.Timestamp(),
-		100, // pChainHeight,
+		100, // coreChainHeight,
 		proVM.ctx.StakingCertLeaf,
 		innerBlk.Bytes(),
 		proVM.ctx.ChainID,
@@ -497,7 +497,7 @@ func TestTwoProBlocksWrappingSameCoreBlockCanBeParsed(t *testing.T) {
 	slb1, err := statelessblock.Build(
 		proVM.preferred,
 		innerBlk.Timestamp(),
-		100, // pChainHeight,
+		100, // coreChainHeight,
 		proVM.ctx.StakingCertLeaf,
 		innerBlk.Bytes(),
 		proVM.ctx.ChainID,
@@ -518,7 +518,7 @@ func TestTwoProBlocksWrappingSameCoreBlockCanBeParsed(t *testing.T) {
 	slb2, err := statelessblock.Build(
 		proVM.preferred,
 		innerBlk.Timestamp(),
-		200, // pChainHeight,
+		200, // coreChainHeight,
 		proVM.ctx.StakingCertLeaf,
 		innerBlk.Bytes(),
 		proVM.ctx.ChainID,
@@ -602,15 +602,15 @@ func TestTwoProBlocksWithSameParentCanBothVerify(t *testing.T) {
 		}
 	}
 
-	pChainHeight, err := proVM.ctx.ValidatorState.GetCurrentHeight()
+	coreChainHeight, err := proVM.ctx.ValidatorState.GetCurrentHeight()
 	if err != nil {
-		t.Fatal("could not retrieve pChain height")
+		t.Fatal("could not retrieve coreChain height")
 	}
 
 	netSlb, err := statelessblock.BuildUnsigned(
 		proVM.preferred,
 		netcoreBlk.Timestamp(),
-		pChainHeight,
+		coreChainHeight,
 		netcoreBlk.Bytes(),
 	)
 	if err != nil {
@@ -844,7 +844,7 @@ func TestExpiredBuildBlock(t *testing.T) {
 		T: t,
 	}
 	valState.GetMinimumHeightF = func() (uint64, error) { return coreGenBlk.Height(), nil }
-	valState.GetCurrentHeightF = func() (uint64, error) { return defaultPChainHeight, nil }
+	valState.GetCurrentHeightF = func() (uint64, error) { return defaultCoreChainHeight, nil }
 	valState.GetValidatorSetF = func(height uint64, allychainID ids.ID) (map[ids.ShortID]uint64, error) {
 		return map[ids.ShortID]uint64{
 			{1}: 100,
@@ -1119,7 +1119,7 @@ func TestInnerVMRollback(t *testing.T) {
 	valState := &validators.TestState{
 		T: t,
 	}
-	valState.GetCurrentHeightF = func() (uint64, error) { return defaultPChainHeight, nil }
+	valState.GetCurrentHeightF = func() (uint64, error) { return defaultCoreChainHeight, nil }
 	valState.GetValidatorSetF = func(height uint64, allychainID ids.ID) (map[ids.ShortID]uint64, error) {
 		return map[ids.ShortID]uint64{
 			{1}: 100,
@@ -1428,7 +1428,7 @@ func TestTwoForks_OneIsAccepted(t *testing.T) {
 	ySlb, err := statelessblock.BuildUnsigned(
 		gBlock.ID(),
 		gBlock.Timestamp(),
-		defaultPChainHeight,
+		defaultCoreChainHeight,
 		yBlock.Bytes(),
 	)
 	if err != nil {
@@ -1539,7 +1539,7 @@ func TestTooFarAdvanced(t *testing.T) {
 	ySlb, err := statelessblock.BuildUnsigned(
 		aBlock.ID(),
 		aBlock.Timestamp().Add(maxSkew),
-		defaultPChainHeight,
+		defaultCoreChainHeight,
 		yBlock.Bytes(),
 	)
 	if err != nil {
@@ -1562,7 +1562,7 @@ func TestTooFarAdvanced(t *testing.T) {
 	ySlb, err = statelessblock.BuildUnsigned(
 		aBlock.ID(),
 		aBlock.Timestamp().Add(proposer.MaxDelay),
-		defaultPChainHeight,
+		defaultCoreChainHeight,
 		yBlock.Bytes(),
 	)
 
@@ -1684,7 +1684,7 @@ func TestTwoOptions_OneIsAccepted(t *testing.T) {
 
 // Ensure that given the chance, built blocks will reference a lagged Core-chain
 // height.
-func TestLaggedPChainHeight(t *testing.T) {
+func TestLaggedCoreChainHeight(t *testing.T) {
 	assert := assert.New(t)
 
 	coreVM, _, proVM, coreGenBlk, _ := initTestProposerVM(t, time.Time{}, 0)
@@ -1707,6 +1707,6 @@ func TestLaggedPChainHeight(t *testing.T) {
 	block, ok := blockIntf.(*postForkBlock)
 	assert.True(ok, "expected post fork block")
 
-	pChainHeight := block.PChainHeight()
-	assert.Equal(pChainHeight, coreGenBlk.Height())
+	coreChainHeight := block.CoreChainHeight()
+	assert.Equal(coreChainHeight, coreGenBlk.Height())
 }

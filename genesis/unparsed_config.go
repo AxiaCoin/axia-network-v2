@@ -95,7 +95,7 @@ type UnparsedConfig struct {
 	InitialStakedFunds         []string         `json:"initialStakedFunds"`
 	InitialStakers             []UnparsedStaker `json:"initialStakers"`
 
-	AXCChainGenesis string `json:"cChainGenesis"`
+	AXCChainGenesis string `json:"axcChainGenesis"`
 
 	Message string `json:"message"`
 }

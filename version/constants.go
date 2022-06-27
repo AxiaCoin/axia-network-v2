@@ -54,11 +54,11 @@ var (
 		constants.TestID:    time.Date(2021, time.September, 16, 21, 0, 0, 0, time.UTC),
 	}
 	ApricotPhase4DefaultTime     = time.Date(2020, time.December, 5, 5, 0, 0, 0, time.UTC)
-	ApricotPhase4MinPChainHeight = map[uint32]uint64{
+	ApricotPhase4MinCoreChainHeight = map[uint32]uint64{
 		constants.MainnetID: 793005,
 		constants.TestID:    47437,
 	}
-	ApricotPhase4DefaultMinPChainHeight uint64
+	ApricotPhase4DefaultMinCoreChainHeight uint64
 
 	ApricotPhase5Times = map[uint32]time.Time{
 		constants.MainnetID: time.Date(2021, time.December, 2, 18, 0, 0, 0, time.UTC),
@@ -109,11 +109,11 @@ func GetApricotPhase4Time(networkID uint32) time.Time {
 	return ApricotPhase4DefaultTime
 }
 
-func GetApricotPhase4MinPChainHeight(networkID uint32) uint64 {
-	if minHeight, exists := ApricotPhase4MinPChainHeight[networkID]; exists {
+func GetApricotPhase4MinCoreChainHeight(networkID uint32) uint64 {
+	if minHeight, exists := ApricotPhase4MinCoreChainHeight[networkID]; exists {
 		return minHeight
 	}
-	return ApricotPhase4DefaultMinPChainHeight
+	return ApricotPhase4DefaultMinCoreChainHeight
 }
 
 func GetApricotPhase5Time(networkID uint32) time.Time {
