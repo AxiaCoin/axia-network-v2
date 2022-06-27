@@ -15,7 +15,7 @@ import (
 
 	"github.com/onsi/gomega"
 
-	runner_client "github.com/axiacoin/axia-network-runner/client"
+	runner_client "github.com/axiacoin/axia-network-v2-runner/client"
 
 	"github.com/axiacoin/axia-network-v2/tests"
 	"github.com/axiacoin/axia-network-v2/tests/e2e"
