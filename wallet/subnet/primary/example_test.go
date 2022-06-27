@@ -61,17 +61,17 @@ func ExampleWallet() {
 		},
 	)
 	if err != nil {
-		fmt.Printf("failed to issue X->P export transaction with: %s\n", err)
+		fmt.Printf("failed to issue Swap->P export transaction with: %s\n", err)
 		return
 	}
-	fmt.Printf("issued X->P export %s in %s\n", exportTxID, time.Since(exportStartTime))
+	fmt.Printf("issued Swap->P export %s in %s\n", exportTxID, time.Since(exportStartTime))
 
 	// Import the 100 schmeckles from the Swap-chain into the Core-chain.
 	importStartTime := time.Now()
 	importTxID, err := pWallet.IssueImportTx(xChainID, owner)
 	if err != nil {
-		fmt.Printf("failed to issue X->P import transaction with: %s\n", err)
+		fmt.Printf("failed to issue Swap->P import transaction with: %s\n", err)
 		return
 	}
-	fmt.Printf("issued X->P import %s in %s\n", importTxID, time.Since(importStartTime))
+	fmt.Printf("issued Swap->P import %s in %s\n", importTxID, time.Since(importStartTime))
 }

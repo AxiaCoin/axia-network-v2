@@ -28,7 +28,7 @@ import (
 const (
 	defaultEncoding    = formatting.Hex
 	codecVersion       = 0
-	configChainIDAlias = "X"
+	configChainIDAlias = "Swap"
 )
 
 var (

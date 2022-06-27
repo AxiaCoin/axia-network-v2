@@ -20,32 +20,32 @@ func TestAddressConversion(t *testing.T) {
 		expectedAddrs []string
 	}{
 		{
-			chain: "X",
+			chain: "Swap",
 			hrp:   "custom",
 			srcAddrs: []string{
-				"X-local1g65uqn6t77p656w64023nh8nd9updzmxyymev2",
-				"X-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u",
+				"Swap-local1g65uqn6t77p656w64023nh8nd9updzmxyymev2",
+				"Swap-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u",
 			},
 			expectedAddrs: []string{
-				"X-custom1g65uqn6t77p656w64023nh8nd9updzmxwd59gh",
-				"X-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p",
+				"Swap-custom1g65uqn6t77p656w64023nh8nd9updzmxwd59gh",
+				"Swap-custom18jma8ppw3nhx5r4ap8clazz0dps7rv5u9xde7p",
 			},
 		},
 		{
-			chain: "X",
+			chain: "Swap",
 			hrp:   "local",
 			srcAddrs: []string{
-				"X-local1g65uqn6t77p656w64023nh8nd9updzmxyymev2",
-				"X-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u",
+				"Swap-local1g65uqn6t77p656w64023nh8nd9updzmxyymev2",
+				"Swap-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u",
 			},
 			expectedAddrs: []string{
-				"X-local1g65uqn6t77p656w64023nh8nd9updzmxyymev2",
-				"X-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u",
+				"Swap-local1g65uqn6t77p656w64023nh8nd9updzmxyymev2",
+				"Swap-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u",
 			},
 		},
 		{
 			srcAddrs: []string{
-				"X-local1g65uqn6t77p656w64023nh8nd9updzmxyymev2",
+				"Swap-local1g65uqn6t77p656w64023nh8nd9updzmxyymev2",
 			},
 			expectedAddrs: []string{
 				"-1g65uqn6t77p656w64023nh8nd9updzmx4x372p",

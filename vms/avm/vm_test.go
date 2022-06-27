@@ -89,7 +89,7 @@ func NewContext(tb testing.TB) *snow.Context {
 
 	errs := wrappers.Errs{}
 	errs.Add(
-		aliaser.Alias(chainID, "X"),
+		aliaser.Alias(chainID, "Swap"),
 		aliaser.Alias(chainID, chainID.String()),
 		aliaser.Alias(platformChainID, "P"),
 		aliaser.Alias(platformChainID, platformChainID.String()),
@@ -1229,7 +1229,7 @@ func TestVMFormat(t *testing.T) {
 		in       ids.ShortID
 		expected string
 	}{
-		{ids.ShortEmpty, "X-testing1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqtu2yas"},
+		{ids.ShortEmpty, "Swap-testing1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqtu2yas"},
 	}
 	for _, test := range tests {
 		t.Run(test.in.String(), func(t *testing.T) {
