@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package peer
@@ -104,7 +104,7 @@ func StartTestPeer(
 			Router:               router,
 			VersionCompatibility: version.GetCompatibility(networkID),
 			VersionParser:        version.NewDefaultApplicationParser(),
-			MyAllychains:            ids.Set{},
+			MySubnets:            ids.Set{},
 			Beacons:              validators.NewSet(),
 			NetworkID:            networkID,
 			PingFrequency:        constants.DefaultPingFrequency,

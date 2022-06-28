@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package platformvm
@@ -36,22 +36,22 @@ func (vm *VM) HealthCheck() (interface{}, error) {
 		)
 	}
 
-	for allychainID := range vm.WhitelistedAllychains {
-		percentConnected, err := vm.getPercentConnected(allychainID)
+	for subnetID := range vm.WhitelistedSubnets {
+		percentConnected, err := vm.getPercentConnected(subnetID)
 		if err != nil {
-			return nil, fmt.Errorf("couldn't get percent connected for %q: %w", allychainID, err)
+			return nil, fmt.Errorf("couldn't get percent connected for %q: %w", subnetID, err)
 		}
 
-		allychainIDStr := allychainID.String()
-		vm.metrics.allychainPercentConnected.WithLabelValues(allychainIDStr).Set(percentConnected)
-		key := fmt.Sprintf("%s-percentConnected", allychainID)
+		subnetIDStr := subnetID.String()
+		vm.metrics.subnetPercentConnected.WithLabelValues(subnetIDStr).Set(percentConnected)
+		key := fmt.Sprintf("%s-percentConnected", subnetID)
 		details[key] = percentConnected
 
 		if percentConnected < MinConnectedStake {
 			errorReasons = append(errorReasons,
 				fmt.Sprintf("connected to %f%% of %q weight; should be connected to at least %f%%",
 					percentConnected*100,
-					allychainIDStr,
+					subnetIDStr,
 					MinConnectedStake*100,
 				),
 			)

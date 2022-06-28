@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package block
@@ -19,7 +19,7 @@ func TestBuild(t *testing.T) {
 
 	parentID := ids.ID{1}
 	timestamp := time.Unix(123, 0)
-	coreChainHeight := uint64(2)
+	pChainHeight := uint64(2)
 	innerBlockBytes := []byte{3}
 	chainID := ids.ID{4}
 
@@ -32,7 +32,7 @@ func TestBuild(t *testing.T) {
 	builtBlock, err := Build(
 		parentID,
 		timestamp,
-		coreChainHeight,
+		pChainHeight,
 		cert,
 		innerBlockBytes,
 		chainID,
@@ -41,7 +41,7 @@ func TestBuild(t *testing.T) {
 	assert.NoError(err)
 
 	assert.Equal(parentID, builtBlock.ParentID())
-	assert.Equal(coreChainHeight, builtBlock.CoreChainHeight())
+	assert.Equal(pChainHeight, builtBlock.PChainHeight())
 	assert.Equal(timestamp, builtBlock.Timestamp())
 	assert.Equal(innerBlockBytes, builtBlock.Block())
 
@@ -55,16 +55,16 @@ func TestBuild(t *testing.T) {
 func TestBuildUnsigned(t *testing.T) {
 	parentID := ids.ID{1}
 	timestamp := time.Unix(123, 0)
-	coreChainHeight := uint64(2)
+	pChainHeight := uint64(2)
 	innerBlockBytes := []byte{3}
 
 	assert := assert.New(t)
 
-	builtBlock, err := BuildUnsigned(parentID, timestamp, coreChainHeight, innerBlockBytes)
+	builtBlock, err := BuildUnsigned(parentID, timestamp, pChainHeight, innerBlockBytes)
 	assert.NoError(err)
 
 	assert.Equal(parentID, builtBlock.ParentID())
-	assert.Equal(coreChainHeight, builtBlock.CoreChainHeight())
+	assert.Equal(pChainHeight, builtBlock.PChainHeight())
 	assert.Equal(timestamp, builtBlock.Timestamp())
 	assert.Equal(innerBlockBytes, builtBlock.Block())
 	assert.Equal(ids.ShortEmpty, builtBlock.Proposer())

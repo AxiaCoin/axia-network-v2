@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package chains
@@ -24,7 +24,7 @@ func (mm MockManager) PrimaryAliasOrDefault(ids.ID) string { return "" }
 func (mm MockManager) Alias(ids.ID, string) error          { return nil }
 func (mm MockManager) RemoveAliases(ids.ID)                {}
 func (mm MockManager) Shutdown()                           {}
-func (mm MockManager) AllychainID(ids.ID) (ids.ID, error)     { return ids.ID{}, nil }
+func (mm MockManager) SubnetID(ids.ID) (ids.ID, error)     { return ids.ID{}, nil }
 func (mm MockManager) IsBootstrapped(ids.ID) bool          { return false }
 
 func (mm MockManager) Lookup(s string) (ids.ID, error) {

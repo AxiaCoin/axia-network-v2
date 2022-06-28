@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package config
@@ -50,12 +50,12 @@ func TestGetChainConfigsFromFiles(t *testing.T) {
 			}(),
 		},
 		"valid alias": {
-			configs:  map[string]string{"AXC": "hello", "Swap": "world"},
-			upgrades: map[string]string{"AXC": "upgradess"},
+			configs:  map[string]string{"C": "hello", "X": "world"},
+			upgrades: map[string]string{"C": "upgradess"},
 			expected: func() map[string]chains.ChainConfig {
 				m := map[string]chains.ChainConfig{}
-				m["AXC"] = chains.ChainConfig{Config: []byte("hello"), Upgrade: []byte("upgradess")}
-				m["Swap"] = chains.ChainConfig{Config: []byte("world"), Upgrade: []byte(nil)}
+				m["C"] = chains.ChainConfig{Config: []byte("hello"), Upgrade: []byte("upgradess")}
+				m["X"] = chains.ChainConfig{Config: []byte("world"), Upgrade: []byte(nil)}
 
 				return m
 			}(),
@@ -124,7 +124,7 @@ func TestGetChainConfigsDirNotExist(t *testing.T) {
 		"full structure": {
 			structure: "/cdir/C/",
 			file:      map[string]string{"config.ex": "hello"},
-			expected:  map[string]chains.ChainConfig{"AXC": {Config: []byte("hello"), Upgrade: []byte(nil)}},
+			expected:  map[string]chains.ChainConfig{"C": {Config: []byte("hello"), Upgrade: []byte(nil)}},
 		},
 	}
 
@@ -171,11 +171,11 @@ func TestSetChainConfigDefaultDir(t *testing.T) {
 	v := setupViper(configFilePath)
 	assert.Equal(defaultChainConfigDir, v.GetString(ChainConfigDirKey))
 
-	chainsDir := filepath.Join(defaultChainConfigDir, "AXC")
+	chainsDir := filepath.Join(defaultChainConfigDir, "C")
 	setupFile(t, chainsDir, chainConfigFileName+".ex", "helloworld")
 	chainConfigs, err := getChainConfigs(v)
 	assert.NoError(err)
-	expected := map[string]chains.ChainConfig{"AXC": {Config: []byte("helloworld"), Upgrade: []byte(nil)}}
+	expected := map[string]chains.ChainConfig{"C": {Config: []byte("helloworld"), Upgrade: []byte(nil)}}
 	assert.Equal(expected, chainConfigs)
 }
 
@@ -217,13 +217,13 @@ func TestGetChainConfigsFromFlags(t *testing.T) {
 		},
 		"valid alias": {
 			fullConfigs: map[string]chains.ChainConfig{
-				"AXC": {Config: []byte("hello"), Upgrade: []byte("upgradess")},
-				"Swap": {Config: []byte("world"), Upgrade: []byte(nil)},
+				"C": {Config: []byte("hello"), Upgrade: []byte("upgradess")},
+				"X": {Config: []byte("world"), Upgrade: []byte(nil)},
 			},
 			expected: func() map[string]chains.ChainConfig {
 				m := map[string]chains.ChainConfig{}
-				m["AXC"] = chains.ChainConfig{Config: []byte("hello"), Upgrade: []byte("upgradess")}
-				m["Swap"] = chains.ChainConfig{Config: []byte("world"), Upgrade: []byte(nil)}
+				m["C"] = chains.ChainConfig{Config: []byte("hello"), Upgrade: []byte("upgradess")}
+				m["X"] = chains.ChainConfig{Config: []byte("world"), Upgrade: []byte(nil)}
 
 				return m
 			}(),
@@ -392,39 +392,39 @@ func TestGetVMAliasesDirNotExists(t *testing.T) {
 	assert.NoError(err)
 }
 
-func TestGetAllychainConfigsFromFile(t *testing.T) {
+func TestGetSubnetConfigsFromFile(t *testing.T) {
 	tests := map[string]struct {
 		givenJSON  string
-		testF      func(*assert.Assertions, map[ids.ID]chains.AllychainConfig)
+		testF      func(*assert.Assertions, map[ids.ID]chains.SubnetConfig)
 		errMessage string
 		fileName   string
 	}{
 		"wrong config": {
 			fileName:  "2Ctt6eGAeo4MLqTmGa7AdRecuVMPGWEX9wSsCLBYrLhX4a394i.json",
 			givenJSON: `thisisnotjson`,
-			testF: func(assert *assert.Assertions, given map[ids.ID]chains.AllychainConfig) {
+			testF: func(assert *assert.Assertions, given map[ids.ID]chains.SubnetConfig) {
 				assert.Nil(given)
 			},
-			errMessage: "couldn't read allychain configs",
+			errMessage: "couldn't read subnet configs",
 		},
-		"allychain is not whitelisted": {
+		"subnet is not whitelisted": {
 			fileName:  "Gmt4fuNsGJAd2PX86LBvycGaBpgCYKbuULdCLZs3SEs1Jx1LU.json",
 			givenJSON: `{"validatorOnly": true}`,
-			testF: func(assert *assert.Assertions, given map[ids.ID]chains.AllychainConfig) {
+			testF: func(assert *assert.Assertions, given map[ids.ID]chains.SubnetConfig) {
 				assert.Empty(given)
 			},
 		},
 		"wrong extension": {
 			fileName:  "2Ctt6eGAeo4MLqTmGa7AdRecuVMPGWEX9wSsCLBYrLhX4a394i.yaml",
 			givenJSON: `{"validatorOnly": true}`,
-			testF: func(assert *assert.Assertions, given map[ids.ID]chains.AllychainConfig) {
+			testF: func(assert *assert.Assertions, given map[ids.ID]chains.SubnetConfig) {
 				assert.Empty(given)
 			},
 		},
 		"invalid consensus parameters": {
 			fileName:  "2Ctt6eGAeo4MLqTmGa7AdRecuVMPGWEX9wSsCLBYrLhX4a394i.json",
 			givenJSON: `{"consensusParameters":{"k": 111, "alpha":1234} }`,
-			testF: func(assert *assert.Assertions, given map[ids.ID]chains.AllychainConfig) {
+			testF: func(assert *assert.Assertions, given map[ids.ID]chains.SubnetConfig) {
 				assert.Nil(given)
 			},
 			errMessage: "fails the condition that: alpha <= k",
@@ -432,7 +432,7 @@ func TestGetAllychainConfigsFromFile(t *testing.T) {
 		"correct config": {
 			fileName:  "2Ctt6eGAeo4MLqTmGa7AdRecuVMPGWEX9wSsCLBYrLhX4a394i.json",
 			givenJSON: `{"validatorOnly": true, "consensusParameters":{"parents": 111, "alpha":16} }`,
-			testF: func(assert *assert.Assertions, given map[ids.ID]chains.AllychainConfig) {
+			testF: func(assert *assert.Assertions, given map[ids.ID]chains.SubnetConfig) {
 				id, _ := ids.FromString("2Ctt6eGAeo4MLqTmGa7AdRecuVMPGWEX9wSsCLBYrLhX4a394i")
 				config, ok := given[id]
 				assert.True(ok)
@@ -448,7 +448,7 @@ func TestGetAllychainConfigsFromFile(t *testing.T) {
 		"gossip config": {
 			fileName:  "2Ctt6eGAeo4MLqTmGa7AdRecuVMPGWEX9wSsCLBYrLhX4a394i.json",
 			givenJSON: `{"appGossipNonValidatorSize": 100 }`,
-			testF: func(assert *assert.Assertions, given map[ids.ID]chains.AllychainConfig) {
+			testF: func(assert *assert.Assertions, given map[ids.ID]chains.SubnetConfig) {
 				id, _ := ids.FromString("2Ctt6eGAeo4MLqTmGa7AdRecuVMPGWEX9wSsCLBYrLhX4a394i")
 				config, ok := given[id]
 				assert.True(ok)
@@ -465,41 +465,41 @@ func TestGetAllychainConfigsFromFile(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			assert := assert.New(t)
 			root := t.TempDir()
-			allychainPath := filepath.Join(root, "allychains")
-			configJSON := fmt.Sprintf(`{%q: %q}`, AllychainConfigDirKey, allychainPath)
+			subnetPath := filepath.Join(root, "subnets")
+			configJSON := fmt.Sprintf(`{%q: %q}`, SubnetConfigDirKey, subnetPath)
 			configFilePath := setupConfigJSON(t, root, configJSON)
-			allychainID, err := ids.FromString("2Ctt6eGAeo4MLqTmGa7AdRecuVMPGWEX9wSsCLBYrLhX4a394i")
+			subnetID, err := ids.FromString("2Ctt6eGAeo4MLqTmGa7AdRecuVMPGWEX9wSsCLBYrLhX4a394i")
 			assert.NoError(err)
-			setupFile(t, allychainPath, test.fileName, test.givenJSON)
+			setupFile(t, subnetPath, test.fileName, test.givenJSON)
 			v := setupViper(configFilePath)
-			allychainConfigs, err := getAllychainConfigs(v, []ids.ID{allychainID})
+			subnetConfigs, err := getSubnetConfigs(v, []ids.ID{subnetID})
 			if len(test.errMessage) > 0 {
 				assert.Error(err)
 				assert.Contains(err.Error(), test.errMessage)
 			} else {
 				assert.NoError(err)
-				test.testF(assert, allychainConfigs)
+				test.testF(assert, subnetConfigs)
 			}
 		})
 	}
 }
 
-func TestGetAllychainConfigsFromFlags(t *testing.T) {
+func TestGetSubnetConfigsFromFlags(t *testing.T) {
 	tests := map[string]struct {
 		givenJSON  string
-		testF      func(*assert.Assertions, map[ids.ID]chains.AllychainConfig)
+		testF      func(*assert.Assertions, map[ids.ID]chains.SubnetConfig)
 		errMessage string
 	}{
 		"no configs": {
 			givenJSON: `{}`,
-			testF: func(assert *assert.Assertions, given map[ids.ID]chains.AllychainConfig) {
+			testF: func(assert *assert.Assertions, given map[ids.ID]chains.SubnetConfig) {
 				assert.Empty(given)
 			},
 			errMessage: "",
 		},
 		"entry with no config": {
 			givenJSON: `{"2Ctt6eGAeo4MLqTmGa7AdRecuVMPGWEX9wSsCLBYrLhX4a394i":{}}`,
-			testF: func(assert *assert.Assertions, given map[ids.ID]chains.AllychainConfig) {
+			testF: func(assert *assert.Assertions, given map[ids.ID]chains.SubnetConfig) {
 				assert.True(len(given) == 1)
 				id, _ := ids.FromString("2Ctt6eGAeo4MLqTmGa7AdRecuVMPGWEX9wSsCLBYrLhX4a394i")
 				config, ok := given[id]
@@ -508,9 +508,9 @@ func TestGetAllychainConfigsFromFlags(t *testing.T) {
 				assert.Equal(20, config.ConsensusParameters.K)
 			},
 		},
-		"allychain is not whitelisted": {
+		"subnet is not whitelisted": {
 			givenJSON: `{"Gmt4fuNsGJAd2PX86LBvycGaBpgCYKbuULdCLZs3SEs1Jx1LU":{"validatorOnly":true}}`,
-			testF: func(assert *assert.Assertions, given map[ids.ID]chains.AllychainConfig) {
+			testF: func(assert *assert.Assertions, given map[ids.ID]chains.SubnetConfig) {
 				assert.Empty(given)
 			},
 		},
@@ -523,7 +523,7 @@ func TestGetAllychainConfigsFromFlags(t *testing.T) {
 					}
 				}
 			}`,
-			testF: func(assert *assert.Assertions, given map[ids.ID]chains.AllychainConfig) {
+			testF: func(assert *assert.Assertions, given map[ids.ID]chains.SubnetConfig) {
 				assert.Empty(given)
 			},
 			errMessage: "fails the condition that: alpha <= k",
@@ -539,7 +539,7 @@ func TestGetAllychainConfigsFromFlags(t *testing.T) {
 					"validatorOnly": true
 				}
 			}`,
-			testF: func(assert *assert.Assertions, given map[ids.ID]chains.AllychainConfig) {
+			testF: func(assert *assert.Assertions, given map[ids.ID]chains.SubnetConfig) {
 				id, _ := ids.FromString("2Ctt6eGAeo4MLqTmGa7AdRecuVMPGWEX9wSsCLBYrLhX4a394i")
 				config, ok := given[id]
 				assert.True(ok)
@@ -558,21 +558,21 @@ func TestGetAllychainConfigsFromFlags(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			assert := assert.New(t)
-			allychainID, err := ids.FromString("2Ctt6eGAeo4MLqTmGa7AdRecuVMPGWEX9wSsCLBYrLhX4a394i")
+			subnetID, err := ids.FromString("2Ctt6eGAeo4MLqTmGa7AdRecuVMPGWEX9wSsCLBYrLhX4a394i")
 			assert.NoError(err)
 			encodedFileContent := base64.StdEncoding.EncodeToString([]byte(test.givenJSON))
 
 			// build viper config
 			v := setupViperFlags()
-			v.Set(AllychainConfigContentKey, encodedFileContent)
+			v.Set(SubnetConfigContentKey, encodedFileContent)
 
-			allychainConfigs, err := getAllychainConfigs(v, []ids.ID{allychainID})
+			subnetConfigs, err := getSubnetConfigs(v, []ids.ID{subnetID})
 			if len(test.errMessage) > 0 {
 				assert.Error(err)
 				assert.Contains(err.Error(), test.errMessage)
 			} else {
 				assert.NoError(err)
-				test.testF(assert, allychainConfigs)
+				test.testF(assert, subnetConfigs)
 			}
 		})
 	}

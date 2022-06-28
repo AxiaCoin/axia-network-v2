@@ -1,11 +1,11 @@
 - name: Setup gpg key
   apt_key:
-    url: https://downloads.axc.network/axia.gpg.key
+    url: https://downloads.avax.network/avalanchego.gpg.key
     state: present
 
-- name: Setup axia repo
+- name: Setup avalanchego repo
   apt_repository:
-    repo: deb https://downloads.axc.network/apt bionic main
+    repo: deb https://downloads.avax.network/apt bionic main
     state: present
 
 - name: Setup golang repo
@@ -28,46 +28,46 @@
 
 - name: Setup systemd
   template:
-    src: templates/axia.service.j2
-    dest: /etc/systemd/system/axia.service
+    src: templates/avalanchego.service.j2
+    dest: /etc/systemd/system/avalanchego.service
     mode: 0755
 
-- name: Create axia user
+- name: Create avalanche user
   user:
     name: "{{ ava_user }}"
     shell: /bin/bash
     uid: 114
     group: "{{ ava_group }}"
 
-- name: Create axia config dir
+- name: Create avalanche config dir
   file:
-    path: /etc/axia
+    path: /etc/avalanchego
     owner: "{{ ava_user }}"
     group: "{{ ava_group }}"
     state: directory
 
-- name: Create axia C config dir
+- name: Create avalanche C config dir
   file:
-    path: /etc/axia/C
+    path: /etc/avalanchego/C
     owner: "{{ ava_user }}"
     group: "{{ ava_group }}"
     state: directory
 
-- name: Create axia log dir
+- name: Create avalanche log dir
   file:
     path: "{{ log_dir }}"
     owner: "{{ ava_user }}"
     group: "{{ ava_group }}"
     state: directory
 
-- name: Create axia database dir
+- name: Create avalanche database dir
   file:
     path: "{{ db_dir }}"
     owner: "{{ ava_user }}"
     group: "{{ ava_group }}"
     state: directory
 
-- name: Create axia plugins directory
+- name: Create avalanche plugins directory
   file:
     path: "{{ plugin_dir }}"
     owner: "{{ ava_user }}"
@@ -75,13 +75,13 @@
     state: directory
     recurse: yes
 
-- name: Build axia
+- name: Build avalanchego
   command: ./scripts/build.sh
   args:
     chdir: "{{ repo_folder }}"
 
-- name: Copy axia binaries to the correct location
-  command: cp build/axia /usr/local/bin/axia
+- name: Copy avalanchego binaries to the correct location
+  command: cp build/avalanchego /usr/local/bin/avalanchego
   args:
     chdir: "{{ repo_folder }}"
 
@@ -91,19 +91,19 @@
     chdir: "{{ repo_folder }}"
 
 
-- name: Configure axia 
+- name: Configure avalanche 
   template:
     src: templates/conf.json.j2
-    dest: /etc/axia/conf.json
+    dest: /etc/avalanchego/conf.json
     mode: 0644
 
-- name: Configure axia C Chain
+- name: Configure avalanche C Chain
   template:
     src: templates/C/config.json.j2
-    dest: /etc/axia/C/config.json
+    dest: /etc/avalanchego/C/config.json
     mode: 0644
 
-- name: Enable Axia
+- name: Enable Avalanche
   systemd:
-    name: axia
+    name: avalanchego
     enabled: yes

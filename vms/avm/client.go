@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package avm
@@ -21,7 +21,7 @@ import (
 // Interface compliance
 var _ Client = &client{}
 
-// Client for interacting with an AVM (Swap-Chain) instance
+// Client for interacting with an AVM (X-Chain) instance
 type Client interface {
 	WalletClient
 	// GetTxStatus returns the status of [txID]
@@ -152,8 +152,8 @@ type Client interface {
 	) (ids.ID, error)
 	// Import sends an import transaction to import funds from [sourceChain] and
 	// returns the ID of the newly created transaction
-	Import(ctx context.Context, user api.UserPass, to, sourceChain string, options ...rpc.Option) (ids.ID, error) // Export sends an asset from this chain to the P/AXC-Chain.
-	// After this tx is accepted, the AXC must be imported to the P/AXC-chain with an importTx.
+	Import(ctx context.Context, user api.UserPass, to, sourceChain string, options ...rpc.Option) (ids.ID, error) // Export sends an asset from this chain to the P/C-Chain.
+	// After this tx is accepted, the AVAX must be imported to the P/C-chain with an importTx.
 	// Returns the ID of the newly created atomic transaction
 	Export(
 		ctx context.Context,

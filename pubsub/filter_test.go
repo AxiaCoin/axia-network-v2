@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package pubsub
@@ -18,7 +18,7 @@ import (
 func TestAddAddressesParseAddresses(t *testing.T) {
 	assert := assert.New(t)
 
-	chainAlias := "Swap"
+	chainAlias := "X"
 	hrp := constants.GetHRP(5)
 
 	addrID := ids.ShortID{1}

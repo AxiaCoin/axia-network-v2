@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package block
@@ -15,7 +15,7 @@ import (
 func equal(assert *assert.Assertions, chainID ids.ID, want, have SignedBlock) {
 	assert.Equal(want.ID(), have.ID())
 	assert.Equal(want.ParentID(), have.ParentID())
-	assert.Equal(want.CoreChainHeight(), have.CoreChainHeight())
+	assert.Equal(want.PChainHeight(), have.PChainHeight())
 	assert.Equal(want.Timestamp(), have.Timestamp())
 	assert.Equal(want.Block(), have.Block())
 	assert.Equal(want.Proposer(), have.Proposer())
@@ -27,12 +27,12 @@ func equal(assert *assert.Assertions, chainID ids.ID, want, have SignedBlock) {
 func TestVerifyNoCertWithSignature(t *testing.T) {
 	parentID := ids.ID{1}
 	timestamp := time.Unix(123, 0)
-	coreChainHeight := uint64(2)
+	pChainHeight := uint64(2)
 	innerBlockBytes := []byte{3}
 
 	assert := assert.New(t)
 
-	builtBlockIntf, err := BuildUnsigned(parentID, timestamp, coreChainHeight, innerBlockBytes)
+	builtBlockIntf, err := BuildUnsigned(parentID, timestamp, pChainHeight, innerBlockBytes)
 	assert.NoError(err)
 
 	builtBlock := builtBlockIntf.(*statelessBlock)

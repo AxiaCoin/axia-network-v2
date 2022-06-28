@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package platformvm
@@ -96,7 +96,7 @@ func TestAddDelegatorTxExecute(t *testing.T) {
 			newValidatorEndTime,                     // end time
 			newValidatorID,                          // node ID
 			rewardAddress,                           // Reward Address
-			reward.PercentDenominator,               // allychain
+			reward.PercentDenominator,               // subnet
 			[]*crypto.PrivateKeySECP256K1R{keys[0]}, // key
 			ids.ShortEmpty,                          // change addr
 		)
@@ -123,7 +123,7 @@ func TestAddDelegatorTxExecute(t *testing.T) {
 			newValidatorEndTime,                     // end time
 			newValidatorID,                          // node ID
 			rewardAddress,                           // Reward Address
-			reward.PercentDenominator,               // allychain
+			reward.PercentDenominator,               // subnet
 			[]*crypto.PrivateKeySECP256K1R{keys[0]}, // key
 			ids.ShortEmpty,                          // change addr
 		)
@@ -168,7 +168,7 @@ func TestAddDelegatorTxExecute(t *testing.T) {
 			setup:         nil,
 			AP3Time:       defaultGenesisTime,
 			shouldErr:     true,
-			description:   "validator stops validating primary network earlier than allychain",
+			description:   "validator stops validating primary network earlier than subnet",
 		},
 		{
 			stakeAmount:   freshVM.MinDelegatorStake,
@@ -204,11 +204,11 @@ func TestAddDelegatorTxExecute(t *testing.T) {
 			setup:         nil,
 			AP3Time:       defaultGenesisTime,
 			shouldErr:     true,
-			description:   "validator not in the current or pending validator sets of the allychain",
+			description:   "validator not in the current or pending validator sets of the subnet",
 		},
 		{
 			stakeAmount:   freshVM.MinDelegatorStake,
-			startTime:     newValidatorStartTime - 1, // start validating allychain before primary network
+			startTime:     newValidatorStartTime - 1, // start validating subnet before primary network
 			endTime:       newValidatorEndTime,
 			nodeID:        newValidatorID,
 			rewardAddress: rewardAddress,
@@ -216,19 +216,19 @@ func TestAddDelegatorTxExecute(t *testing.T) {
 			setup:         addMinStakeValidator,
 			AP3Time:       defaultGenesisTime,
 			shouldErr:     true,
-			description:   "validator starts validating allychain before primary network",
+			description:   "validator starts validating subnet before primary network",
 		},
 		{
 			stakeAmount:   freshVM.MinDelegatorStake,
 			startTime:     newValidatorStartTime,
-			endTime:       newValidatorEndTime + 1, // stop validating allychain after stopping validating primary network
+			endTime:       newValidatorEndTime + 1, // stop validating subnet after stopping validating primary network
 			nodeID:        newValidatorID,
 			rewardAddress: rewardAddress,
 			feeKeys:       []*crypto.PrivateKeySECP256K1R{keys[0]},
 			setup:         addMinStakeValidator,
 			AP3Time:       defaultGenesisTime,
 			shouldErr:     true,
-			description:   "validator stops validating primary network before allychain",
+			description:   "validator stops validating primary network before subnet",
 		},
 		{
 			stakeAmount:   freshVM.MinDelegatorStake,

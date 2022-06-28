@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package indexer
@@ -14,7 +14,7 @@ import (
 // Interface compliance
 var _ Client = &client{}
 
-// Client interface for Axia Indexer API Endpoint
+// Client interface for Avalanche Indexer API Endpoint
 type Client interface {
 	// GetContainerRange returns the transactions at index [startIndex], [startIndex+1], ... , [startIndex+n-1]
 	// If [n] == 0, returns an empty response (i.e. null).
@@ -33,7 +33,7 @@ type Client interface {
 	GetContainerByID(context.Context, *GetIndexArgs, ...rpc.Option) (Container, error)
 }
 
-// Client implementation for Axia Indexer API Endpoint
+// Client implementation for Avalanche Indexer API Endpoint
 type client struct {
 	requester rpc.EndpointRequester
 }

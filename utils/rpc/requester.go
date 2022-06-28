@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package rpc
@@ -93,20 +93,20 @@ type EndpointRequester interface {
 	SendRequest(ctx context.Context, method string, params interface{}, reply interface{}, options ...Option) error
 }
 
-type axiaEndpointRequester struct {
+type avalancheEndpointRequester struct {
 	requester      Requester
 	endpoint, base string
 }
 
 func NewEndpointRequester(uri, endpoint, base string) EndpointRequester {
-	return &axiaEndpointRequester{
+	return &avalancheEndpointRequester{
 		requester: NewRPCRequester(uri),
 		endpoint:  endpoint,
 		base:      base,
 	}
 }
 
-func (e *axiaEndpointRequester) SendRequest(
+func (e *avalancheEndpointRequester) SendRequest(
 	ctx context.Context,
 	method string,
 	params interface{},

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package genesis
@@ -26,7 +26,7 @@ type LockedAmount struct {
 
 type Allocation struct {
 	ETHAddr        ids.ShortID    `json:"ethAddr"`
-	AXCAddr       ids.ShortID    `json:"axcAddr"`
+	AVAXAddr       ids.ShortID    `json:"avaxAddr"`
 	InitialAmount  uint64         `json:"initialAmount"`
 	UnlockSchedule []LockedAmount `json:"unlockSchedule"`
 }
@@ -37,12 +37,12 @@ func (a Allocation) Unparse(networkID uint32) (UnparsedAllocation, error) {
 		UnlockSchedule: a.UnlockSchedule,
 		ETHAddr:        "0x" + hex.EncodeToString(a.ETHAddr.Bytes()),
 	}
-	axcAddr, err := formatting.FormatAddress(
-		"Swap",
+	avaxAddr, err := formatting.FormatAddress(
+		"X",
 		constants.GetHRP(networkID),
-		a.AXCAddr.Bytes(),
+		a.AVAXAddr.Bytes(),
 	)
-	ua.AXCAddr = axcAddr
+	ua.AVAXAddr = avaxAddr
 	return ua, err
 }
 
@@ -53,14 +53,14 @@ type Staker struct {
 }
 
 func (s Staker) Unparse(networkID uint32) (UnparsedStaker, error) {
-	axcAddr, err := formatting.FormatAddress(
-		"Swap",
+	avaxAddr, err := formatting.FormatAddress(
+		"X",
 		constants.GetHRP(networkID),
 		s.RewardAddress.Bytes(),
 	)
 	return UnparsedStaker{
 		NodeID:        s.NodeID.PrefixedString(constants.NodeIDPrefix),
-		RewardAddress: axcAddr,
+		RewardAddress: avaxAddr,
 		DelegationFee: s.DelegationFee,
 	}, err
 }
@@ -77,7 +77,7 @@ type Config struct {
 	InitialStakedFunds         []ids.ShortID `json:"initialStakedFunds"`
 	InitialStakers             []Staker      `json:"initialStakers"`
 
-	AXCChainGenesis string `json:"axcChainGenesis"`
+	CChainGenesis string `json:"cChainGenesis"`
 
 	Message string `json:"message"`
 }
@@ -91,7 +91,7 @@ func (c Config) Unparse() (UnparsedConfig, error) {
 		InitialStakeDurationOffset: c.InitialStakeDurationOffset,
 		InitialStakedFunds:         make([]string, len(c.InitialStakedFunds)),
 		InitialStakers:             make([]UnparsedStaker, len(c.InitialStakers)),
-		AXCChainGenesis:            c.AXCChainGenesis,
+		CChainGenesis:              c.CChainGenesis,
 		Message:                    c.Message,
 	}
 	for i, a := range c.Allocations {
@@ -102,15 +102,15 @@ func (c Config) Unparse() (UnparsedConfig, error) {
 		uc.Allocations[i] = ua
 	}
 	for i, isa := range c.InitialStakedFunds {
-		axcAddr, err := formatting.FormatAddress(
-			"Swap",
+		avaxAddr, err := formatting.FormatAddress(
+			"X",
 			constants.GetHRP(uc.NetworkID),
 			isa.Bytes(),
 		)
 		if err != nil {
 			return uc, err
 		}
-		uc.InitialStakedFunds[i] = axcAddr
+		uc.InitialStakedFunds[i] = avaxAddr
 	}
 	for i, is := range c.InitialStakers {
 		uis, err := is.Unparse(c.NetworkID)
@@ -146,9 +146,9 @@ var (
 	// genesis.
 	MainnetConfig Config
 
-	// TestConfig is the config that should be used to generate the test
+	// FujiConfig is the config that should be used to generate the fuji
 	// genesis.
-	TestConfig Config
+	FujiConfig Config
 
 	// LocalConfig is the config that should be used to generate a local
 	// genesis.
@@ -156,27 +156,27 @@ var (
 )
 
 func init() {
-	// unparsedMainnetConfig := UnparsedConfig{}
-	// unparsedTestConfig := UnparsedConfig{}
+	unparsedMainnetConfig := UnparsedConfig{}
+	unparsedFujiConfig := UnparsedConfig{}
 	unparsedLocalConfig := UnparsedConfig{}
 
 	errs := wrappers.Errs{}
 	errs.Add(
-		// json.Unmarshal([]byte(mainnetGenesisConfigJSON), &unparsedMainnetConfig),
-		// json.Unmarshal([]byte(testGenesisConfigJSON), &unparsedTestConfig),
+		json.Unmarshal([]byte(mainnetGenesisConfigJSON), &unparsedMainnetConfig),
+		json.Unmarshal([]byte(fujiGenesisConfigJSON), &unparsedFujiConfig),
 		json.Unmarshal([]byte(localGenesisConfigJSON), &unparsedLocalConfig),
 	)
 	if errs.Errored() {
 		panic(errs.Err)
 	}
 
-	// mainnetConfig, err := unparsedMainnetConfig.Parse()
-	// errs.Add(err)
-	// MainnetConfig = mainnetConfig
+	mainnetConfig, err := unparsedMainnetConfig.Parse()
+	errs.Add(err)
+	MainnetConfig = mainnetConfig
 
-	// testConfig, err := unparsedTestConfig.Parse()
-	// errs.Add(err)
-	// TestConfig = testConfig
+	fujiConfig, err := unparsedFujiConfig.Parse()
+	errs.Add(err)
+	FujiConfig = fujiConfig
 
 	localConfig, err := unparsedLocalConfig.Parse()
 	errs.Add(err)
@@ -191,8 +191,8 @@ func GetConfig(networkID uint32) *Config {
 	switch networkID {
 	case constants.MainnetID:
 		return &MainnetConfig
-	case constants.TestID:
-		return &TestConfig
+	case constants.FujiID:
+		return &FujiConfig
 	case constants.LocalID:
 		return &LocalConfig
 	default:

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package snowstorm
@@ -403,7 +403,7 @@ func (dg *Directed) RecordPoll(votes ids.Bag) (bool, error) {
 	// a transaction.
 	dg.pollNumber++
 
-	// This flag tracks if the Axia instance needs to recompute its
+	// This flag tracks if the Avalanche instance needs to recompute its
 	// frontiers. Frontiers only need to be recalculated if preferences change
 	// or if a tx was accepted.
 	changed := false

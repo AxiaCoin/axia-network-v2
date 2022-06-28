@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package p
@@ -7,11 +7,11 @@ import (
 	"errors"
 
 	"github.com/axiacoin/axia-network-v2/ids"
-	"github.com/axiacoin/axia-network-v2/vms/components/axc"
+	"github.com/axiacoin/axia-network-v2/vms/components/avax"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/status"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
-	"github.com/axiacoin/axia-network-v2/wallet/allychain/primary/common"
+	"github.com/axiacoin/axia-network-v2/wallet/subnet/primary/common"
 )
 
 var (
@@ -30,13 +30,13 @@ type Wallet interface {
 	Signer() Signer
 
 	// IssueBaseTx creates, signs, and issues a new simple value transfer.
-	// Because the Core-chain doesn't intend for balance transfers to occur, this
-	// method is expensive and abuses the creation of allychains.
+	// Because the P-chain doesn't intend for balance transfers to occur, this
+	// method is expensive and abuses the creation of subnets.
 	//
 	// - [outputs] specifies all the recipients and amounts that should be sent
 	//   from this transaction.
 	IssueBaseTx(
-		outputs []*axc.TransferableOutput,
+		outputs []*avax.TransferableOutput,
 		options ...common.Option,
 	) (ids.ID, error)
 
@@ -57,13 +57,13 @@ type Wallet interface {
 		options ...common.Option,
 	) (ids.ID, error)
 
-	// IssueAddAllychainValidatorTx creates, signs, and issues a new validator of a
-	// allychain.
+	// IssueAddSubnetValidatorTx creates, signs, and issues a new validator of a
+	// subnet.
 	//
 	// - [validator] specifies all the details of the validation period such as
-	//   the startTime, endTime, sampling weight, nodeID, and allychainID.
-	IssueAddAllychainValidatorTx(
-		validator *platformvm.AllychainValidator,
+	//   the startTime, endTime, sampling weight, nodeID, and subnetID.
+	IssueAddSubnetValidatorTx(
+		validator *platformvm.SubnetValidator,
 		options ...common.Option,
 	) (ids.ID, error)
 
@@ -81,16 +81,16 @@ type Wallet interface {
 	) (ids.ID, error)
 
 	// IssueCreateChainTx creates, signs, and issues a new chain in the named
-	// allychain.
+	// subnet.
 	//
-	// - [allychainID] specifies the allychain to launch the chain in.
+	// - [subnetID] specifies the subnet to launch the chain in.
 	// - [genesis] specifies the initial state of the new chain.
 	// - [vmID] specifies the vm that the new chain will run.
 	// - [fxIDs] specifies all the feature extensions that the vm should be
 	//   running with.
 	// - [chainName] specifies a human readable name for the chain.
 	IssueCreateChainTx(
-		allychainID ids.ID,
+		subnetID ids.ID,
 		genesis []byte,
 		vmID ids.ID,
 		fxIDs []ids.ID,
@@ -98,12 +98,12 @@ type Wallet interface {
 		options ...common.Option,
 	) (ids.ID, error)
 
-	// IssueCreateAllychainTx creates, signs, and issues a new allychain with the
+	// IssueCreateSubnetTx creates, signs, and issues a new subnet with the
 	// specified owner.
 	//
 	// - [owner] specifies who has the ability to create new chains and add new
-	//   validators to the allychain.
-	IssueCreateAllychainTx(
+	//   validators to the subnet.
+	IssueCreateSubnetTx(
 		owner *secp256k1fx.OutputOwners,
 		options ...common.Option,
 	) (ids.ID, error)
@@ -126,7 +126,7 @@ type Wallet interface {
 	// - [outputs] specifies the outputs to send to the [chainID].
 	IssueExportTx(
 		chainID ids.ID,
-		outputs []*axc.TransferableOutput,
+		outputs []*avax.TransferableOutput,
 		options ...common.Option,
 	) (ids.ID, error)
 
@@ -169,7 +169,7 @@ func (w *wallet) Builder() Builder { return w.builder }
 func (w *wallet) Signer() Signer { return w.signer }
 
 func (w *wallet) IssueBaseTx(
-	outputs []*axc.TransferableOutput,
+	outputs []*avax.TransferableOutput,
 	options ...common.Option,
 ) (ids.ID, error) {
 	utx, err := w.builder.NewBaseTx(outputs, options...)
@@ -192,11 +192,11 @@ func (w *wallet) IssueAddValidatorTx(
 	return w.IssueUnsignedTx(utx, options...)
 }
 
-func (w *wallet) IssueAddAllychainValidatorTx(
-	validator *platformvm.AllychainValidator,
+func (w *wallet) IssueAddSubnetValidatorTx(
+	validator *platformvm.SubnetValidator,
 	options ...common.Option,
 ) (ids.ID, error) {
-	utx, err := w.builder.NewAddAllychainValidatorTx(validator, options...)
+	utx, err := w.builder.NewAddSubnetValidatorTx(validator, options...)
 	if err != nil {
 		return ids.Empty, err
 	}
@@ -216,25 +216,25 @@ func (w *wallet) IssueAddDelegatorTx(
 }
 
 func (w *wallet) IssueCreateChainTx(
-	allychainID ids.ID,
+	subnetID ids.ID,
 	genesis []byte,
 	vmID ids.ID,
 	fxIDs []ids.ID,
 	chainName string,
 	options ...common.Option,
 ) (ids.ID, error) {
-	utx, err := w.builder.NewCreateChainTx(allychainID, genesis, vmID, fxIDs, chainName, options...)
+	utx, err := w.builder.NewCreateChainTx(subnetID, genesis, vmID, fxIDs, chainName, options...)
 	if err != nil {
 		return ids.Empty, err
 	}
 	return w.IssueUnsignedTx(utx, options...)
 }
 
-func (w *wallet) IssueCreateAllychainTx(
+func (w *wallet) IssueCreateSubnetTx(
 	owner *secp256k1fx.OutputOwners,
 	options ...common.Option,
 ) (ids.ID, error) {
-	utx, err := w.builder.NewCreateAllychainTx(owner, options...)
+	utx, err := w.builder.NewCreateSubnetTx(owner, options...)
 	if err != nil {
 		return ids.Empty, err
 	}
@@ -255,7 +255,7 @@ func (w *wallet) IssueImportTx(
 
 func (w *wallet) IssueExportTx(
 	chainID ids.ID,
-	outputs []*axc.TransferableOutput,
+	outputs []*avax.TransferableOutput,
 	options ...common.Option,
 ) (ids.ID, error) {
 	utx, err := w.builder.NewExportTx(chainID, outputs, options...)

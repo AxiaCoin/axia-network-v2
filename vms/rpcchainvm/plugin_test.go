@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package rpcchainvm
@@ -78,7 +78,7 @@ func TestHelperProcess(*testing.T) {
 	plugin.Serve(&plugin.ServeConfig{
 		HandshakeConfig: TestHandshake,
 		Plugins: map[string]plugin.Plugin{
-			"vm": NewTestVM(&TestAllychainVM{logger: pluginLogger}),
+			"vm": NewTestVM(&TestSubnetVM{logger: pluginLogger}),
 		},
 
 		GRPCServer: grpcutils.NewDefaultServer,
@@ -91,7 +91,7 @@ type testVMPlugin struct {
 	vm TestVM
 }
 
-func NewTestVM(vm *TestAllychainVM) plugin.Plugin {
+func NewTestVM(vm *TestSubnetVM) plugin.Plugin {
 	return &testVMPlugin{vm: vm}
 }
 

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package common
@@ -22,7 +22,7 @@ type Config struct {
 	Alpha         uint64
 	Sender        Sender
 	Bootstrapable Bootstrapable
-	Allychain        Allychain
+	Subnet        Subnet
 	Timer         Timer
 
 	// Should Bootstrap be retried
@@ -50,7 +50,7 @@ func (c *Config) Context() *snow.ConsensusContext { return c.Ctx }
 // IsBootstrapped returns true iff this chain is done bootstrapping
 func (c *Config) IsBootstrapped() bool { return c.Ctx.GetState() == snow.NormalOp }
 
-// Shared among common.bootstrapper and snowman/axia bootstrapper
+// Shared among common.bootstrapper and snowman/avalanche bootstrapper
 type SharedConfig struct {
 	// Tracks the last requestID that was used in a request
 	RequestID uint32

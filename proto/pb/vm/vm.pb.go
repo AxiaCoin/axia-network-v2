@@ -28,18 +28,18 @@ type InitializeRequest struct {
 	unknownFields protoimpl.UnknownFields
 
 	NetworkId    uint32               `protobuf:"varint,1,opt,name=network_id,json=networkId,proto3" json:"network_id,omitempty"`
-	AllychainId     []byte               `protobuf:"bytes,2,opt,name=allychain_id,json=allychainId,proto3" json:"allychain_id,omitempty"`
+	SubnetId     []byte               `protobuf:"bytes,2,opt,name=subnet_id,json=subnetId,proto3" json:"subnet_id,omitempty"`
 	ChainId      []byte               `protobuf:"bytes,3,opt,name=chain_id,json=chainId,proto3" json:"chain_id,omitempty"`
 	NodeId       []byte               `protobuf:"bytes,4,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
-	CoreChainId     []byte               `protobuf:"bytes,5,opt,name=x_chain_id,json=coreChainId,proto3" json:"x_chain_id,omitempty"`
-	AxcAssetId  []byte               `protobuf:"bytes,6,opt,name=axc_asset_id,json=axcAssetId,proto3" json:"axc_asset_id,omitempty"`
+	XChainId     []byte               `protobuf:"bytes,5,opt,name=x_chain_id,json=xChainId,proto3" json:"x_chain_id,omitempty"`
+	AvaxAssetId  []byte               `protobuf:"bytes,6,opt,name=avax_asset_id,json=avaxAssetId,proto3" json:"avax_asset_id,omitempty"`
 	GenesisBytes []byte               `protobuf:"bytes,7,opt,name=genesis_bytes,json=genesisBytes,proto3" json:"genesis_bytes,omitempty"`
 	UpgradeBytes []byte               `protobuf:"bytes,8,opt,name=upgrade_bytes,json=upgradeBytes,proto3" json:"upgrade_bytes,omitempty"`
 	ConfigBytes  []byte               `protobuf:"bytes,9,opt,name=config_bytes,json=configBytes,proto3" json:"config_bytes,omitempty"`
 	DbServers    []*VersionedDBServer `protobuf:"bytes,10,rep,name=db_servers,json=dbServers,proto3" json:"db_servers,omitempty"`
 	// server_addr is the address of the gRPC server which serves
 	// the messenger, keystore, shared memory, blockchain alias,
-	// allychain alias, and appSender services
+	// subnet alias, and appSender services
 	ServerAddr string `protobuf:"bytes,20,opt,name=server_addr,json=serverAddr,proto3" json:"server_addr,omitempty"`
 }
 
@@ -82,9 +82,9 @@ func (x *InitializeRequest) GetNetworkId() uint32 {
 	return 0
 }
 
-func (x *InitializeRequest) GetAllychainId() []byte {
+func (x *InitializeRequest) GetSubnetId() []byte {
 	if x != nil {
-		return x.AllychainId
+		return x.SubnetId
 	}
 	return nil
 }
@@ -103,16 +103,16 @@ func (x *InitializeRequest) GetNodeId() []byte {
 	return nil
 }
 
-func (x *InitializeRequest) GetCoreChainId() []byte {
+func (x *InitializeRequest) GetXChainId() []byte {
 	if x != nil {
-		return x.CoreChainId
+		return x.XChainId
 	}
 	return nil
 }
 
-func (x *InitializeRequest) GetAxcAssetId() []byte {
+func (x *InitializeRequest) GetAvaxAssetId() []byte {
 	if x != nil {
-		return x.AxcAssetId
+		return x.AvaxAssetId
 	}
 	return nil
 }

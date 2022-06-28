@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package network
@@ -121,11 +121,11 @@ type Config struct {
 	// TLSKey is this node's TLS key that is used to sign IPs.
 	TLSKey crypto.Signer `json:"-"`
 
-	// WhitelistedAllychains of the node.
-	WhitelistedAllychains ids.Set        `json:"whitelistedAllychains"`
+	// WhitelistedSubnets of the node.
+	WhitelistedSubnets ids.Set        `json:"whitelistedSubnets"`
 	Beacons            validators.Set `json:"beacons"`
 
-	// Validators are the current validators in the Axia network
+	// Validators are the current validators in the Avalanche network
 	Validators validators.Manager `json:"validators"`
 
 	UptimeCalculator uptime.Calculator `json:"-"`

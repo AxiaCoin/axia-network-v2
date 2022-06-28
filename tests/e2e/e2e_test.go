@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package e2e_test
@@ -34,7 +34,7 @@ func TestE2E(t *testing.T) {
 
 var (
 	logLevel            string
-	axiaLogLevel string
+	avalanchegoLogLevel string
 
 	networkRunnerGRPCEp string
 	execPath            string
@@ -53,10 +53,10 @@ func init() {
 		"log level",
 	)
 	flag.StringVar(
-		&axiaLogLevel,
-		"axia-log-level",
+		&avalanchegoLogLevel,
+		"avalanchego-log-level",
 		"INFO",
-		"axiaLogLevel log level (optional, only required for local network-runner)",
+		"avalanchegoLogLevel log level (optional, only required for local network-runner)",
 	)
 
 	flag.StringVar(
@@ -67,9 +67,9 @@ func init() {
 	)
 	flag.StringVar(
 		&execPath,
-		"axia-path",
+		"avalanchego-path",
 		"",
-		"[optional] axia executable path (only required for local network-runner tests)",
+		"[optional] avalanchego executable path (only required for local network-runner tests)",
 	)
 
 	// TODO: set timestamp on the test network machines to be more realistic
@@ -83,7 +83,7 @@ func init() {
 		&uris,
 		"uris",
 		"",
-		"URIs for axia node (comma-separated, required to run against existing cluster)",
+		"URIs for avalanche node (comma-separated, required to run against existing cluster)",
 	)
 }
 
@@ -111,7 +111,7 @@ var _ = ginkgo.BeforeSuite(func() {
 
 		tests.Outf("{{magenta}}starting network-runner with %q{{/}}\n", execPath)
 		ctx, cancel = context.WithTimeout(context.Background(), 15*time.Second)
-		resp, err := runnerCli.Start(ctx, execPath, runner_client.WithLogLevel(axiaLogLevel))
+		resp, err := runnerCli.Start(ctx, execPath, runner_client.WithLogLevel(avalanchegoLogLevel))
 		cancel()
 		gomega.Expect(err).Should(gomega.BeNil())
 		tests.Outf("{{green}}successfully started network-runner :{{/}} %+v\n", resp.ClusterInfo.NodeNames)

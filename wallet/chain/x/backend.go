@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package x
@@ -10,20 +10,20 @@ import (
 
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/vms/avm"
-	"github.com/axiacoin/axia-network-v2/vms/components/axc"
+	"github.com/axiacoin/axia-network-v2/vms/components/avax"
 )
 
 var _ Backend = &backend{}
 
 type ChainUTXOs interface {
-	AddUTXO(ctx stdcontext.Context, destinationChainID ids.ID, utxo *axc.UTXO) error
+	AddUTXO(ctx stdcontext.Context, destinationChainID ids.ID, utxo *avax.UTXO) error
 	RemoveUTXO(ctx stdcontext.Context, sourceChainID, utxoID ids.ID) error
 
-	UTXOs(ctx stdcontext.Context, sourceChainID ids.ID) ([]*axc.UTXO, error)
-	GetUTXO(ctx stdcontext.Context, sourceChainID, utxoID ids.ID) (*axc.UTXO, error)
+	UTXOs(ctx stdcontext.Context, sourceChainID ids.ID) ([]*avax.UTXO, error)
+	GetUTXO(ctx stdcontext.Context, sourceChainID, utxoID ids.ID) (*avax.UTXO, error)
 }
 
-// Backend defines the full interface required to support an Swap-chain wallet.
+// Backend defines the full interface required to support an X-chain wallet.
 type Backend interface {
 	ChainUTXOs
 	BuilderBackend
@@ -64,12 +64,12 @@ func (b *backend) AcceptTx(ctx stdcontext.Context, tx *avm.Tx) error {
 			err := b.AddUTXO(
 				ctx,
 				utx.DestinationChain,
-				&axc.UTXO{
-					UTXOID: axc.UTXOID{
+				&avax.UTXO{
+					UTXOID: avax.UTXOID{
 						TxID:        txID,
 						OutputIndex: uint32(len(utx.Outs) + i),
 					},
-					Asset: axc.Asset{ID: out.AssetID()},
+					Asset: avax.Asset{ID: out.AssetID()},
 					Out:   out.Out,
 				},
 			)

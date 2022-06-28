@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package platformvm
@@ -15,7 +15,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/utils/constants"
 	"github.com/axiacoin/axia-network-v2/utils/crypto"
 	"github.com/axiacoin/axia-network-v2/utils/math"
-	"github.com/axiacoin/axia-network-v2/vms/components/axc"
+	"github.com/axiacoin/axia-network-v2/vms/components/avax"
 	"github.com/axiacoin/axia-network-v2/vms/components/verify"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 )
@@ -36,7 +36,7 @@ type UnsignedAddDelegatorTx struct {
 	// Describes the delegatee
 	Validator Validator `serialize:"true" json:"validator"`
 	// Where to send staked tokens when done validating
-	Stake []*axc.TransferableOutput `serialize:"true" json:"stake"`
+	Stake []*avax.TransferableOutput `serialize:"true" json:"stake"`
 	// Where to send staking rewards when done validating
 	RewardsOwner Owner `serialize:"true" json:"rewardsOwner"`
 }
@@ -97,7 +97,7 @@ func (tx *UnsignedAddDelegatorTx) SyntacticVerify(ctx *snow.Context) error {
 	}
 
 	switch {
-	case !axc.IsSortedTransferableOutputs(tx.Stake, Codec):
+	case !avax.IsSortedTransferableOutputs(tx.Stake, Codec):
 		return errOutputsNotSorted
 	case totalStakeWeight != tx.Validator.Wght:
 		return fmt.Errorf("delegator weight %d is not equal to total stake weight %d", tx.Validator.Wght, totalStakeWeight)
@@ -151,7 +151,7 @@ func (tx *UnsignedAddDelegatorTx) Execute(
 		return nil, nil, errWeightTooSmall
 	}
 
-	outs := make([]*axc.TransferableOutput, len(tx.Outs)+len(tx.Stake))
+	outs := make([]*avax.TransferableOutput, len(tx.Outs)+len(tx.Stake))
 	copy(outs, tx.Outs)
 	copy(outs[len(tx.Outs):], tx.Stake)
 
@@ -247,7 +247,7 @@ func (tx *UnsignedAddDelegatorTx) Execute(
 		}
 
 		// Verify the flowcheck
-		if err := vm.semanticVerifySpend(parentState, tx, tx.Ins, outs, stx.Creds, vm.AddStakerTxFee, vm.ctx.AXCAssetID); err != nil {
+		if err := vm.semanticVerifySpend(parentState, tx, tx.Ins, outs, stx.Creds, vm.AddStakerTxFee, vm.ctx.AVAXAssetID); err != nil {
 			return nil, nil, fmt.Errorf("failed semanticVerifySpend: %w", err)
 		}
 
@@ -268,14 +268,14 @@ func (tx *UnsignedAddDelegatorTx) Execute(
 	consumeInputs(onCommitState, tx.Ins)
 	// Produce the UTXOS
 	txID := tx.ID()
-	produceOutputs(onCommitState, txID, vm.ctx.AXCAssetID, tx.Outs)
+	produceOutputs(onCommitState, txID, vm.ctx.AVAXAssetID, tx.Outs)
 
 	// Set up the state if this tx is aborted
 	onAbortState := newVersionedState(parentState, currentStakers, pendingStakers)
 	// Consume the UTXOS
 	consumeInputs(onAbortState, tx.Ins)
 	// Produce the UTXOS
-	produceOutputs(onAbortState, txID, vm.ctx.AXCAssetID, outs)
+	produceOutputs(onAbortState, txID, vm.ctx.AVAXAssetID, outs)
 
 	return onCommitState, onAbortState, nil
 }
@@ -302,7 +302,7 @@ func (vm *VM) newAddDelegatorTx(
 	}
 	// Create the tx
 	utx := &UnsignedAddDelegatorTx{
-		BaseTx: BaseTx{BaseTx: axc.BaseTx{
+		BaseTx: BaseTx{BaseTx: avax.BaseTx{
 			NetworkID:    vm.ctx.NetworkID,
 			BlockchainID: vm.ctx.ChainID,
 			Ins:          ins,
@@ -485,7 +485,7 @@ func maxStakeAmount(
 }
 
 func (vm *VM) maxStakeAmount(
-	allychainID ids.ID,
+	subnetID ids.ID,
 	nodeID ids.ShortID,
 	startTime time.Time,
 	endTime time.Time,
@@ -496,20 +496,20 @@ func (vm *VM) maxStakeAmount(
 	if timestamp := vm.internalState.GetTimestamp(); startTime.Before(timestamp) {
 		return 0, errStartTimeTooEarly
 	}
-	if allychainID == constants.PrimaryNetworkID {
-		return vm.maxPrimaryAllychainStakeAmount(nodeID, startTime, endTime)
+	if subnetID == constants.PrimaryNetworkID {
+		return vm.maxPrimarySubnetStakeAmount(nodeID, startTime, endTime)
 	}
-	return vm.maxAllychainStakeAmount(allychainID, nodeID, startTime, endTime)
+	return vm.maxSubnetStakeAmount(subnetID, nodeID, startTime, endTime)
 }
 
-func (vm *VM) maxAllychainStakeAmount(
-	allychainID ids.ID,
+func (vm *VM) maxSubnetStakeAmount(
+	subnetID ids.ID,
 	nodeID ids.ShortID,
 	startTime time.Time,
 	endTime time.Time,
 ) (uint64, error) {
 	var (
-		vdrTx  *UnsignedAddAllychainValidatorTx
+		vdrTx  *UnsignedAddSubnetValidatorTx
 		exists bool
 	)
 
@@ -520,12 +520,12 @@ func (vm *VM) maxAllychainStakeAmount(
 	currentValidator, err := currentStakers.GetValidator(nodeID)
 	switch err {
 	case nil:
-		vdrTx, exists = currentValidator.AllychainValidators()[allychainID]
+		vdrTx, exists = currentValidator.SubnetValidators()[subnetID]
 		if !exists {
-			vdrTx = pendingValidator.AllychainValidators()[allychainID]
+			vdrTx = pendingValidator.SubnetValidators()[subnetID]
 		}
 	case database.ErrNotFound:
-		vdrTx = pendingValidator.AllychainValidators()[allychainID]
+		vdrTx = pendingValidator.SubnetValidators()[subnetID]
 	default:
 		return 0, err
 	}
@@ -542,7 +542,7 @@ func (vm *VM) maxAllychainStakeAmount(
 	return vdrTx.Weight(), nil
 }
 
-func (vm *VM) maxPrimaryAllychainStakeAmount(
+func (vm *VM) maxPrimarySubnetStakeAmount(
 	nodeID ids.ShortID,
 	startTime time.Time,
 	endTime time.Time,

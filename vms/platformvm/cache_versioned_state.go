@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package platformvm
@@ -8,18 +8,18 @@ import (
 
 	"github.com/axiacoin/axia-network-v2/database"
 	"github.com/axiacoin/axia-network-v2/ids"
-	"github.com/axiacoin/axia-network-v2/vms/components/axc"
+	"github.com/axiacoin/axia-network-v2/vms/components/avax"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/status"
 )
 
 var _ VersionedState = &versionedStateImpl{}
 
 type UTXOGetter interface {
-	GetUTXO(utxoID ids.ID) (*axc.UTXO, error)
+	GetUTXO(utxoID ids.ID) (*avax.UTXO, error)
 }
 
 type UTXOAdder interface {
-	AddUTXO(utxo *axc.UTXO)
+	AddUTXO(utxo *avax.UTXO)
 }
 
 type UTXODeleter interface {
@@ -36,8 +36,8 @@ type MutableState interface {
 	UTXOState
 	ValidatorState
 
-	AddRewardUTXO(txID ids.ID, utxo *axc.UTXO)
-	GetRewardUTXOs(txID ids.ID) ([]*axc.UTXO, error)
+	AddRewardUTXO(txID ids.ID, utxo *avax.UTXO)
+	GetRewardUTXOs(txID ids.ID) ([]*avax.UTXO, error)
 
 	GetTimestamp() time.Time
 	SetTimestamp(time.Time)
@@ -45,10 +45,10 @@ type MutableState interface {
 	GetCurrentSupply() uint64
 	SetCurrentSupply(uint64)
 
-	GetAllychains() ([]*Tx, error)
-	AddAllychain(createAllychainTx *Tx)
+	GetSubnets() ([]*Tx, error)
+	AddSubnet(createSubnetTx *Tx)
 
-	GetChains(allychainID ids.ID) ([]*Tx, error)
+	GetChains(subnetID ids.ID) ([]*Tx, error)
 	AddChain(createChainTx *Tx)
 
 	GetTx(txID ids.ID) (*Tx, status.Status, error)
@@ -72,14 +72,14 @@ type versionedStateImpl struct {
 
 	currentSupply uint64
 
-	addedAllychains  []*Tx
-	cachedAllychains []*Tx
+	addedSubnets  []*Tx
+	cachedSubnets []*Tx
 
 	addedChains  map[ids.ID][]*Tx
 	cachedChains map[ids.ID][]*Tx
 
 	// map of txID -> []*UTXO
-	addedRewardUTXOs map[ids.ID][]*axc.UTXO
+	addedRewardUTXOs map[ids.ID][]*avax.UTXO
 
 	// map of txID -> {*Tx, Status}
 	addedTxs map[ids.ID]*txStatusImpl
@@ -95,7 +95,7 @@ type txStatusImpl struct {
 
 type utxoImpl struct {
 	utxoID ids.ID
-	utxo   *axc.UTXO
+	utxo   *avax.UTXO
 }
 
 func newVersionedState(
@@ -128,58 +128,58 @@ func (vs *versionedStateImpl) SetCurrentSupply(currentSupply uint64) {
 	vs.currentSupply = currentSupply
 }
 
-func (vs *versionedStateImpl) GetAllychains() ([]*Tx, error) {
-	if len(vs.addedAllychains) == 0 {
-		return vs.parentState.GetAllychains()
+func (vs *versionedStateImpl) GetSubnets() ([]*Tx, error) {
+	if len(vs.addedSubnets) == 0 {
+		return vs.parentState.GetSubnets()
 	}
-	if len(vs.cachedAllychains) != 0 {
-		return vs.cachedAllychains, nil
+	if len(vs.cachedSubnets) != 0 {
+		return vs.cachedSubnets, nil
 	}
-	allychains, err := vs.parentState.GetAllychains()
+	subnets, err := vs.parentState.GetSubnets()
 	if err != nil {
 		return nil, err
 	}
-	newAllychains := make([]*Tx, len(allychains)+len(vs.addedAllychains))
-	copy(newAllychains, allychains)
-	for i, allychain := range vs.addedAllychains {
-		newAllychains[i+len(allychains)] = allychain
+	newSubnets := make([]*Tx, len(subnets)+len(vs.addedSubnets))
+	copy(newSubnets, subnets)
+	for i, subnet := range vs.addedSubnets {
+		newSubnets[i+len(subnets)] = subnet
 	}
-	vs.cachedAllychains = newAllychains
-	return newAllychains, nil
+	vs.cachedSubnets = newSubnets
+	return newSubnets, nil
 }
 
-func (vs *versionedStateImpl) AddAllychain(createAllychainTx *Tx) {
-	vs.addedAllychains = append(vs.addedAllychains, createAllychainTx)
-	if vs.cachedAllychains != nil {
-		vs.cachedAllychains = append(vs.cachedAllychains, createAllychainTx)
+func (vs *versionedStateImpl) AddSubnet(createSubnetTx *Tx) {
+	vs.addedSubnets = append(vs.addedSubnets, createSubnetTx)
+	if vs.cachedSubnets != nil {
+		vs.cachedSubnets = append(vs.cachedSubnets, createSubnetTx)
 	}
 }
 
-func (vs *versionedStateImpl) GetChains(allychainID ids.ID) ([]*Tx, error) {
+func (vs *versionedStateImpl) GetChains(subnetID ids.ID) ([]*Tx, error) {
 	if len(vs.addedChains) == 0 {
 		// No chains have been added
-		return vs.parentState.GetChains(allychainID)
+		return vs.parentState.GetChains(subnetID)
 	}
-	addedChains := vs.addedChains[allychainID]
+	addedChains := vs.addedChains[subnetID]
 	if len(addedChains) == 0 {
-		// No chains have been added to this allychain
-		return vs.parentState.GetChains(allychainID)
+		// No chains have been added to this subnet
+		return vs.parentState.GetChains(subnetID)
 	}
 
-	// There have been chains added to the requested allychain
+	// There have been chains added to the requested subnet
 
 	if vs.cachedChains == nil {
-		// This is the first time we are going to be caching the allychain chains
+		// This is the first time we are going to be caching the subnet chains
 		vs.cachedChains = make(map[ids.ID][]*Tx)
 	}
 
-	cachedChains, cached := vs.cachedChains[allychainID]
+	cachedChains, cached := vs.cachedChains[subnetID]
 	if cached {
 		return cachedChains, nil
 	}
 
 	// This chain wasn't cached yet
-	chains, err := vs.parentState.GetChains(allychainID)
+	chains, err := vs.parentState.GetChains(subnetID)
 	if err != nil {
 		return nil, err
 	}
@@ -189,7 +189,7 @@ func (vs *versionedStateImpl) GetChains(allychainID ids.ID) ([]*Tx, error) {
 	for i, chain := range addedChains {
 		newChains[i+len(chains)] = chain
 	}
-	vs.cachedChains[allychainID] = newChains
+	vs.cachedChains[subnetID] = newChains
 	return newChains, nil
 }
 
@@ -197,17 +197,17 @@ func (vs *versionedStateImpl) AddChain(createChainTx *Tx) {
 	tx := createChainTx.UnsignedTx.(*UnsignedCreateChainTx)
 	if vs.addedChains == nil {
 		vs.addedChains = map[ids.ID][]*Tx{
-			tx.AllychainID: {createChainTx},
+			tx.SubnetID: {createChainTx},
 		}
 	} else {
-		vs.addedChains[tx.AllychainID] = append(vs.addedChains[tx.AllychainID], createChainTx)
+		vs.addedChains[tx.SubnetID] = append(vs.addedChains[tx.SubnetID], createChainTx)
 	}
 
-	cachedChains, cached := vs.cachedChains[tx.AllychainID]
+	cachedChains, cached := vs.cachedChains[tx.SubnetID]
 	if !cached {
 		return
 	}
-	vs.cachedChains[tx.AllychainID] = append(cachedChains, createChainTx)
+	vs.cachedChains[tx.SubnetID] = append(cachedChains, createChainTx)
 }
 
 func (vs *versionedStateImpl) GetTx(txID ids.ID) (*Tx, status.Status, error) {
@@ -233,21 +233,21 @@ func (vs *versionedStateImpl) AddTx(tx *Tx, status status.Status) {
 	}
 }
 
-func (vs *versionedStateImpl) GetRewardUTXOs(txID ids.ID) ([]*axc.UTXO, error) {
+func (vs *versionedStateImpl) GetRewardUTXOs(txID ids.ID) ([]*avax.UTXO, error) {
 	if utxos, exists := vs.addedRewardUTXOs[txID]; exists {
 		return utxos, nil
 	}
 	return vs.parentState.GetRewardUTXOs(txID)
 }
 
-func (vs *versionedStateImpl) AddRewardUTXO(txID ids.ID, utxo *axc.UTXO) {
+func (vs *versionedStateImpl) AddRewardUTXO(txID ids.ID, utxo *avax.UTXO) {
 	if vs.addedRewardUTXOs == nil {
-		vs.addedRewardUTXOs = make(map[ids.ID][]*axc.UTXO)
+		vs.addedRewardUTXOs = make(map[ids.ID][]*avax.UTXO)
 	}
 	vs.addedRewardUTXOs[txID] = append(vs.addedRewardUTXOs[txID], utxo)
 }
 
-func (vs *versionedStateImpl) GetUTXO(utxoID ids.ID) (*axc.UTXO, error) {
+func (vs *versionedStateImpl) GetUTXO(utxoID ids.ID) (*avax.UTXO, error) {
 	utxo, modified := vs.modifiedUTXOs[utxoID]
 	if !modified {
 		return vs.parentState.GetUTXO(utxoID)
@@ -258,7 +258,7 @@ func (vs *versionedStateImpl) GetUTXO(utxoID ids.ID) (*axc.UTXO, error) {
 	return utxo.utxo, nil
 }
 
-func (vs *versionedStateImpl) AddUTXO(utxo *axc.UTXO) {
+func (vs *versionedStateImpl) AddUTXO(utxo *avax.UTXO) {
 	newUTXO := &utxoImpl{
 		utxoID: utxo.InputID(),
 		utxo:   utxo,
@@ -300,8 +300,8 @@ func (vs *versionedStateImpl) SetBase(parentState MutableState) {
 func (vs *versionedStateImpl) Apply(is InternalState) {
 	is.SetTimestamp(vs.timestamp)
 	is.SetCurrentSupply(vs.currentSupply)
-	for _, allychain := range vs.addedAllychains {
-		is.AddAllychain(allychain)
+	for _, subnet := range vs.addedSubnets {
+		is.AddSubnet(subnet)
 	}
 	for _, chains := range vs.addedChains {
 		for _, chain := range chains {

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package message
@@ -27,7 +27,7 @@ const (
 	SigBytes                         // Used in handshake / peer gossiping
 	VersionTime                      // Used in handshake / peer gossiping
 	Peers                            // Used in peer gossiping
-	TrackedAllychains                   // Used in handshake / peer gossiping
+	TrackedSubnets                   // Used in handshake / peer gossiping
 	AppBytes                         // Used at application level
 	VMMessage                        // Used internally
 	Uptime                           // Used for Pong
@@ -69,7 +69,7 @@ func (f Field) Packer() func(*wrappers.Packer, interface{}) {
 		return wrappers.TryPackLong
 	case Peers:
 		return wrappers.TryPackIPCertList
-	case TrackedAllychains:
+	case TrackedSubnets:
 		return wrappers.TryPackHashes
 	case Uptime:
 		return wrappers.TryPackByte
@@ -113,7 +113,7 @@ func (f Field) Unpacker() func(*wrappers.Packer) interface{} {
 		return wrappers.TryUnpackLong
 	case Peers:
 		return wrappers.TryUnpackIPCertList
-	case TrackedAllychains:
+	case TrackedSubnets:
 		return wrappers.TryUnpackHashes
 	case Uptime:
 		return wrappers.TryUnpackByte
@@ -156,8 +156,8 @@ func (f Field) String() string {
 		return "VersionTime"
 	case Peers:
 		return "Peers"
-	case TrackedAllychains:
-		return "TrackedAllychains"
+	case TrackedSubnets:
+		return "TrackedSubnets"
 	case VMMessage:
 		return "VMMessage"
 	case Uptime:

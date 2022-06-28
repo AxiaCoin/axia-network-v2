@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package platformvm
@@ -13,7 +13,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/snow"
 	"github.com/axiacoin/axia-network-v2/utils/crypto"
 	"github.com/axiacoin/axia-network-v2/utils/math"
-	"github.com/axiacoin/axia-network-v2/vms/components/axc"
+	"github.com/axiacoin/axia-network-v2/vms/components/avax"
 	"github.com/axiacoin/axia-network-v2/vms/components/verify"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 )
@@ -34,7 +34,7 @@ type UnsignedExportTx struct {
 	DestinationChain ids.ID `serialize:"true" json:"destinationChain"`
 
 	// Outputs that are exported to the chain
-	ExportedOutputs []*axc.TransferableOutput `serialize:"true" json:"exportedOutputs"`
+	ExportedOutputs []*avax.TransferableOutput `serialize:"true" json:"exportedOutputs"`
 }
 
 // InitCtx sets the FxID fields in the inputs and outputs of this
@@ -74,7 +74,7 @@ func (tx *UnsignedExportTx) SyntacticVerify(ctx *snow.Context) error {
 			return errWrongLocktime
 		}
 	}
-	if !axc.IsSortedTransferableOutputs(tx.ExportedOutputs, Codec) {
+	if !avax.IsSortedTransferableOutputs(tx.ExportedOutputs, Codec) {
 		return errOutputsNotSorted
 	}
 
@@ -98,18 +98,18 @@ func (tx *UnsignedExportTx) Execute(
 		return nil, err
 	}
 
-	outs := make([]*axc.TransferableOutput, len(tx.Outs)+len(tx.ExportedOutputs))
+	outs := make([]*avax.TransferableOutput, len(tx.Outs)+len(tx.ExportedOutputs))
 	copy(outs, tx.Outs)
 	copy(outs[len(tx.Outs):], tx.ExportedOutputs)
 
 	if vm.bootstrapped.GetValue() {
-		if err := verify.SameAllychain(vm.ctx, tx.DestinationChain); err != nil {
+		if err := verify.SameSubnet(vm.ctx, tx.DestinationChain); err != nil {
 			return nil, err
 		}
 	}
 
 	// Verify the flowcheck
-	if err := vm.semanticVerifySpend(vs, tx, tx.Ins, outs, stx.Creds, vm.TxFee, vm.ctx.AXCAssetID); err != nil {
+	if err := vm.semanticVerifySpend(vs, tx, tx.Ins, outs, stx.Creds, vm.TxFee, vm.ctx.AVAXAssetID); err != nil {
 		return nil, fmt.Errorf("failed semanticVerifySpend: %w", err)
 	}
 
@@ -117,7 +117,7 @@ func (tx *UnsignedExportTx) Execute(
 	consumeInputs(vs, tx.Ins)
 	// Produce the UTXOS
 	txID := tx.ID()
-	produceOutputs(vs, txID, vm.ctx.AXCAssetID, tx.Outs)
+	produceOutputs(vs, txID, vm.ctx.AVAXAssetID, tx.Outs)
 	return nil, nil
 }
 
@@ -127,12 +127,12 @@ func (tx *UnsignedExportTx) AtomicOperations() (ids.ID, *atomic.Requests, error)
 
 	elems := make([]*atomic.Element, len(tx.ExportedOutputs))
 	for i, out := range tx.ExportedOutputs {
-		utxo := &axc.UTXO{
-			UTXOID: axc.UTXOID{
+		utxo := &avax.UTXO{
+			UTXOID: avax.UTXOID{
 				TxID:        txID,
 				OutputIndex: uint32(len(tx.Outs) + i),
 			},
-			Asset: axc.Asset{ID: out.AssetID()},
+			Asset: avax.Asset{ID: out.AssetID()},
 			Out:   out.Out,
 		}
 
@@ -145,7 +145,7 @@ func (tx *UnsignedExportTx) AtomicOperations() (ids.ID, *atomic.Requests, error)
 			Key:   utxoID[:],
 			Value: utxoBytes,
 		}
-		if out, ok := utxo.Out.(axc.Addressable); ok {
+		if out, ok := utxo.Out.(avax.Addressable); ok {
 			elem.Traits = out.Addresses()
 		}
 
@@ -198,15 +198,15 @@ func (vm *VM) newExportTx(
 
 	// Create the transaction
 	utx := &UnsignedExportTx{
-		BaseTx: BaseTx{BaseTx: axc.BaseTx{
+		BaseTx: BaseTx{BaseTx: avax.BaseTx{
 			NetworkID:    vm.ctx.NetworkID,
 			BlockchainID: vm.ctx.ChainID,
 			Ins:          ins,
 			Outs:         outs, // Non-exported outputs
 		}},
 		DestinationChain: chainID,
-		ExportedOutputs: []*axc.TransferableOutput{{ // Exported to Swap-Chain
-			Asset: axc.Asset{ID: vm.ctx.AXCAssetID},
+		ExportedOutputs: []*avax.TransferableOutput{{ // Exported to X-Chain
+			Asset: avax.Asset{ID: vm.ctx.AVAXAssetID},
 			Out: &secp256k1fx.TransferOutput{
 				Amt: amount,
 				OutputOwners: secp256k1fx.OutputOwners{

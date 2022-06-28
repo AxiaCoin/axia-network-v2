@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package platformvm
@@ -19,7 +19,7 @@ type Factory struct {
 	// The node's chain manager
 	Chains chains.Manager
 
-	// Node's validator set maps allychainID -> validators of the allychain
+	// Node's validator set maps subnetID -> validators of the subnet
 	Validators validators.Manager
 
 	// Provides access to the uptime manager as a thread safe data structure
@@ -28,8 +28,8 @@ type Factory struct {
 	// True if the node is being run with staking enabled
 	StakingEnabled bool
 
-	// Set of allychains that this node is validating
-	WhitelistedAllychains ids.Set
+	// Set of subnets that this node is validating
+	WhitelistedSubnets ids.Set
 
 	// Fee that must be burned by every create staker transaction
 	AddStakerTxFee uint64
@@ -40,8 +40,8 @@ type Factory struct {
 	// Fee that must be burned by every state creating transaction before AP3
 	CreateAssetTxFee uint64
 
-	// Fee that must be burned by every allychain creating transaction after AP3
-	CreateAllychainTxFee uint64
+	// Fee that must be burned by every subnet creating transaction after AP3
+	CreateSubnetTxFee uint64
 
 	// Fee that must be burned by every blockchain creating transaction after AP3
 	CreateBlockchainTxFee uint64
@@ -52,7 +52,7 @@ type Factory struct {
 	// The maximum amount of tokens that can be bonded on a validator
 	MaxValidatorStake uint64
 
-	// Minimum stake, in nAXC, that can be delegated on the primary network
+	// Minimum stake, in nAVAX, that can be delegated on the primary network
 	MinDelegatorStake uint64
 
 	// Minimum fee that can be charged for delegation

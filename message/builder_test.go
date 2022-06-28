@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package message
@@ -45,8 +45,8 @@ func TestBuildVersion(t *testing.T) {
 	myVersion := version.NewDefaultVersion(1, 2, 3).String()
 	myVersionTime := uint64(time.Now().Unix())
 	sig := make([]byte, 65)
-	allychainID := ids.Empty.Prefix(1)
-	allychainIDs := [][]byte{allychainID[:]}
+	subnetID := ids.Empty.Prefix(1)
+	subnetIDs := [][]byte{subnetID[:]}
 	msg, err := UncompressingBuilder.Version(
 		networkID,
 		myTime,
@@ -54,7 +54,7 @@ func TestBuildVersion(t *testing.T) {
 		myVersion,
 		myVersionTime,
 		sig,
-		[]ids.ID{allychainID},
+		[]ids.ID{subnetID},
 	)
 	assert.NoError(t, err)
 	assert.NotNil(t, msg)
@@ -71,7 +71,7 @@ func TestBuildVersion(t *testing.T) {
 	assert.EqualValues(t, myVersion, parsedMsg.Get(VersionStr))
 	assert.EqualValues(t, myVersionTime, parsedMsg.Get(VersionTime))
 	assert.EqualValues(t, sig, parsedMsg.Get(SigBytes))
-	assert.EqualValues(t, allychainIDs, parsedMsg.Get(TrackedAllychains))
+	assert.EqualValues(t, subnetIDs, parsedMsg.Get(TrackedSubnets))
 }
 
 func TestBuildGetAcceptedFrontier(t *testing.T) {

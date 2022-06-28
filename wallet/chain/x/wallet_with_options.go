@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package x
@@ -6,10 +6,10 @@ package x
 import (
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/vms/avm"
-	"github.com/axiacoin/axia-network-v2/vms/components/axc"
+	"github.com/axiacoin/axia-network-v2/vms/components/avax"
 	"github.com/axiacoin/axia-network-v2/vms/components/verify"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
-	"github.com/axiacoin/axia-network-v2/wallet/allychain/primary/common"
+	"github.com/axiacoin/axia-network-v2/wallet/subnet/primary/common"
 )
 
 var _ Wallet = &walletWithOptions{}
@@ -37,7 +37,7 @@ func (w *walletWithOptions) Builder() Builder {
 }
 
 func (w *walletWithOptions) IssueBaseTx(
-	outputs []*axc.TransferableOutput,
+	outputs []*avax.TransferableOutput,
 	options ...common.Option,
 ) (ids.ID, error) {
 	return w.Wallet.IssueBaseTx(
@@ -132,7 +132,7 @@ func (w *walletWithOptions) IssueImportTx(
 
 func (w *walletWithOptions) IssueExportTx(
 	chainID ids.ID,
-	outputs []*axc.TransferableOutput,
+	outputs []*avax.TransferableOutput,
 	options ...common.Option,
 ) (ids.ID, error) {
 	return w.Wallet.IssueExportTx(

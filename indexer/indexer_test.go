@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package indexer
@@ -17,16 +17,16 @@ import (
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow"
 	"github.com/axiacoin/axia-network-v2/snow/choices"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/axia"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/avalanche"
 	"github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
 	"github.com/axiacoin/axia-network-v2/snow/consensus/snowstorm"
-	"github.com/axiacoin/axia-network-v2/snow/engine/axia/mocks"
+	"github.com/axiacoin/axia-network-v2/snow/engine/avalanche/mocks"
 	"github.com/axiacoin/axia-network-v2/snow/engine/common"
 	"github.com/axiacoin/axia-network-v2/snow/triggers"
 	"github.com/axiacoin/axia-network-v2/utils"
 	"github.com/axiacoin/axia-network-v2/utils/logging"
 
-	avvtxmocks "github.com/axiacoin/axia-network-v2/snow/engine/axia/vertex/mocks"
+	avvtxmocks "github.com/axiacoin/axia-network-v2/snow/engine/avalanche/vertex/mocks"
 	smblockmocks "github.com/axiacoin/axia-network-v2/snow/engine/snowman/block/mocks"
 	smengmocks "github.com/axiacoin/axia-network-v2/snow/engine/snowman/mocks"
 )
@@ -300,7 +300,7 @@ func TestIndexer(t *testing.T) {
 	}
 	// Mocked VM knows about this block now
 	dagEngine.On("GetVtx", vtxID).Return(
-		&axia.TestVertex{
+		&avalanche.TestVertex{
 			TestDecidable: choices.TestDecidable{
 				StatusV: choices.Accepted,
 				IDV:     vtxID,
@@ -532,7 +532,7 @@ func TestIgnoreNonDefaultChains(t *testing.T) {
 	// Assert state is right
 	chain1Ctx := snow.DefaultConsensusContextTest()
 	chain1Ctx.ChainID = ids.GenerateTestID()
-	chain1Ctx.AllychainID = ids.GenerateTestID()
+	chain1Ctx.SubnetID = ids.GenerateTestID()
 
 	// RegisterChain should return without adding an index for this chain
 	chainVM := &smblockmocks.ChainVM{}

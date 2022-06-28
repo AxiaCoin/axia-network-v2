@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package genesis
@@ -29,9 +29,9 @@ func TestValidateConfig(t *testing.T) {
 			networkID: 1,
 			config:    &MainnetConfig,
 		},
-		"test": {
+		"fuji": {
 			networkID: 5,
-			config:    &TestConfig,
+			config:    &FujiConfig,
 		},
 		"local": {
 			networkID: 12345,
@@ -108,20 +108,20 @@ func TestValidateConfig(t *testing.T) {
 		"initial staked funds not in allocations": {
 			networkID: 5,
 			config: func() *Config {
-				thisConfig := TestConfig
+				thisConfig := FujiConfig
 				thisConfig.InitialStakedFunds = append(thisConfig.InitialStakedFunds, LocalConfig.InitialStakedFunds[0])
 				return &thisConfig
 			}(),
 			err: "does not have an allocation to stake",
 		},
-		"empty AXC-Chain genesis": {
+		"empty C-Chain genesis": {
 			networkID: 12345,
 			config: func() *Config {
 				thisConfig := LocalConfig
-				thisConfig.AXCChainGenesis = ""
+				thisConfig.CChainGenesis = ""
 				return &thisConfig
 			}(),
-			err: "AXC-Chain genesis cannot be empty",
+			err: "C-Chain genesis cannot be empty",
 		},
 		"empty message": {
 			networkID: 12345,
@@ -154,7 +154,7 @@ var (
 		"allocations": [
 			{
 				"ethAddr": "0xb3d82b1367d362de99ab59a658165aff520cbd4d",
-				"axcAddr": "Swap-local1g65uqn6t77p656w64023nh8nd9updzmxyymev2",
+				"avaxAddr": "X-local1g65uqn6t77p656w64023nh8nd9updzmxyymev2",
 				"initialAmount": 0,
 				"unlockSchedule": [
 					{
@@ -165,7 +165,7 @@ var (
 			},
 			{
 				"ethAddr": "0xb3d82b1367d362de99ab59a658165aff520cbd4d",
-				"axcAddr": "Swap-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u",
+				"avaxAddr": "X-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u",
 				"initialAmount": 300000000000000000,
 				"unlockSchedule": [
 					{
@@ -179,7 +179,7 @@ var (
 			},
 			{
 				"ethAddr": "0xb3d82b1367d362de99ab59a658165aff520cbd4d",
-				"axcAddr": "Swap-local1ur873jhz9qnaqv5qthk5sn3e8nj3e0kmggalnu",
+				"avaxAddr": "X-local1ur873jhz9qnaqv5qthk5sn3e8nj3e0kmggalnu",
 				"initialAmount": 10000000000000000,
 				"unlockSchedule": [
 					{
@@ -193,36 +193,36 @@ var (
 		"initialStakeDuration": 31536000,
 		"initialStakeDurationOffset": 5400,
 		"initialStakedFunds": [
-			"Swap-local1g65uqn6t77p656w64023nh8nd9updzmxyymev2"
+			"X-local1g65uqn6t77p656w64023nh8nd9updzmxyymev2"
 		],
 		"initialStakers": [
 			{
 				"nodeID": "NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg",
-				"rewardAddress": "Swap-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u",
+				"rewardAddress": "X-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u",
 				"delegationFee": 1000000
 			},
 			{
 				"nodeID": "NodeID-MFrZFVCXPv5iCn6M9K6XduxGTYp891xXZ",
-				"rewardAddress": "Swap-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u",
+				"rewardAddress": "X-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u",
 				"delegationFee": 500000
 			},
 			{
 				"nodeID": "NodeID-NFBbbJ4qCmNaCzeW7sxErhvWqvEQMnYcN",
-				"rewardAddress": "Swap-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u",
+				"rewardAddress": "X-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u",
 				"delegationFee": 250000
 			},
 			{
 				"nodeID": "NodeID-GWPcbFJZFfZreETSoWjPimr846mXEKCtu",
-				"rewardAddress": "Swap-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u",
+				"rewardAddress": "X-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u",
 				"delegationFee": 125000
 			},
 			{
 				"nodeID": "NodeID-P7oB2McjBGgW2NXXWVYjV8JEDFoW9xDE5",
-				"rewardAddress": "Swap-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u",
+				"rewardAddress": "X-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u",
 				"delegationFee": 62500
 			}
 		],
-		"axcChainGenesis": "{\"config\":{\"chainId\":43112,\"homesteadBlock\":0,\"daoForkBlock\":0,\"daoForkSupport\":true,\"eip150Block\":0,\"eip150Hash\":\"0x2086799aeebeae135c246c65021c82b4e15a2c451340993aacfd2751886514f0\",\"eip155Block\":0,\"eip158Block\":0,\"byzantiumBlock\":0,\"constantinopleBlock\":0,\"petersburgBlock\":0,\"istanbulBlock\":0,\"muirGlacierBlock\":0},\"nonce\":\"0x0\",\"timestamp\":\"0x0\",\"extraData\":\"0x00\",\"gasLimit\":\"0x5f5e100\",\"difficulty\":\"0x0\",\"mixHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"coinbase\":\"0x0000000000000000000000000000000000000000\",\"alloc\":{\"0100000000000000000000000000000000000000\":{\"code\":\"0x7300000000000000000000000000000000000000003014608060405260043610603d5760003560e01c80631e010439146042578063b6510bb314606e575b600080fd5b605c60048036036020811015605657600080fd5b503560b1565b60408051918252519081900360200190f35b818015607957600080fd5b5060af60048036036080811015608e57600080fd5b506001600160a01b03813516906020810135906040810135906060013560b6565b005b30cd90565b836001600160a01b031681836108fc8690811502906040516000604051808303818888878c8acf9550505050505015801560f4573d6000803e3d6000fd5b505050505056fea26469706673582212201eebce970fe3f5cb96bf8ac6ba5f5c133fc2908ae3dcd51082cfee8f583429d064736f6c634300060a0033\",\"balance\":\"0x0\"}},\"number\":\"0x0\",\"gasUsed\":\"0x0\",\"parentHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\"}",
+		"cChainGenesis": "{\"config\":{\"chainId\":43112,\"homesteadBlock\":0,\"daoForkBlock\":0,\"daoForkSupport\":true,\"eip150Block\":0,\"eip150Hash\":\"0x2086799aeebeae135c246c65021c82b4e15a2c451340993aacfd2751886514f0\",\"eip155Block\":0,\"eip158Block\":0,\"byzantiumBlock\":0,\"constantinopleBlock\":0,\"petersburgBlock\":0,\"istanbulBlock\":0,\"muirGlacierBlock\":0},\"nonce\":\"0x0\",\"timestamp\":\"0x0\",\"extraData\":\"0x00\",\"gasLimit\":\"0x5f5e100\",\"difficulty\":\"0x0\",\"mixHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"coinbase\":\"0x0000000000000000000000000000000000000000\",\"alloc\":{\"0100000000000000000000000000000000000000\":{\"code\":\"0x7300000000000000000000000000000000000000003014608060405260043610603d5760003560e01c80631e010439146042578063b6510bb314606e575b600080fd5b605c60048036036020811015605657600080fd5b503560b1565b60408051918252519081900360200190f35b818015607957600080fd5b5060af60048036036080811015608e57600080fd5b506001600160a01b03813516906020810135906040810135906060013560b6565b005b30cd90565b836001600160a01b031681836108fc8690811502906040516000604051808303818888878c8acf9550505050505015801560f4573d6000803e3d6000fd5b505050505056fea26469706673582212201eebce970fe3f5cb96bf8ac6ba5f5c133fc2908ae3dcd51082cfee8f583429d064736f6c634300060a0033\",\"balance\":\"0x0\"}},\"number\":\"0x0\",\"gasUsed\":\"0x0\",\"parentHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\"}",
 		"message": "{{ fun_quote }}"
 	}`
 	invalidGenesisConfigJSON = `{
@@ -243,15 +243,15 @@ func TestGenesisFromFile(t *testing.T) {
 			customConfig: customGenesisConfigJSON,
 			err:          "cannot override genesis config for standard network mainnet (1)",
 		},
-		"test": {
-			networkID:    constants.TestID,
+		"fuji": {
+			networkID:    constants.FujiID,
 			customConfig: customGenesisConfigJSON,
-			err:          "cannot override genesis config for standard network test (5)",
+			err:          "cannot override genesis config for standard network fuji (5)",
 		},
-		"test (with custom specified)": {
-			networkID:    constants.TestID,
+		"fuji (with custom specified)": {
+			networkID:    constants.FujiID,
 			customConfig: localGenesisConfigJSON, // won't load
-			err:          "cannot override genesis config for standard network test (5)",
+			err:          "cannot override genesis config for standard network fuji (5)",
 		},
 		"local": {
 			networkID:    constants.LocalID,
@@ -329,9 +329,9 @@ func TestGenesisFromFlag(t *testing.T) {
 			networkID: constants.MainnetID,
 			err:       "cannot override genesis config for standard network mainnet (1)",
 		},
-		"test": {
-			networkID: constants.TestID,
-			err:       "cannot override genesis config for standard network test (5)",
+		"fuji": {
+			networkID: constants.FujiID,
+			err:       "cannot override genesis config for standard network fuji (5)",
 		},
 		"local": {
 			networkID: constants.LocalID,
@@ -377,7 +377,7 @@ func TestGenesisFromFlag(t *testing.T) {
 					genBytes, err = json.Marshal(&MainnetConfig)
 					assert.NoError(err)
 				case constants.TestnetID:
-					genBytes, err = json.Marshal(&TestConfig)
+					genBytes, err = json.Marshal(&FujiConfig)
 					assert.NoError(err)
 				case constants.LocalID:
 					genBytes, err = json.Marshal(&LocalConfig)
@@ -431,7 +431,7 @@ func TestVMGenesis(t *testing.T) {
 			},
 		},
 		{
-			networkID: constants.TestID,
+			networkID: constants.FujiID,
 			vmTest: []vmTest{
 				{
 					vmID:       constants.AVMID,
@@ -486,7 +486,7 @@ func TestVMGenesis(t *testing.T) {
 	}
 }
 
-func TestAXCAssetID(t *testing.T) {
+func TestAVAXAssetID(t *testing.T) {
 	tests := []struct {
 		networkID  uint32
 		expectedID string
@@ -496,7 +496,7 @@ func TestAXCAssetID(t *testing.T) {
 			expectedID: "FvwEAhmxKfeiG8SnEvq42hc6whRyY3EFYAvebMqDNDGCgxN5Z",
 		},
 		{
-			networkID:  constants.TestID,
+			networkID:  constants.FujiID,
 			expectedID: "U8iRqJoiJm8xZHAacmvYyZVwqQx6uDNtQeP3CQ6fcgQk3JqnK",
 		},
 		{
@@ -510,13 +510,13 @@ func TestAXCAssetID(t *testing.T) {
 			assert := assert.New(t)
 
 			config := GetConfig(test.networkID)
-			_, axcAssetID, err := FromConfig(config)
+			_, avaxAssetID, err := FromConfig(config)
 			assert.NoError(err)
 
 			assert.Equal(
 				test.expectedID,
-				axcAssetID.String(),
-				"AXC assetID with networkID %d mismatch",
+				avaxAssetID.String(),
+				"AVAX assetID with networkID %d mismatch",
 				test.networkID,
 			)
 		})

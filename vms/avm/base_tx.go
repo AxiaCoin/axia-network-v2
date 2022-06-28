@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package avm
@@ -10,7 +10,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/database"
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow"
-	"github.com/axiacoin/axia-network-v2/vms/components/axc"
+	"github.com/axiacoin/axia-network-v2/vms/components/avax"
 	"github.com/axiacoin/axia-network-v2/vms/components/verify"
 )
 
@@ -22,7 +22,7 @@ var (
 
 // BaseTx is the basis of all transactions.
 type BaseTx struct {
-	axc.BaseTx `serialize:"true"`
+	avax.BaseTx `serialize:"true"`
 }
 
 // Init sets the FxID fields in the inputs and outputs of this [BaseTx]
@@ -64,11 +64,11 @@ func (t *BaseTx) SyntacticVerify(
 		return err
 	}
 
-	return axc.VerifyTx(
+	return avax.VerifyTx(
 		txFee,
 		txFeeAssetID,
-		[][]*axc.TransferableInput{t.Ins},
-		[][]*axc.TransferableOutput{t.Outs},
+		[][]*avax.TransferableInput{t.Ins},
+		[][]*avax.TransferableOutput{t.Outs},
 		c,
 	)
 }

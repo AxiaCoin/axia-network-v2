@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package avm
@@ -12,7 +12,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/snow/engine/common"
 	"github.com/axiacoin/axia-network-v2/utils/crypto"
 	"github.com/axiacoin/axia-network-v2/utils/units"
-	"github.com/axiacoin/axia-network-v2/vms/components/axc"
+	"github.com/axiacoin/axia-network-v2/vms/components/avax"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 )
 
@@ -24,7 +24,7 @@ func TestSetsAndGets(t *testing.T) {
 			Fx: &FxTest{
 				InitializeF: func(vmIntf interface{}) error {
 					vm := vmIntf.(secp256k1fx.VM)
-					return vm.CodecRegistry().RegisterType(&axc.TestVerifiable{})
+					return vm.CodecRegistry().RegisterType(&avax.TestVerifiable{})
 				},
 			},
 		}},
@@ -40,26 +40,26 @@ func TestSetsAndGets(t *testing.T) {
 
 	state := vm.state
 
-	utxo := &axc.UTXO{
-		UTXOID: axc.UTXOID{
+	utxo := &avax.UTXO{
+		UTXOID: avax.UTXOID{
 			TxID:        ids.Empty,
 			OutputIndex: 1,
 		},
-		Asset: axc.Asset{ID: ids.Empty},
-		Out:   &axc.TestVerifiable{},
+		Asset: avax.Asset{ID: ids.Empty},
+		Out:   &avax.TestVerifiable{},
 	}
 
-	tx := &Tx{UnsignedTx: &BaseTx{BaseTx: axc.BaseTx{
+	tx := &Tx{UnsignedTx: &BaseTx{BaseTx: avax.BaseTx{
 		NetworkID:    networkID,
 		BlockchainID: chainID,
-		Ins: []*axc.TransferableInput{{
-			UTXOID: axc.UTXOID{
+		Ins: []*avax.TransferableInput{{
+			UTXOID: avax.UTXOID{
 				TxID:        ids.Empty,
 				OutputIndex: 0,
 			},
-			Asset: axc.Asset{ID: assetID},
+			Asset: avax.Asset{ID: assetID},
 			In: &secp256k1fx.TransferInput{
-				Amt: 20 * units.KiloAxc,
+				Amt: 20 * units.KiloAvax,
 				Input: secp256k1fx.Input{
 					SigIndices: []uint32{
 						0,
@@ -114,7 +114,7 @@ func TestFundingNoAddresses(t *testing.T) {
 			Fx: &FxTest{
 				InitializeF: func(vmIntf interface{}) error {
 					vm := vmIntf.(secp256k1fx.VM)
-					return vm.CodecRegistry().RegisterType(&axc.TestVerifiable{})
+					return vm.CodecRegistry().RegisterType(&avax.TestVerifiable{})
 				},
 			},
 		}},
@@ -130,13 +130,13 @@ func TestFundingNoAddresses(t *testing.T) {
 
 	state := vm.state
 
-	utxo := &axc.UTXO{
-		UTXOID: axc.UTXOID{
+	utxo := &avax.UTXO{
+		UTXOID: avax.UTXOID{
 			TxID:        ids.Empty,
 			OutputIndex: 1,
 		},
-		Asset: axc.Asset{ID: ids.Empty},
-		Out:   &axc.TestVerifiable{},
+		Asset: avax.Asset{ID: ids.Empty},
+		Out:   &avax.TestVerifiable{},
 	}
 
 	if err := state.PutUTXO(utxo.InputID(), utxo); err != nil {
@@ -155,7 +155,7 @@ func TestFundingAddresses(t *testing.T) {
 			Fx: &FxTest{
 				InitializeF: func(vmIntf interface{}) error {
 					vm := vmIntf.(secp256k1fx.VM)
-					return vm.CodecRegistry().RegisterType(&axc.TestAddressable{})
+					return vm.CodecRegistry().RegisterType(&avax.TestAddressable{})
 				},
 			},
 		}},
@@ -171,13 +171,13 @@ func TestFundingAddresses(t *testing.T) {
 
 	state := vm.state
 
-	utxo := &axc.UTXO{
-		UTXOID: axc.UTXOID{
+	utxo := &avax.UTXO{
+		UTXOID: avax.UTXOID{
 			TxID:        ids.Empty,
 			OutputIndex: 1,
 		},
-		Asset: axc.Asset{ID: ids.Empty},
-		Out: &axc.TestAddressable{
+		Asset: avax.Asset{ID: ids.Empty},
+		Out: &avax.TestAddressable{
 			Addrs: [][]byte{{0}},
 		},
 	}

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package socket
@@ -12,7 +12,7 @@ func TestSocketSendAndReceive(t *testing.T) {
 	var (
 		connCh     chan net.Conn
 		socketName = "/tmp/pipe-test.sock"
-		msg        = append([]byte("axia"), make([]byte, 1000000)...)
+		msg        = append([]byte("avalanche"), make([]byte, 1000000)...)
 		msgLen     = int64(len(msg))
 	)
 

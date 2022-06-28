@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package platformvm
@@ -20,7 +20,7 @@ var _ Block = &ProposalBlock{}
 // 	1. Advance the chain's timestamp (*AdvanceTimeTx)
 //  2. Remove a staker from the staker set (*RewardStakerTx)
 //  3. Add a new staker to the set of pending (future) stakers
-//     (*AddValidatorTx, *AddDelegatorTx, *AddAllychainValidatorTx)
+//     (*AddValidatorTx, *AddDelegatorTx, *AddSubnetValidatorTx)
 //
 // The proposal will be enacted (change the chain's state) if the proposal block
 // is accepted and followed by an accepted Commit block

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package node
@@ -18,7 +18,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	coreth "github.com/axiacoin/axia-network-v2-coreth/plugin/evm"
+	coreth "github.com/ava-labs/coreth/plugin/evm"
 
 	"github.com/axiacoin/axia-network-v2/api/admin"
 	"github.com/axiacoin/axia-network-v2/api/auth"
@@ -76,7 +76,7 @@ var (
 	errShuttingDown  = errors.New("server shutting down")
 )
 
-// Node is an instance of an Axia node.
+// Node is an instance of an Avalanche node.
 type Node struct {
 	Log        logging.Logger
 	LogFactory logging.Factory
@@ -253,7 +253,7 @@ func (n *Node) initNetworking() error {
 	n.Config.NetworkConfig.Beacons = n.beacons
 	n.Config.NetworkConfig.TLSConfig = tlsConfig
 	n.Config.NetworkConfig.TLSKey = tlsKey
-	n.Config.NetworkConfig.WhitelistedAllychains = n.Config.WhitelistedAllychains
+	n.Config.NetworkConfig.WhitelistedSubnets = n.Config.WhitelistedSubnets
 	n.Config.NetworkConfig.UptimeCalculator = n.uptimeCalculator
 	n.Config.NetworkConfig.UptimeRequirement = n.Config.UptimeRequirement
 
@@ -474,7 +474,7 @@ func (n *Node) initChains(genesisBytes []byte) {
 	// Create the Platform Chain
 	n.chainManager.ForceCreateChain(chains.ChainParameters{
 		ID:            constants.PlatformChainID,
-		AllychainID:      constants.PrimaryNetworkID,
+		SubnetID:      constants.PrimaryNetworkID,
 		GenesisData:   genesisBytes, // Specifies other chains to create
 		VMAlias:       constants.PlatformVMID.String(),
 		CustomBeacons: n.beacons,
@@ -546,25 +546,25 @@ func (n *Node) addDefaultVMAliases() error {
 // Create the chainManager and register the following VMs:
 // AVM, Simple Payments DAG, Simple Payments Chain, and Platform VM
 // Assumes n.DBManager, n.vdrs all initialized (non-nil)
-func (n *Node) initChainManager(axcAssetID ids.ID) error {
+func (n *Node) initChainManager(avaxAssetID ids.ID) error {
 	createAVMTx, err := genesis.VMGenesis(n.Config.GenesisBytes, constants.AVMID)
 	if err != nil {
 		return err
 	}
-	swapChainID := createAVMTx.ID()
+	xChainID := createAVMTx.ID()
 
 	createEVMTx, err := genesis.VMGenesis(n.Config.GenesisBytes, constants.EVMID)
 	if err != nil {
 		return err
 	}
-	axcChainID := createEVMTx.ID()
+	cChainID := createEVMTx.ID()
 
 	// If any of these chains die, the node shuts down
 	criticalChains := ids.Set{}
 	criticalChains.Add(
 		constants.PlatformChainID,
-		swapChainID,
-		axcChainID,
+		xChainID,
+		cChainID,
 	)
 
 	// Manages network timeouts
@@ -615,18 +615,18 @@ func (n *Node) initChainManager(axcAssetID ids.ID) error {
 		Server:                                  n.APIServer,
 		Keystore:                                n.keystore,
 		AtomicMemory:                            &n.sharedMemory,
-		AXCAssetID:                             axcAssetID,
-		SwapChainID:                                swapChainID,
+		AVAXAssetID:                             avaxAssetID,
+		XChainID:                                xChainID,
 		CriticalChains:                          criticalChains,
 		TimeoutManager:                          timeoutManager,
 		Health:                                  n.health,
-		WhitelistedAllychains:                      n.Config.WhitelistedAllychains,
+		WhitelistedSubnets:                      n.Config.WhitelistedSubnets,
 		RetryBootstrap:                          n.Config.RetryBootstrap,
 		RetryBootstrapWarnFrequency:             n.Config.RetryBootstrapWarnFrequency,
 		ShutdownNodeFunc:                        n.Shutdown,
 		MeterVMEnabled:                          n.Config.MeterVMEnabled,
 		Metrics:                                 n.MetricsGatherer,
-		AllychainConfigs:                           n.Config.AllychainConfigs,
+		SubnetConfigs:                           n.Config.SubnetConfigs,
 		ChainConfigs:                            n.Config.ChainConfigs,
 		ConsensusGossipFrequency:                n.Config.ConsensusGossipFrequency,
 		GossipConfig:                            n.Config.GossipConfig,
@@ -634,7 +634,7 @@ func (n *Node) initChainManager(axcAssetID ids.ID) error {
 		BootstrapAncestorsMaxContainersSent:     n.Config.BootstrapAncestorsMaxContainersSent,
 		BootstrapAncestorsMaxContainersReceived: n.Config.BootstrapAncestorsMaxContainersReceived,
 		ApricotPhase4Time:                       version.GetApricotPhase4Time(n.Config.NetworkID),
-		ApricotPhase4MinCoreChainHeight:            version.GetApricotPhase4MinCoreChainHeight(n.Config.NetworkID),
+		ApricotPhase4MinPChainHeight:            version.GetApricotPhase4MinPChainHeight(n.Config.NetworkID),
 		ResetProposerVMHeightIndex:              n.Config.ResetProposerVMHeightIndex,
 	})
 
@@ -643,13 +643,13 @@ func (n *Node) initChainManager(axcAssetID ids.ID) error {
 	return nil
 }
 
-// initVMs initializes the VMs Axia supports + any additional vms installed as plugins.
+// initVMs initializes the VMs Avalanche supports + any additional vms installed as plugins.
 func (n *Node) initVMs() error {
 	n.Log.Info("initializing VMs")
 
 	vdrs := n.vdrs
 
-	// If staking is disabled, ignore updates to Allychains' validator sets
+	// If staking is disabled, ignore updates to Subnets' validator sets
 	// Instead of updating node's validator manager, platform chain makes changes
 	// to its own local validator manager (which isn't used for sampling)
 	if !n.Config.EnableStaking {
@@ -662,7 +662,7 @@ func (n *Node) initVMs() error {
 		VMManager: n.Config.VMManager,
 	})
 
-	// Register the VMs that Axia supports
+	// Register the VMs that Avalanche supports
 	errs := wrappers.Errs{}
 	errs.Add(
 		vmRegisterer.Register(constants.PlatformVMID, &platformvm.Factory{
@@ -670,10 +670,10 @@ func (n *Node) initVMs() error {
 			Validators:             vdrs,
 			UptimeLockedCalculator: n.uptimeCalculator,
 			StakingEnabled:         n.Config.EnableStaking,
-			WhitelistedAllychains:     n.Config.WhitelistedAllychains,
+			WhitelistedSubnets:     n.Config.WhitelistedSubnets,
 			TxFee:                  n.Config.TxFee,
 			CreateAssetTxFee:       n.Config.CreateAssetTxFee,
-			CreateAllychainTxFee:      n.Config.CreateAllychainTxFee,
+			CreateSubnetTxFee:      n.Config.CreateSubnetTxFee,
 			CreateBlockchainTxFee:  n.Config.CreateBlockchainTxFee,
 			UptimePercentage:       n.Config.UptimeRequirement,
 			MinValidatorStake:      n.Config.MinValidatorStake,
@@ -854,7 +854,7 @@ func (n *Node) initInfoAPI() error {
 			NetworkID:             n.Config.NetworkID,
 			TxFee:                 n.Config.TxFee,
 			CreateAssetTxFee:      n.Config.CreateAssetTxFee,
-			CreateAllychainTxFee:     n.Config.CreateAllychainTxFee,
+			CreateSubnetTxFee:     n.Config.CreateSubnetTxFee,
 			CreateBlockchainTxFee: n.Config.CreateBlockchainTxFee,
 			VMManager:             n.Config.VMManager,
 		},
@@ -1070,7 +1070,7 @@ func (n *Node) Initialize(
 	if err := n.addDefaultVMAliases(); err != nil {
 		return fmt.Errorf("couldn't initialize API aliases: %w", err)
 	}
-	if err := n.initChainManager(n.Config.AxcAssetID); err != nil { // Set up the chain manager
+	if err := n.initChainManager(n.Config.AvaxAssetID); err != nil { // Set up the chain manager
 		return fmt.Errorf("couldn't initialize chain manager: %w", err)
 	}
 	if err := n.initVMs(); err != nil { // Initialize the VM registry.

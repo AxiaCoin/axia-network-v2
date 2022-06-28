@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package validators
@@ -17,7 +17,7 @@ type Validator interface {
 	ID() ids.ShortID
 
 	// Weight that can be used for weighted sampling. If this validator is
-	// validating the primary network, returns the amount of AXC staked.
+	// validating the primary network, returns the amount of AVAX staked.
 	Weight() uint64
 }
 

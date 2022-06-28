@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package platformvm
@@ -11,7 +11,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/utils/crypto"
 	"github.com/axiacoin/axia-network-v2/utils/hashing"
 	"github.com/axiacoin/axia-network-v2/utils/math"
-	"github.com/axiacoin/axia-network-v2/vms/components/axc"
+	"github.com/axiacoin/axia-network-v2/vms/components/avax"
 	"github.com/axiacoin/axia-network-v2/vms/components/verify"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 )
@@ -27,7 +27,7 @@ var (
 // Arguments:
 // - [keys] are the owners of the funds
 // - [amount] is the amount of funds that are trying to be staked
-// - [fee] is the amount of AXC that should be burned
+// - [fee] is the amount of AVAX that should be burned
 // - [changeAddr] is the address that change, if there is any, is sent to
 // Returns:
 // - [inputs] the inputs that should be consumed to fund the outputs
@@ -42,9 +42,9 @@ func (vm *VM) stake(
 	fee uint64,
 	changeAddr ids.ShortID,
 ) (
-	[]*axc.TransferableInput, // inputs
-	[]*axc.TransferableOutput, // returnedOutputs
-	[]*axc.TransferableOutput, // stakedOutputs
+	[]*avax.TransferableInput, // inputs
+	[]*avax.TransferableOutput, // returnedOutputs
+	[]*avax.TransferableOutput, // stakedOutputs
 	[][]*crypto.PrivateKeySECP256K1R, // signers
 	error,
 ) {
@@ -52,7 +52,7 @@ func (vm *VM) stake(
 	for _, key := range keys {
 		addrs.Add(key.PublicKey().Address())
 	}
-	utxos, err := axc.GetAllUTXOs(vm.internalState, addrs) // The UTXOs controlled by [keys]
+	utxos, err := avax.GetAllUTXOs(vm.internalState, addrs) // The UTXOs controlled by [keys]
 	if err != nil {
 		return nil, nil, nil, nil, fmt.Errorf("couldn't get UTXOs: %w", err)
 	}
@@ -62,24 +62,24 @@ func (vm *VM) stake(
 	// Minimum time this transaction will be issued at
 	now := uint64(vm.clock.Time().Unix())
 
-	ins := []*axc.TransferableInput{}
-	returnedOuts := []*axc.TransferableOutput{}
-	stakedOuts := []*axc.TransferableOutput{}
+	ins := []*avax.TransferableInput{}
+	returnedOuts := []*avax.TransferableOutput{}
+	stakedOuts := []*avax.TransferableOutput{}
 	signers := [][]*crypto.PrivateKeySECP256K1R{}
 
-	// Amount of AXC that has been staked
+	// Amount of AVAX that has been staked
 	amountStaked := uint64(0)
 
 	// Consume locked UTXOs
 	for _, utxo := range utxos {
-		// If we have consumed more AXC than we are trying to stake, then we
-		// have no need to consume more locked AXC
+		// If we have consumed more AVAX than we are trying to stake, then we
+		// have no need to consume more locked AVAX
 		if amountStaked >= amount {
 			break
 		}
 
-		if assetID := utxo.AssetID(); assetID != vm.ctx.AXCAssetID {
-			continue // We only care about staking AXC, so ignore other assets
+		if assetID := utxo.AssetID(); assetID != vm.ctx.AVAXAssetID {
+			continue // We only care about staking AVAX, so ignore other assets
 		}
 
 		out, ok := utxo.Out.(*StakeableLockOut)
@@ -105,9 +105,9 @@ func (vm *VM) stake(
 			// We couldn't spend the output, so move on to the next one
 			continue
 		}
-		in, ok := inIntf.(axc.TransferableIn)
+		in, ok := inIntf.(avax.TransferableIn)
 		if !ok { // should never happen
-			vm.ctx.Log.Warn("expected input to be axc.TransferableIn but is %T", inIntf)
+			vm.ctx.Log.Warn("expected input to be avax.TransferableIn but is %T", inIntf)
 			continue
 		}
 
@@ -123,9 +123,9 @@ func (vm *VM) stake(
 		remainingValue -= amountToStake
 
 		// Add the input to the consumed inputs
-		ins = append(ins, &axc.TransferableInput{
+		ins = append(ins, &avax.TransferableInput{
 			UTXOID: utxo.UTXOID,
-			Asset:  axc.Asset{ID: vm.ctx.AXCAssetID},
+			Asset:  avax.Asset{ID: vm.ctx.AVAXAssetID},
 			In: &StakeableLockIn{
 				Locktime:       out.Locktime,
 				TransferableIn: in,
@@ -133,8 +133,8 @@ func (vm *VM) stake(
 		})
 
 		// Add the output to the staked outputs
-		stakedOuts = append(stakedOuts, &axc.TransferableOutput{
-			Asset: axc.Asset{ID: vm.ctx.AXCAssetID},
+		stakedOuts = append(stakedOuts, &avax.TransferableOutput{
+			Asset: avax.Asset{ID: vm.ctx.AVAXAssetID},
 			Out: &StakeableLockOut{
 				Locktime: out.Locktime,
 				TransferableOut: &secp256k1fx.TransferOutput{
@@ -147,8 +147,8 @@ func (vm *VM) stake(
 		if remainingValue > 0 {
 			// This input provided more value than was needed to be locked.
 			// Some of it must be returned
-			returnedOuts = append(returnedOuts, &axc.TransferableOutput{
-				Asset: axc.Asset{ID: vm.ctx.AXCAssetID},
+			returnedOuts = append(returnedOuts, &avax.TransferableOutput{
+				Asset: avax.Asset{ID: vm.ctx.AVAXAssetID},
 				Out: &StakeableLockOut{
 					Locktime: out.Locktime,
 					TransferableOut: &secp256k1fx.TransferOutput{
@@ -163,19 +163,19 @@ func (vm *VM) stake(
 		signers = append(signers, inSigners)
 	}
 
-	// Amount of AXC that has been burned
+	// Amount of AVAX that has been burned
 	amountBurned := uint64(0)
 
 	for _, utxo := range utxos {
-		// If we have consumed more AXC than we are trying to stake, and we
-		// have burned more AXC then we need to, then we have no need to
-		// consume more AXC
+		// If we have consumed more AVAX than we are trying to stake, and we
+		// have burned more AVAX then we need to, then we have no need to
+		// consume more AVAX
 		if amountBurned >= fee && amountStaked >= amount {
 			break
 		}
 
-		if assetID := utxo.AssetID(); assetID != vm.ctx.AXCAssetID {
-			continue // We only care about burning AXC, so ignore other assets
+		if assetID := utxo.AssetID(); assetID != vm.ctx.AVAXAssetID {
+			continue // We only care about burning AVAX, so ignore other assets
 		}
 
 		out := utxo.Out
@@ -195,7 +195,7 @@ func (vm *VM) stake(
 			// We couldn't spend this UTXO, so we skip to the next one
 			continue
 		}
-		in, ok := inIntf.(axc.TransferableIn)
+		in, ok := inIntf.(avax.TransferableIn)
 		if !ok {
 			// Because we only use the secp Fx right now, this should never
 			// happen
@@ -222,16 +222,16 @@ func (vm *VM) stake(
 		remainingValue -= amountToStake
 
 		// Add the input to the consumed inputs
-		ins = append(ins, &axc.TransferableInput{
+		ins = append(ins, &avax.TransferableInput{
 			UTXOID: utxo.UTXOID,
-			Asset:  axc.Asset{ID: vm.ctx.AXCAssetID},
+			Asset:  avax.Asset{ID: vm.ctx.AVAXAssetID},
 			In:     in,
 		})
 
 		if amountToStake > 0 {
 			// Some of this input was put for staking
-			stakedOuts = append(stakedOuts, &axc.TransferableOutput{
-				Asset: axc.Asset{ID: vm.ctx.AXCAssetID},
+			stakedOuts = append(stakedOuts, &avax.TransferableOutput{
+				Asset: avax.Asset{ID: vm.ctx.AVAXAssetID},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: amountToStake,
 					OutputOwners: secp256k1fx.OutputOwners{
@@ -245,8 +245,8 @@ func (vm *VM) stake(
 
 		if remainingValue > 0 {
 			// This input had extra value, so some of it must be returned
-			returnedOuts = append(returnedOuts, &axc.TransferableOutput{
-				Asset: axc.Asset{ID: vm.ctx.AXCAssetID},
+			returnedOuts = append(returnedOuts, &avax.TransferableOutput{
+				Asset: avax.Asset{ID: vm.ctx.AVAXAssetID},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: remainingValue,
 					OutputOwners: secp256k1fx.OutputOwners{
@@ -268,38 +268,38 @@ func (vm *VM) stake(
 			amountBurned, amountStaked, fee, amount)
 	}
 
-	axc.SortTransferableInputsWithSigners(ins, signers) // sort inputs and keys
-	axc.SortTransferableOutputs(returnedOuts, Codec)    // sort outputs
-	axc.SortTransferableOutputs(stakedOuts, Codec)      // sort outputs
+	avax.SortTransferableInputsWithSigners(ins, signers) // sort inputs and keys
+	avax.SortTransferableOutputs(returnedOuts, Codec)    // sort outputs
+	avax.SortTransferableOutputs(stakedOuts, Codec)      // sort outputs
 
 	return ins, returnedOuts, stakedOuts, signers, nil
 }
 
-// authorize an operation on behalf of the named allychain with the provided keys.
+// authorize an operation on behalf of the named subnet with the provided keys.
 func (vm *VM) authorize(
 	vs MutableState,
-	allychainID ids.ID,
+	subnetID ids.ID,
 	keys []*crypto.PrivateKeySECP256K1R,
 ) (
 	verify.Verifiable, // Input that names owners
 	[]*crypto.PrivateKeySECP256K1R, // Keys that prove ownership
 	error,
 ) {
-	allychainTx, _, err := vs.GetTx(allychainID)
+	subnetTx, _, err := vs.GetTx(subnetID)
 	if err != nil {
 		return nil, nil, fmt.Errorf(
-			"failed to fetch allychain %s: %w",
-			allychainID,
+			"failed to fetch subnet %s: %w",
+			subnetID,
 			err,
 		)
 	}
-	allychain, ok := allychainTx.UnsignedTx.(*UnsignedCreateAllychainTx)
+	subnet, ok := subnetTx.UnsignedTx.(*UnsignedCreateSubnetTx)
 	if !ok {
 		return nil, nil, errWrongTxType
 	}
 
-	// Make sure the owners of the allychain match the provided keys
-	owner, ok := allychain.Owner.(*secp256k1fx.OutputOwners)
+	// Make sure the owners of the subnet match the provided keys
+	owner, ok := subnet.Owner.(*secp256k1fx.OutputOwners)
 	if !ok {
 		return nil, nil, errUnknownOwners
 	}
@@ -310,7 +310,7 @@ func (vm *VM) authorize(
 	// Make sure that the operation is valid after a minimum time
 	now := uint64(vm.clock.Time().Unix())
 
-	// Attempt to prove ownership of the allychain
+	// Attempt to prove ownership of the subnet
 	indices, signers, matches := kc.Match(owner, now)
 	if !matches {
 		return nil, nil, errCantSign
@@ -327,13 +327,13 @@ func (vm *VM) authorize(
 func (vm *VM) semanticVerifySpend(
 	utxoDB UTXOGetter,
 	tx UnsignedTx,
-	ins []*axc.TransferableInput,
-	outs []*axc.TransferableOutput,
+	ins []*avax.TransferableInput,
+	outs []*avax.TransferableOutput,
 	creds []verify.Verifiable,
 	feeAmount uint64,
 	feeAssetID ids.ID,
 ) error {
-	utxos := make([]*axc.UTXO, len(ins))
+	utxos := make([]*avax.UTXO, len(ins))
 	for index, input := range ins {
 		utxo, err := utxoDB.GetUTXO(input.InputID())
 		if err != nil {
@@ -357,9 +357,9 @@ func (vm *VM) semanticVerifySpend(
 // Precondition: [tx] has already been syntactically verified
 func (vm *VM) semanticVerifySpendUTXOs(
 	tx UnsignedTx,
-	utxos []*axc.UTXO,
-	ins []*axc.TransferableInput,
-	outs []*axc.TransferableOutput,
+	utxos []*avax.UTXO,
+	ins []*avax.TransferableInput,
+	outs []*avax.TransferableOutput,
 	creds []verify.Verifiable,
 	feeAmount uint64,
 	feeAssetID ids.ID,
@@ -548,7 +548,7 @@ func (vm *VM) semanticVerifySpendUTXOs(
 // Removes the UTXOs consumed by [ins] from the UTXO set
 func consumeInputs(
 	utxoDB UTXODeleter,
-	ins []*axc.TransferableInput,
+	ins []*avax.TransferableInput,
 ) {
 	for _, input := range ins {
 		utxoDB.DeleteUTXO(input.InputID())
@@ -561,15 +561,15 @@ func produceOutputs(
 	utxoDB UTXOAdder,
 	txID ids.ID,
 	assetID ids.ID,
-	outs []*axc.TransferableOutput,
+	outs []*avax.TransferableOutput,
 ) {
 	for index, out := range outs {
-		utxoDB.AddUTXO(&axc.UTXO{
-			UTXOID: axc.UTXOID{
+		utxoDB.AddUTXO(&avax.UTXO{
+			UTXOID: avax.UTXOID{
 				TxID:        txID,
 				OutputIndex: uint32(index),
 			},
-			Asset: axc.Asset{ID: assetID},
+			Asset: avax.Asset{ID: assetID},
 			Out:   out.Output(),
 		})
 	}

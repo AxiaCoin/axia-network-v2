@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package rpcchainvm
@@ -37,13 +37,13 @@ import (
 )
 
 // Test_VMCreateHandlers tests the Handle and HandleSimple RPCs by creating a plugin and
-// serving the handlers exposed by the allychain. The test then will exercise the service
+// serving the handlers exposed by the subnet. The test then will exercise the service
 // as a regression test.
 func Test_VMCreateHandlers(t *testing.T) {
 	assert := assert.New(t)
 	pr := &pingRequest{
 		Version: "2.0",
-		Method:  "allychain.ping",
+		Method:  "subnet.ping",
 		Params:  []string{},
 		ID:      "1",
 	}
@@ -91,7 +91,7 @@ func Test_VMCreateHandlers(t *testing.T) {
 				assert.NoError(err)
 			}
 
-			// Get the handlers exposed by the allychain vm.
+			// Get the handlers exposed by the subnet vm.
 			handlers, err := vm.CreateHandlers()
 			assert.NoErrorf(err, "failed to get handlers: %v", err)
 
@@ -274,11 +274,11 @@ func (vm *TestVMClient) CreateHandlers() (map[string]*common.HTTPHandler, error)
 	return handlers, nil
 }
 
-type TestAllychainVM struct {
+type TestSubnetVM struct {
 	logger hclog.Logger
 }
 
-func (vm *TestAllychainVM) CreateHandlers() (map[string]*common.HTTPHandler, error) {
+func (vm *TestSubnetVM) CreateHandlers() (map[string]*common.HTTPHandler, error) {
 	apis := make(map[string]*common.HTTPHandler)
 
 	testEchoMsgCount := 5
@@ -322,7 +322,7 @@ func getTestRPCServer() (*gorillarpc.Server, error) {
 	server := gorillarpc.NewServer()
 	server.RegisterCodec(cjson.NewCodec(), "application/json")
 	server.RegisterCodec(cjson.NewCodec(), "application/json;charset=UTF-8")
-	if err := server.RegisterService(&PingService{}, "allychain"); err != nil {
+	if err := server.RegisterService(&PingService{}, "subnet"); err != nil {
 		return nil, fmt.Errorf("failed to create rpc server %v", err)
 	}
 	return server, nil

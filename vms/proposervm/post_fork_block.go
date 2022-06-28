@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package proposervm
@@ -113,10 +113,10 @@ func (b *postForkBlock) verifyPreForkChild(child *preForkBlock) error {
 
 func (b *postForkBlock) verifyPostForkChild(child *postForkBlock) error {
 	parentTimestamp := b.Timestamp()
-	parentCoreChainHeight := b.CoreChainHeight()
+	parentPChainHeight := b.PChainHeight()
 	return b.postForkCommonComponents.Verify(
 		parentTimestamp,
-		parentCoreChainHeight,
+		parentPChainHeight,
 		child,
 	)
 }
@@ -141,12 +141,12 @@ func (b *postForkBlock) buildChild() (Block, error) {
 	return b.postForkCommonComponents.buildChild(
 		b.ID(),
 		b.Timestamp(),
-		b.CoreChainHeight(),
+		b.PChainHeight(),
 	)
 }
 
-func (b *postForkBlock) coreChainHeight() (uint64, error) {
-	return b.CoreChainHeight(), nil
+func (b *postForkBlock) pChainHeight() (uint64, error) {
+	return b.PChainHeight(), nil
 }
 
 func (b *postForkBlock) setStatus(status choices.Status) {

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package config
@@ -14,7 +14,7 @@ const (
 	NetworkNameKey                                     = "network-id"
 	TxFeeKey                                           = "tx-fee"
 	CreateAssetTxFeeKey                                = "create-asset-tx-fee"
-	CreateAllychainTxFeeKey                               = "create-allychain-tx-fee"
+	CreateSubnetTxFeeKey                               = "create-subnet-tx-fee"
 	CreateBlockchainTxFeeKey                           = "create-blockchain-tx-fee"
 	UptimeRequirementKey                               = "uptime-requirement"
 	MinValidatorStakeKey                               = "min-validator-stake"
@@ -104,13 +104,13 @@ const (
 	SnowQuorumSizeKey                                  = "snow-quorum-size"
 	SnowVirtuousCommitThresholdKey                     = "snow-virtuous-commit-threshold"
 	SnowRogueCommitThresholdKey                        = "snow-rogue-commit-threshold"
-	SnowAxiaNumParentsKey                         = "snow-axia-num-parents"
-	SnowAxiaBatchSizeKey                          = "snow-axia-batch-size"
+	SnowAvalancheNumParentsKey                         = "snow-avalanche-num-parents"
+	SnowAvalancheBatchSizeKey                          = "snow-avalanche-batch-size"
 	SnowConcurrentRepollsKey                           = "snow-concurrent-repolls"
 	SnowOptimalProcessingKey                           = "snow-optimal-processing"
 	SnowMaxProcessingKey                               = "snow-max-processing"
 	SnowMaxTimeProcessingKey                           = "snow-max-time-processing"
-	WhitelistedAllychainsKey                              = "whitelisted-allychains"
+	WhitelistedSubnetsKey                              = "whitelisted-subnets"
 	AdminAPIEnabledKey                                 = "api-admin-enabled"
 	InfoAPIEnabledKey                                  = "api-info-enabled"
 	KeystoreAPIEnabledKey                              = "api-keystore-enabled"
@@ -148,8 +148,8 @@ const (
 	BootstrapAncestorsMaxContainersReceivedKey         = "bootstrap-ancestors-max-containers-received"
 	ChainConfigDirKey                                  = "chain-config-dir"
 	ChainConfigContentKey                              = "chain-config-content"
-	AllychainConfigDirKey                                 = "allychain-config-dir"
-	AllychainConfigContentKey                             = "allychain-config-content"
+	SubnetConfigDirKey                                 = "subnet-config-dir"
+	SubnetConfigContentKey                             = "subnet-config-content"
 	ProfileDirKey                                      = "profile-dir"
 	ProfileContinuousEnabledKey                        = "profile-continuous-enabled"
 	ProfileContinuousFreqKey                           = "profile-continuous-freq"

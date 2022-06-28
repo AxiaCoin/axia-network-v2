@@ -1,4 +1,4 @@
-axia_nodes:
+avalanche_nodes:
   hosts:
     localhost:
       ansible_connection: local

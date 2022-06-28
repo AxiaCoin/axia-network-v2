@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package getter
@@ -33,7 +33,7 @@ func testSetup(t *testing.T) (*block.TestVM, *common.SenderTest, common.Config) 
 	vm.Default(true)
 
 	isBootstrapped := false
-	allychain := &common.AllychainTest{
+	subnet := &common.SubnetTest{
 		T:               t,
 		IsBootstrappedF: func() bool { return isBootstrapped },
 		BootstrappedF:   func(ids.ID) { isBootstrapped = true },
@@ -53,7 +53,7 @@ func testSetup(t *testing.T) (*block.TestVM, *common.SenderTest, common.Config) 
 		SampleK:                        peers.Len(),
 		Alpha:                          peers.Weight()/2 + 1,
 		Sender:                         sender,
-		Allychain:                         allychain,
+		Subnet:                         subnet,
 		Timer:                          &common.TimerTest{},
 		AncestorsMaxContainersSent:     2000,
 		AncestorsMaxContainersReceived: 2000,

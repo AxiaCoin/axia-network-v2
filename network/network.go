@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package network
@@ -44,7 +44,7 @@ const (
 var (
 	_                      sender.ExternalSender = &network{}
 	_                      Network               = &network{}
-	errNoPrimaryValidators                       = errors.New("no default allychain validators")
+	errNoPrimaryValidators                       = errors.New("no default subnet validators")
 )
 
 // Network defines the functionality of the networking library.
@@ -186,7 +186,7 @@ func NewNetwork(
 		return nil, fmt.Errorf("initializing peer metrics failed with: %w", err)
 	}
 
-	metrics, err := newMetrics(config.Namespace, metricsRegisterer, config.WhitelistedAllychains)
+	metrics, err := newMetrics(config.Namespace, metricsRegisterer, config.WhitelistedSubnets)
 	if err != nil {
 		return nil, fmt.Errorf("initializing network metrics failed with: %w", err)
 	}
@@ -203,7 +203,7 @@ func NewNetwork(
 		Router:               router,
 		VersionCompatibility: version.GetCompatibility(config.NetworkID),
 		VersionParser:        version.NewDefaultApplicationParser(),
-		MyAllychains:            config.WhitelistedAllychains,
+		MySubnets:            config.WhitelistedSubnets,
 		Beacons:              config.Beacons,
 		NetworkID:            config.NetworkID,
 		PingFrequency:        config.PingFrequency,
@@ -241,8 +241,8 @@ func NewNetwork(
 	return n, nil
 }
 
-func (n *network) Send(msg message.OutboundMessage, nodeIDs ids.ShortSet, allychainID ids.ID, validatorOnly bool) ids.ShortSet {
-	peers := n.getPeers(nodeIDs, allychainID, validatorOnly)
+func (n *network) Send(msg message.OutboundMessage, nodeIDs ids.ShortSet, subnetID ids.ID, validatorOnly bool) ids.ShortSet {
+	peers := n.getPeers(nodeIDs, subnetID, validatorOnly)
 	n.peerConfig.Metrics.MultipleSendsFailed(
 		msg.Op(),
 		nodeIDs.Len()-len(peers),
@@ -252,13 +252,13 @@ func (n *network) Send(msg message.OutboundMessage, nodeIDs ids.ShortSet, allych
 
 func (n *network) Gossip(
 	msg message.OutboundMessage,
-	allychainID ids.ID,
+	subnetID ids.ID,
 	validatorOnly bool,
 	numValidatorsToSend int,
 	numNonValidatorsToSend int,
 	numPeersToSend int,
 ) ids.ShortSet {
-	peers := n.samplePeers(allychainID, validatorOnly, numValidatorsToSend, numNonValidatorsToSend, numPeersToSend)
+	peers := n.samplePeers(subnetID, validatorOnly, numValidatorsToSend, numNonValidatorsToSend, numPeersToSend)
 	return n.send(msg, peers)
 }
 
@@ -454,7 +454,7 @@ func (n *network) Version() (message.OutboundMessage, error) {
 		n.peerConfig.VersionCompatibility.Version().String(),
 		mySignedIP.IP.Timestamp,
 		mySignedIP.Signature,
-		n.peerConfig.MyAllychains.List(),
+		n.peerConfig.MySubnets.List(),
 	)
 }
 
@@ -594,13 +594,13 @@ func (n *network) sampleValidatorIPs() []utils.IPCertDesc {
 //
 // - [nodeIDs] the IDs of the peers that should be returned if they are
 //   connected.
-// - [allychainID] the allychainID whose membership should be considered if
+// - [subnetID] the subnetID whose membership should be considered if
 //   [validatorOnly] is set to true.
 // - [validatorOnly] is the flag to drop any nodes from [nodeIDs] that are not
-//   validators in [allychainID].
+//   validators in [subnetID].
 func (n *network) getPeers(
 	nodeIDs ids.ShortSet,
-	allychainID ids.ID,
+	subnetID ids.ID,
 	validatorOnly bool,
 ) []peer.Peer {
 	peers := make([]peer.Peer, 0, nodeIDs.Len())
@@ -614,12 +614,12 @@ func (n *network) getPeers(
 			continue
 		}
 
-		trackedAllychains := peer.TrackedAllychains()
-		if !trackedAllychains.Contains(allychainID) {
+		trackedSubnets := peer.TrackedSubnets()
+		if !trackedSubnets.Contains(subnetID) {
 			continue
 		}
 
-		if validatorOnly && !n.config.Validators.Contains(allychainID, nodeID) {
+		if validatorOnly && !n.config.Validators.Contains(subnetID, nodeID) {
 			continue
 		}
 
@@ -630,7 +630,7 @@ func (n *network) getPeers(
 }
 
 func (n *network) samplePeers(
-	allychainID ids.ID,
+	subnetID ids.ID,
 	validatorOnly bool,
 	numValidatorsToSample,
 	numNonValidatorsToSample int,
@@ -648,9 +648,9 @@ func (n *network) samplePeers(
 	return n.connectedPeers.Sample(
 		numValidatorsToSample+numNonValidatorsToSample+numPeersToSample,
 		func(p peer.Peer) bool {
-			// Only return peers that are tracking [allychainID]
-			trackedAllychains := p.TrackedAllychains()
-			if !trackedAllychains.Contains(allychainID) {
+			// Only return peers that are tracking [subnetID]
+			trackedSubnets := p.TrackedSubnets()
+			if !trackedSubnets.Contains(subnetID) {
 				return false
 			}
 
@@ -659,7 +659,7 @@ func (n *network) samplePeers(
 				return true
 			}
 
-			if n.config.Validators.Contains(allychainID, p.ID()) {
+			if n.config.Validators.Contains(subnetID, p.ID()) {
 				numValidatorsToSample--
 				return numValidatorsToSample >= 0
 			}

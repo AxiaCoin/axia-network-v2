@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package avm
@@ -10,7 +10,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/codec"
 	"github.com/axiacoin/axia-network-v2/database"
 	"github.com/axiacoin/axia-network-v2/database/prefixdb"
-	"github.com/axiacoin/axia-network-v2/vms/components/axc"
+	"github.com/axiacoin/axia-network-v2/vms/components/avax"
 )
 
 const (
@@ -28,17 +28,17 @@ var (
 // State persistently maintains a set of UTXOs, transaction, statuses, and
 // singletons.
 type State interface {
-	axc.UTXOState
-	axc.StatusState
-	axc.SingletonState
+	avax.UTXOState
+	avax.StatusState
+	avax.SingletonState
 	TxState
 	DeduplicateTx(tx *UniqueTx) *UniqueTx
 }
 
 type state struct {
-	axc.UTXOState
-	axc.StatusState
-	axc.SingletonState
+	avax.UTXOState
+	avax.StatusState
+	avax.SingletonState
 	TxState
 
 	uniqueTxs cache.Deduplicator
@@ -56,12 +56,12 @@ func NewState(config StateConfig) (State, error) {
 	singletonDB := prefixdb.New(singletonStatePrefix, config.DB)
 	txDB := prefixdb.New(txStatePrefix, config.DB)
 
-	utxoState, err := axc.NewMeteredUTXOState(utxoDB, config.Codec, config.Metrics)
+	utxoState, err := avax.NewMeteredUTXOState(utxoDB, config.Codec, config.Metrics)
 	if err != nil {
 		return nil, err
 	}
 
-	statusState, err := axc.NewMeteredStatusState(statusDB, config.Metrics)
+	statusState, err := avax.NewMeteredStatusState(statusDB, config.Metrics)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func NewState(config StateConfig) (State, error) {
 	return &state{
 		UTXOState:      utxoState,
 		StatusState:    statusState,
-		SingletonState: axc.NewSingletonState(singletonDB),
+		SingletonState: avax.NewSingletonState(singletonDB),
 		TxState:        txState,
 
 		uniqueTxs: &cache.EvictableLRU{

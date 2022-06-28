@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package sender
@@ -15,15 +15,15 @@ type ExternalSender interface {
 	Send(
 		msg message.OutboundMessage,
 		nodeIDs ids.ShortSet,
-		allychainID ids.ID,
+		subnetID ids.ID,
 		validatorOnly bool,
 	) ids.ShortSet
 
-	// Send a message to a random group of nodes in a allychain.
+	// Send a message to a random group of nodes in a subnet.
 	// Nodes are sampled based on their validator status.
 	Gossip(
 		msg message.OutboundMessage,
-		allychainID ids.ID,
+		subnetID ids.ID,
 		validatorOnly bool,
 		numValidatorsToSend int,
 		numNonValidatorsToSend int,

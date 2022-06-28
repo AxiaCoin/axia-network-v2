@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package avm
@@ -12,7 +12,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/utils"
 	"github.com/axiacoin/axia-network-v2/utils/crypto"
-	"github.com/axiacoin/axia-network-v2/vms/components/axc"
+	"github.com/axiacoin/axia-network-v2/vms/components/avax"
 	"github.com/axiacoin/axia-network-v2/vms/components/verify"
 )
 
@@ -23,8 +23,8 @@ var (
 )
 
 type Operation struct {
-	axc.Asset `serialize:"true"`
-	UTXOIDs    []*axc.UTXOID `serialize:"true" json:"inputIDs"`
+	avax.Asset `serialize:"true"`
+	UTXOIDs    []*avax.UTXOID `serialize:"true" json:"inputIDs"`
 	FxID       ids.ID         `serialize:"false" json:"fxID"`
 	Op         FxOperation    `serialize:"true" json:"operation"`
 }
@@ -35,7 +35,7 @@ func (op *Operation) Verify(c codec.Manager) error {
 		return errNilOperation
 	case op.Op == nil:
 		return errNilFxOperation
-	case !axc.IsSortedAndUniqueUTXOIDs(op.UTXOIDs):
+	case !avax.IsSortedAndUniqueUTXOIDs(op.UTXOIDs):
 		return errNotSortedAndUniqueUTXOIDs
 	default:
 		return verify.All(&op.Asset, op.Op)

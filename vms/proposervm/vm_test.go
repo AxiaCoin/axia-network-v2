@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package proposervm
@@ -36,7 +36,7 @@ var (
 	genesisUnixTimestamp int64 = 1000
 	genesisTimestamp           = time.Unix(genesisUnixTimestamp, 0)
 
-	defaultCoreChainHeight uint64 = 2000
+	defaultPChainHeight uint64 = 2000
 
 	errUnknownBlock      = errors.New("unknown block")
 	errUnverifiedBlock   = errors.New("unverified block")
@@ -54,7 +54,7 @@ func init() {
 func initTestProposerVM(
 	t *testing.T,
 	proBlkStartTime time.Time,
-	minCoreChainHeight uint64,
+	minPChainHeight uint64,
 ) (
 	*block.TestVM,
 	*validators.TestState,
@@ -102,14 +102,14 @@ func initTestProposerVM(
 		}
 	}
 
-	proVM := New(coreVM, proBlkStartTime, minCoreChainHeight, false)
+	proVM := New(coreVM, proBlkStartTime, minPChainHeight, false)
 
 	valState := &validators.TestState{
 		T: t,
 	}
 	valState.GetMinimumHeightF = func() (uint64, error) { return coreGenBlk.HeightV, nil }
-	valState.GetCurrentHeightF = func() (uint64, error) { return defaultCoreChainHeight, nil }
-	valState.GetValidatorSetF = func(height uint64, allychainID ids.ID) (map[ids.ShortID]uint64, error) {
+	valState.GetCurrentHeightF = func() (uint64, error) { return defaultPChainHeight, nil }
+	valState.GetValidatorSetF = func(height uint64, subnetID ids.ID) (map[ids.ShortID]uint64, error) {
 		res := make(map[ids.ShortID]uint64)
 		res[proVM.ctx.NodeID] = uint64(10)
 		res[ids.ShortID{1}] = uint64(5)
@@ -452,7 +452,7 @@ func TestCoreBlockFailureCauseProposerBlockParseFailure(t *testing.T) {
 	slb, err := statelessblock.Build(
 		proVM.preferred,
 		innerBlk.Timestamp(),
-		100, // coreChainHeight,
+		100, // pChainHeight,
 		proVM.ctx.StakingCertLeaf,
 		innerBlk.Bytes(),
 		proVM.ctx.ChainID,
@@ -497,7 +497,7 @@ func TestTwoProBlocksWrappingSameCoreBlockCanBeParsed(t *testing.T) {
 	slb1, err := statelessblock.Build(
 		proVM.preferred,
 		innerBlk.Timestamp(),
-		100, // coreChainHeight,
+		100, // pChainHeight,
 		proVM.ctx.StakingCertLeaf,
 		innerBlk.Bytes(),
 		proVM.ctx.ChainID,
@@ -518,7 +518,7 @@ func TestTwoProBlocksWrappingSameCoreBlockCanBeParsed(t *testing.T) {
 	slb2, err := statelessblock.Build(
 		proVM.preferred,
 		innerBlk.Timestamp(),
-		200, // coreChainHeight,
+		200, // pChainHeight,
 		proVM.ctx.StakingCertLeaf,
 		innerBlk.Bytes(),
 		proVM.ctx.ChainID,
@@ -602,15 +602,15 @@ func TestTwoProBlocksWithSameParentCanBothVerify(t *testing.T) {
 		}
 	}
 
-	coreChainHeight, err := proVM.ctx.ValidatorState.GetCurrentHeight()
+	pChainHeight, err := proVM.ctx.ValidatorState.GetCurrentHeight()
 	if err != nil {
-		t.Fatal("could not retrieve coreChain height")
+		t.Fatal("could not retrieve pChain height")
 	}
 
 	netSlb, err := statelessblock.BuildUnsigned(
 		proVM.preferred,
 		netcoreBlk.Timestamp(),
-		coreChainHeight,
+		pChainHeight,
 		netcoreBlk.Bytes(),
 	)
 	if err != nil {
@@ -844,8 +844,8 @@ func TestExpiredBuildBlock(t *testing.T) {
 		T: t,
 	}
 	valState.GetMinimumHeightF = func() (uint64, error) { return coreGenBlk.Height(), nil }
-	valState.GetCurrentHeightF = func() (uint64, error) { return defaultCoreChainHeight, nil }
-	valState.GetValidatorSetF = func(height uint64, allychainID ids.ID) (map[ids.ShortID]uint64, error) {
+	valState.GetCurrentHeightF = func() (uint64, error) { return defaultPChainHeight, nil }
+	valState.GetValidatorSetF = func(height uint64, subnetID ids.ID) (map[ids.ShortID]uint64, error) {
 		return map[ids.ShortID]uint64{
 			{1}: 100,
 		}, nil
@@ -1119,8 +1119,8 @@ func TestInnerVMRollback(t *testing.T) {
 	valState := &validators.TestState{
 		T: t,
 	}
-	valState.GetCurrentHeightF = func() (uint64, error) { return defaultCoreChainHeight, nil }
-	valState.GetValidatorSetF = func(height uint64, allychainID ids.ID) (map[ids.ShortID]uint64, error) {
+	valState.GetCurrentHeightF = func() (uint64, error) { return defaultPChainHeight, nil }
+	valState.GetValidatorSetF = func(height uint64, subnetID ids.ID) (map[ids.ShortID]uint64, error) {
 		return map[ids.ShortID]uint64{
 			{1}: 100,
 		}, nil
@@ -1278,7 +1278,7 @@ func TestInnerVMRollback(t *testing.T) {
 func TestBuildBlockDuringWindow(t *testing.T) {
 	coreVM, valState, proVM, coreGenBlk, _ := initTestProposerVM(t, time.Time{}, 0) // enable ProBlks
 
-	valState.GetValidatorSetF = func(height uint64, allychainID ids.ID) (map[ids.ShortID]uint64, error) {
+	valState.GetValidatorSetF = func(height uint64, subnetID ids.ID) (map[ids.ShortID]uint64, error) {
 		return map[ids.ShortID]uint64{
 			proVM.ctx.NodeID: 10,
 		}, nil
@@ -1428,7 +1428,7 @@ func TestTwoForks_OneIsAccepted(t *testing.T) {
 	ySlb, err := statelessblock.BuildUnsigned(
 		gBlock.ID(),
 		gBlock.Timestamp(),
-		defaultCoreChainHeight,
+		defaultPChainHeight,
 		yBlock.Bytes(),
 	)
 	if err != nil {
@@ -1539,7 +1539,7 @@ func TestTooFarAdvanced(t *testing.T) {
 	ySlb, err := statelessblock.BuildUnsigned(
 		aBlock.ID(),
 		aBlock.Timestamp().Add(maxSkew),
-		defaultCoreChainHeight,
+		defaultPChainHeight,
 		yBlock.Bytes(),
 	)
 	if err != nil {
@@ -1562,7 +1562,7 @@ func TestTooFarAdvanced(t *testing.T) {
 	ySlb, err = statelessblock.BuildUnsigned(
 		aBlock.ID(),
 		aBlock.Timestamp().Add(proposer.MaxDelay),
-		defaultCoreChainHeight,
+		defaultPChainHeight,
 		yBlock.Bytes(),
 	)
 
@@ -1682,9 +1682,9 @@ func TestTwoOptions_OneIsAccepted(t *testing.T) {
 	}
 }
 
-// Ensure that given the chance, built blocks will reference a lagged Core-chain
+// Ensure that given the chance, built blocks will reference a lagged P-chain
 // height.
-func TestLaggedCoreChainHeight(t *testing.T) {
+func TestLaggedPChainHeight(t *testing.T) {
 	assert := assert.New(t)
 
 	coreVM, _, proVM, coreGenBlk, _ := initTestProposerVM(t, time.Time{}, 0)
@@ -1707,6 +1707,6 @@ func TestLaggedCoreChainHeight(t *testing.T) {
 	block, ok := blockIntf.(*postForkBlock)
 	assert.True(ok, "expected post fork block")
 
-	coreChainHeight := block.CoreChainHeight()
-	assert.Equal(coreChainHeight, coreGenBlk.Height())
+	pChainHeight := block.PChainHeight()
+	assert.Equal(pChainHeight, coreGenBlk.Height())
 }

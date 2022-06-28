@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package genesis
@@ -38,7 +38,7 @@ func getIPs(networkID uint32) []string {
 			"52.47.181.114:9651",
 			"15.188.9.42:9651",
 		}
-	case constants.TestID:
+	case constants.FujiID:
 		return []string{
 			"3.214.61.227:9651",
 			"52.206.218.4:9651",
@@ -97,7 +97,7 @@ func getNodeIDs(networkID uint32) []string {
 			"NodeID-HCw7S2TVbFPDWNBo1GnFWqJ47f9rDJtt1",
 			"NodeID-FYv1Lb29SqMpywYXH7yNkcFAzRF2jvm3K",
 		}
-	case constants.TestID:
+	case constants.FujiID:
 		return []string{
 			"NodeID-2m38qc95mhHXtrhjyGbe7r2NhniqHHJRB",
 			"NodeID-JjvzhxnLHLUQ5HjVRkvG827ivbLXPwA9u",

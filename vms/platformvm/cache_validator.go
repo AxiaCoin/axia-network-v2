@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package platformvm
@@ -11,20 +11,20 @@ var _ validator = &validatorImpl{}
 
 type validator interface {
 	Delegators() []*UnsignedAddDelegatorTx
-	AllychainValidators() map[ids.ID]*UnsignedAddAllychainValidatorTx
+	SubnetValidators() map[ids.ID]*UnsignedAddSubnetValidatorTx
 }
 
 type validatorImpl struct {
 	// sorted in order of next operation, either addition or removal.
 	delegators []*UnsignedAddDelegatorTx
-	// maps allychainID to tx
-	allychains map[ids.ID]*UnsignedAddAllychainValidatorTx
+	// maps subnetID to tx
+	subnets map[ids.ID]*UnsignedAddSubnetValidatorTx
 }
 
 func (v *validatorImpl) Delegators() []*UnsignedAddDelegatorTx {
 	return v.delegators
 }
 
-func (v *validatorImpl) AllychainValidators() map[ids.ID]*UnsignedAddAllychainValidatorTx {
-	return v.allychains
+func (v *validatorImpl) SubnetValidators() map[ids.ID]*UnsignedAddSubnetValidatorTx {
+	return v.subnets
 }

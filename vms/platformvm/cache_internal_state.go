@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package platformvm
@@ -22,7 +22,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/utils/constants"
 	"github.com/axiacoin/axia-network-v2/utils/hashing"
 	"github.com/axiacoin/axia-network-v2/utils/wrappers"
-	"github.com/axiacoin/axia-network-v2/vms/components/axc"
+	"github.com/axiacoin/axia-network-v2/vms/components/avax"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/status"
 
 	safemath "github.com/axiacoin/axia-network-v2/utils/math"
@@ -34,13 +34,13 @@ var (
 	pendingPrefix         = []byte("pending")
 	validatorPrefix       = []byte("validator")
 	delegatorPrefix       = []byte("delegator")
-	allychainValidatorPrefix = []byte("allychainValidator")
+	subnetValidatorPrefix = []byte("subnetValidator")
 	validatorDiffsPrefix  = []byte("validatorDiffs")
 	blockPrefix           = []byte("block")
 	txPrefix              = []byte("tx")
 	rewardUTXOsPrefix     = []byte("rewardUTXOs")
 	utxoPrefix            = []byte("utxo")
-	allychainPrefix          = []byte("allychain")
+	subnetPrefix          = []byte("subnet")
 	chainPrefix           = []byte("chain")
 	singletonPrefix       = []byte("singleton")
 
@@ -73,13 +73,13 @@ const (
 type InternalState interface {
 	MutableState
 	uptime.State
-	axc.UTXOReader
+	avax.UTXOReader
 
 	SetHeight(height uint64)
 
 	AddCurrentStaker(tx *Tx, potentialReward uint64)
 	DeleteCurrentStaker(tx *Tx)
-	GetValidatorWeightDiffs(height uint64, allychainID ids.ID) (map[ids.ShortID]*ValidatorWeightDiff, error)
+	GetValidatorWeightDiffs(height uint64, subnetID ids.ID) (map[ids.ShortID]*ValidatorWeightDiff, error)
 
 	AddPendingStaker(tx *Tx)
 	DeletePendingStaker(tx *Tx)
@@ -109,7 +109,7 @@ type InternalState interface {
  * | | |-. delegator
  * | | | '-. list
  * | | |   '-- txID -> potential reward
- * | | '-. allychainValidator
+ * | | '-. subnetValidator
  * | |   '-. list
  * | |     '-- txID -> nil
  * | |-. pending
@@ -119,11 +119,11 @@ type InternalState interface {
  * | | |-. delegator
  * | | | '-. list
  * | | |   '-- txID -> nil
- * | | '-. allychainValidator
+ * | | '-. subnetValidator
  * | |   '-. list
  * | |     '-- txID -> nil
  * | '-. diffs
- * |   '-. height+allychain
+ * |   '-. height+subnet
  * |     '-. list
  * |       '-- nodeID -> weightChange
  * |-. blocks
@@ -136,11 +136,11 @@ type InternalState interface {
  * |     '-- utxoID -> utxo bytes
  * |- utxos
  * | '-- utxoDB
- * |-. allychains
+ * |-. subnets
  * | '-. list
  * |   '-- txID -> nil
  * |-. chains
- * | '-. allychainID
+ * | '-. subnetID
  * |   '-. list
  * |     '-- txID -> nil
  * '-. singletons
@@ -171,17 +171,17 @@ type internalStateImpl struct {
 	currentValidatorList         linkeddb.LinkedDB
 	currentDelegatorBaseDB       database.Database
 	currentDelegatorList         linkeddb.LinkedDB
-	currentAllychainValidatorBaseDB database.Database
-	currentAllychainValidatorList   linkeddb.LinkedDB
+	currentSubnetValidatorBaseDB database.Database
+	currentSubnetValidatorList   linkeddb.LinkedDB
 	pendingValidatorsDB          database.Database
 	pendingValidatorBaseDB       database.Database
 	pendingValidatorList         linkeddb.LinkedDB
 	pendingDelegatorBaseDB       database.Database
 	pendingDelegatorList         linkeddb.LinkedDB
-	pendingAllychainValidatorBaseDB database.Database
-	pendingAllychainValidatorList   linkeddb.LinkedDB
+	pendingSubnetValidatorBaseDB database.Database
+	pendingSubnetValidatorList   linkeddb.LinkedDB
 
-	validatorDiffsCache cache.Cacher // cache of heightWithAllychain -> map[ids.ShortID]*ValidatorWeightDiff
+	validatorDiffsCache cache.Cacher // cache of heightWithSubnet -> map[ids.ShortID]*ValidatorWeightDiff
 	validatorDiffsDB    database.Database
 
 	addedBlocks map[ids.ID]Block // map of blockID -> Block
@@ -192,22 +192,22 @@ type internalStateImpl struct {
 	txCache  cache.Cacher             // cache of txID -> {*Tx, Status} if the entry is nil, it is not in the database
 	txDB     database.Database
 
-	addedRewardUTXOs map[ids.ID][]*axc.UTXO // map of txID -> []*UTXO
+	addedRewardUTXOs map[ids.ID][]*avax.UTXO // map of txID -> []*UTXO
 	rewardUTXOsCache cache.Cacher            // cache of txID -> []*UTXO
 	rewardUTXODB     database.Database
 
-	modifiedUTXOs map[ids.ID]*axc.UTXO // map of modified UTXOID -> *UTXO if the UTXO is nil, it has been removed
+	modifiedUTXOs map[ids.ID]*avax.UTXO // map of modified UTXOID -> *UTXO if the UTXO is nil, it has been removed
 	utxoDB        database.Database
-	utxoState     axc.UTXOState
+	utxoState     avax.UTXOState
 
-	cachedAllychains []*Tx // nil if the allychains haven't been loaded
-	addedAllychains  []*Tx
-	allychainBaseDB  database.Database
-	allychainDB      linkeddb.LinkedDB
+	cachedSubnets []*Tx // nil if the subnets haven't been loaded
+	addedSubnets  []*Tx
+	subnetBaseDB  database.Database
+	subnetDB      linkeddb.LinkedDB
 
-	addedChains  map[ids.ID][]*Tx // maps allychainID -> the newly added chains to the allychain
-	chainCache   cache.Cacher     // cache of allychainID -> the chains after all local modifications []*Tx
-	chainDBCache cache.Cacher     // cache of allychainID -> linkedDB
+	addedChains  map[ids.ID][]*Tx // maps subnetID -> the newly added chains to the subnet
+	chainCache   cache.Cacher     // cache of subnetID -> the chains after all local modifications []*Tx
+	chainDBCache cache.Cacher     // cache of subnetID -> linkedDB
 	chainDB      database.Database
 
 	originalTimestamp, timestamp         time.Time
@@ -221,9 +221,9 @@ type ValidatorWeightDiff struct {
 	Amount   uint64 `serialize:"true"`
 }
 
-type heightWithAllychain struct {
+type heightWithSubnet struct {
 	Height   uint64 `serialize:"true"`
-	AllychainID ids.ID `serialize:"true"`
+	SubnetID ids.ID `serialize:"true"`
 }
 
 type stateTx struct {
@@ -244,18 +244,18 @@ func newInternalStateDatabases(vm *VM, db database.Database) *internalStateImpl 
 	currentValidatorsDB := prefixdb.New(currentPrefix, validatorsDB)
 	currentValidatorBaseDB := prefixdb.New(validatorPrefix, currentValidatorsDB)
 	currentDelegatorBaseDB := prefixdb.New(delegatorPrefix, currentValidatorsDB)
-	currentAllychainValidatorBaseDB := prefixdb.New(allychainValidatorPrefix, currentValidatorsDB)
+	currentSubnetValidatorBaseDB := prefixdb.New(subnetValidatorPrefix, currentValidatorsDB)
 
 	pendingValidatorsDB := prefixdb.New(pendingPrefix, validatorsDB)
 	pendingValidatorBaseDB := prefixdb.New(validatorPrefix, pendingValidatorsDB)
 	pendingDelegatorBaseDB := prefixdb.New(delegatorPrefix, pendingValidatorsDB)
-	pendingAllychainValidatorBaseDB := prefixdb.New(allychainValidatorPrefix, pendingValidatorsDB)
+	pendingSubnetValidatorBaseDB := prefixdb.New(subnetValidatorPrefix, pendingValidatorsDB)
 
 	validatorDiffsDB := prefixdb.New(validatorDiffsPrefix, validatorsDB)
 
 	rewardUTXODB := prefixdb.New(rewardUTXOsPrefix, baseDB)
 	utxoDB := prefixdb.New(utxoPrefix, baseDB)
-	allychainBaseDB := prefixdb.New(allychainPrefix, baseDB)
+	subnetBaseDB := prefixdb.New(subnetPrefix, baseDB)
 	return &internalStateImpl{
 		vm: vm,
 
@@ -270,15 +270,15 @@ func newInternalStateDatabases(vm *VM, db database.Database) *internalStateImpl 
 		currentValidatorList:         linkeddb.NewDefault(currentValidatorBaseDB),
 		currentDelegatorBaseDB:       currentDelegatorBaseDB,
 		currentDelegatorList:         linkeddb.NewDefault(currentDelegatorBaseDB),
-		currentAllychainValidatorBaseDB: currentAllychainValidatorBaseDB,
-		currentAllychainValidatorList:   linkeddb.NewDefault(currentAllychainValidatorBaseDB),
+		currentSubnetValidatorBaseDB: currentSubnetValidatorBaseDB,
+		currentSubnetValidatorList:   linkeddb.NewDefault(currentSubnetValidatorBaseDB),
 		pendingValidatorsDB:          pendingValidatorsDB,
 		pendingValidatorBaseDB:       pendingValidatorBaseDB,
 		pendingValidatorList:         linkeddb.NewDefault(pendingValidatorBaseDB),
 		pendingDelegatorBaseDB:       pendingDelegatorBaseDB,
 		pendingDelegatorList:         linkeddb.NewDefault(pendingDelegatorBaseDB),
-		pendingAllychainValidatorBaseDB: pendingAllychainValidatorBaseDB,
-		pendingAllychainValidatorList:   linkeddb.NewDefault(pendingAllychainValidatorBaseDB),
+		pendingSubnetValidatorBaseDB: pendingSubnetValidatorBaseDB,
+		pendingSubnetValidatorList:   linkeddb.NewDefault(pendingSubnetValidatorBaseDB),
 		validatorDiffsDB:             validatorDiffsDB,
 
 		addedBlocks: make(map[ids.ID]Block),
@@ -287,14 +287,14 @@ func newInternalStateDatabases(vm *VM, db database.Database) *internalStateImpl 
 		addedTxs: make(map[ids.ID]*txStatusImpl),
 		txDB:     prefixdb.New(txPrefix, baseDB),
 
-		addedRewardUTXOs: make(map[ids.ID][]*axc.UTXO),
+		addedRewardUTXOs: make(map[ids.ID][]*avax.UTXO),
 		rewardUTXODB:     rewardUTXODB,
 
-		modifiedUTXOs: make(map[ids.ID]*axc.UTXO),
+		modifiedUTXOs: make(map[ids.ID]*avax.UTXO),
 		utxoDB:        utxoDB,
 
-		allychainBaseDB: allychainBaseDB,
-		allychainDB:     linkeddb.NewDefault(allychainBaseDB),
+		subnetBaseDB: subnetBaseDB,
+		subnetDB:     linkeddb.NewDefault(subnetBaseDB),
 
 		addedChains: make(map[ids.ID][]*Tx),
 		chainDB:     prefixdb.New(chainPrefix, baseDB),
@@ -308,7 +308,7 @@ func (st *internalStateImpl) initCaches() {
 	st.blockCache = &cache.LRU{Size: blockCacheSize}
 	st.txCache = &cache.LRU{Size: txCacheSize}
 	st.rewardUTXOsCache = &cache.LRU{Size: rewardUTXOsCacheSize}
-	st.utxoState = axc.NewUTXOState(st.utxoDB, GenesisCodec)
+	st.utxoState = avax.NewUTXOState(st.utxoDB, GenesisCodec)
 	st.chainCache = &cache.LRU{Size: chainCacheSize}
 	st.chainDBCache = &cache.LRU{Size: chainDBCacheSize}
 }
@@ -350,7 +350,7 @@ func (st *internalStateImpl) initMeteredCaches(metrics prometheus.Registerer) er
 		return err
 	}
 
-	utxoState, err := axc.NewMeteredUTXOState(st.utxoDB, GenesisCodec, metrics)
+	utxoState, err := avax.NewMeteredUTXOState(st.utxoDB, GenesisCodec, metrics)
 	if err != nil {
 		return err
 	}
@@ -448,47 +448,47 @@ func (st *internalStateImpl) SetCurrentSupply(currentSupply uint64) { st.current
 func (st *internalStateImpl) GetLastAccepted() ids.ID             { return st.lastAccepted }
 func (st *internalStateImpl) SetLastAccepted(lastAccepted ids.ID) { st.lastAccepted = lastAccepted }
 
-func (st *internalStateImpl) GetAllychains() ([]*Tx, error) {
-	if st.cachedAllychains != nil {
-		return st.cachedAllychains, nil
+func (st *internalStateImpl) GetSubnets() ([]*Tx, error) {
+	if st.cachedSubnets != nil {
+		return st.cachedSubnets, nil
 	}
 
-	allychainDBIt := st.allychainDB.NewIterator()
-	defer allychainDBIt.Release()
+	subnetDBIt := st.subnetDB.NewIterator()
+	defer subnetDBIt.Release()
 
 	txs := []*Tx(nil)
-	for allychainDBIt.Next() {
-		allychainIDBytes := allychainDBIt.Key()
-		allychainID, err := ids.ToID(allychainIDBytes)
+	for subnetDBIt.Next() {
+		subnetIDBytes := subnetDBIt.Key()
+		subnetID, err := ids.ToID(subnetIDBytes)
 		if err != nil {
 			return nil, err
 		}
-		allychainTx, _, err := st.GetTx(allychainID)
+		subnetTx, _, err := st.GetTx(subnetID)
 		if err != nil {
 			return nil, err
 		}
-		txs = append(txs, allychainTx)
+		txs = append(txs, subnetTx)
 	}
-	if err := allychainDBIt.Error(); err != nil {
+	if err := subnetDBIt.Error(); err != nil {
 		return nil, err
 	}
-	txs = append(txs, st.addedAllychains...)
-	st.cachedAllychains = txs
+	txs = append(txs, st.addedSubnets...)
+	st.cachedSubnets = txs
 	return txs, nil
 }
 
-func (st *internalStateImpl) AddAllychain(createAllychainTx *Tx) {
-	st.addedAllychains = append(st.addedAllychains, createAllychainTx)
-	if st.cachedAllychains != nil {
-		st.cachedAllychains = append(st.cachedAllychains, createAllychainTx)
+func (st *internalStateImpl) AddSubnet(createSubnetTx *Tx) {
+	st.addedSubnets = append(st.addedSubnets, createSubnetTx)
+	if st.cachedSubnets != nil {
+		st.cachedSubnets = append(st.cachedSubnets, createSubnetTx)
 	}
 }
 
-func (st *internalStateImpl) GetChains(allychainID ids.ID) ([]*Tx, error) {
-	if chainsIntf, cached := st.chainCache.Get(allychainID); cached {
+func (st *internalStateImpl) GetChains(subnetID ids.ID) ([]*Tx, error) {
+	if chainsIntf, cached := st.chainCache.Get(subnetID); cached {
 		return chainsIntf.([]*Tx), nil
 	}
-	chainDB := st.getChainDB(allychainID)
+	chainDB := st.getChainDB(subnetID)
 	chainDBIt := chainDB.NewIterator()
 	defer chainDBIt.Release()
 
@@ -508,29 +508,29 @@ func (st *internalStateImpl) GetChains(allychainID ids.ID) ([]*Tx, error) {
 	if err := chainDBIt.Error(); err != nil {
 		return nil, err
 	}
-	txs = append(txs, st.addedChains[allychainID]...)
-	st.chainCache.Put(allychainID, txs)
+	txs = append(txs, st.addedChains[subnetID]...)
+	st.chainCache.Put(subnetID, txs)
 	return txs, nil
 }
 
 func (st *internalStateImpl) AddChain(createChainTxIntf *Tx) {
 	createChainTx := createChainTxIntf.UnsignedTx.(*UnsignedCreateChainTx)
-	allychainID := createChainTx.AllychainID
-	st.addedChains[allychainID] = append(st.addedChains[allychainID], createChainTxIntf)
-	if chainsIntf, cached := st.chainCache.Get(allychainID); cached {
+	subnetID := createChainTx.SubnetID
+	st.addedChains[subnetID] = append(st.addedChains[subnetID], createChainTxIntf)
+	if chainsIntf, cached := st.chainCache.Get(subnetID); cached {
 		chains := chainsIntf.([]*Tx)
 		chains = append(chains, createChainTxIntf)
-		st.chainCache.Put(allychainID, chains)
+		st.chainCache.Put(subnetID, chains)
 	}
 }
 
-func (st *internalStateImpl) getChainDB(allychainID ids.ID) linkeddb.LinkedDB {
-	if chainDBIntf, cached := st.chainDBCache.Get(allychainID); cached {
+func (st *internalStateImpl) getChainDB(subnetID ids.ID) linkeddb.LinkedDB {
+	if chainDBIntf, cached := st.chainDBCache.Get(subnetID); cached {
 		return chainDBIntf.(linkeddb.LinkedDB)
 	}
-	rawChainDB := prefixdb.New(allychainID[:], st.chainDB)
+	rawChainDB := prefixdb.New(subnetID[:], st.chainDB)
 	chainDB := linkeddb.NewDefault(rawChainDB)
-	st.chainDBCache.Put(allychainID, chainDB)
+	st.chainDBCache.Put(subnetID, chainDB)
 	return chainDB
 }
 
@@ -582,12 +582,12 @@ func (st *internalStateImpl) AddTx(tx *Tx, status status.Status) {
 	}
 }
 
-func (st *internalStateImpl) GetRewardUTXOs(txID ids.ID) ([]*axc.UTXO, error) {
+func (st *internalStateImpl) GetRewardUTXOs(txID ids.ID) ([]*avax.UTXO, error) {
 	if utxos, exists := st.addedRewardUTXOs[txID]; exists {
 		return utxos, nil
 	}
 	if utxos, exists := st.rewardUTXOsCache.Get(txID); exists {
-		return utxos.([]*axc.UTXO), nil
+		return utxos.([]*avax.UTXO), nil
 	}
 
 	rawTxDB := prefixdb.New(txID[:], st.rewardUTXODB)
@@ -595,9 +595,9 @@ func (st *internalStateImpl) GetRewardUTXOs(txID ids.ID) ([]*axc.UTXO, error) {
 	it := txDB.NewIterator()
 	defer it.Release()
 
-	utxos := []*axc.UTXO(nil)
+	utxos := []*avax.UTXO(nil)
 	for it.Next() {
-		utxo := &axc.UTXO{}
+		utxo := &avax.UTXO{}
 		if _, err := Codec.Unmarshal(it.Value(), utxo); err != nil {
 			return nil, err
 		}
@@ -611,11 +611,11 @@ func (st *internalStateImpl) GetRewardUTXOs(txID ids.ID) ([]*axc.UTXO, error) {
 	return utxos, nil
 }
 
-func (st *internalStateImpl) AddRewardUTXO(txID ids.ID, utxo *axc.UTXO) {
+func (st *internalStateImpl) AddRewardUTXO(txID ids.ID, utxo *avax.UTXO) {
 	st.addedRewardUTXOs[txID] = append(st.addedRewardUTXOs[txID], utxo)
 }
 
-func (st *internalStateImpl) GetUTXO(utxoID ids.ID) (*axc.UTXO, error) {
+func (st *internalStateImpl) GetUTXO(utxoID ids.ID) (*avax.UTXO, error) {
 	if utxo, exists := st.modifiedUTXOs[utxoID]; exists {
 		if utxo == nil {
 			return nil, database.ErrNotFound
@@ -625,7 +625,7 @@ func (st *internalStateImpl) GetUTXO(utxoID ids.ID) (*axc.UTXO, error) {
 	return st.utxoState.GetUTXO(utxoID)
 }
 
-func (st *internalStateImpl) AddUTXO(utxo *axc.UTXO) {
+func (st *internalStateImpl) AddUTXO(utxo *avax.UTXO) {
 	st.modifiedUTXOs[utxo.InputID()] = utxo
 }
 
@@ -743,10 +743,10 @@ func (st *internalStateImpl) DeletePendingStaker(tx *Tx) {
 	st.deletedPendingStakers = append(st.deletedPendingStakers, tx)
 }
 
-func (st *internalStateImpl) GetValidatorWeightDiffs(height uint64, allychainID ids.ID) (map[ids.ShortID]*ValidatorWeightDiff, error) {
-	prefixStruct := heightWithAllychain{
+func (st *internalStateImpl) GetValidatorWeightDiffs(height uint64, subnetID ids.ID) (map[ids.ShortID]*ValidatorWeightDiff, error) {
+	prefixStruct := heightWithSubnet{
 		Height:   height,
-		AllychainID: allychainID,
+		SubnetID: subnetID,
 	}
 	prefixBytes, err := GenesisCodec.Marshal(CodecVersion, prefixStruct)
 	if err != nil {
@@ -817,8 +817,8 @@ func (st *internalStateImpl) CommitBatch() (database.Batch, error) {
 	if err := st.writeUTXOs(); err != nil {
 		return nil, fmt.Errorf("failed to write UTXOs with: %w", err)
 	}
-	if err := st.writeAllychains(); err != nil {
-		return nil, fmt.Errorf("failed to write current allychains with: %w", err)
+	if err := st.writeSubnets(); err != nil {
+		return nil, fmt.Errorf("failed to write current subnets with: %w", err)
 	}
 	if err := st.writeChains(); err != nil {
 		return nil, fmt.Errorf("failed to write chains with: %w", err)
@@ -832,11 +832,11 @@ func (st *internalStateImpl) CommitBatch() (database.Batch, error) {
 func (st *internalStateImpl) Close() error {
 	errs := wrappers.Errs{}
 	errs.Add(
-		st.pendingAllychainValidatorBaseDB.Close(),
+		st.pendingSubnetValidatorBaseDB.Close(),
 		st.pendingDelegatorBaseDB.Close(),
 		st.pendingValidatorBaseDB.Close(),
 		st.pendingValidatorsDB.Close(),
-		st.currentAllychainValidatorBaseDB.Close(),
+		st.currentSubnetValidatorBaseDB.Close(),
 		st.currentDelegatorBaseDB.Close(),
 		st.currentValidatorBaseDB.Close(),
 		st.currentValidatorsDB.Close(),
@@ -845,7 +845,7 @@ func (st *internalStateImpl) Close() error {
 		st.txDB.Close(),
 		st.rewardUTXODB.Close(),
 		st.utxoDB.Close(),
-		st.allychainBaseDB.Close(),
+		st.subnetBaseDB.Close(),
 		st.chainDB.Close(),
 		st.singletonDB.Close(),
 		st.baseDB.Close(),
@@ -863,13 +863,13 @@ type currentValidatorState struct {
 }
 
 func (st *internalStateImpl) writeCurrentStakers() error {
-	weightDiffs := make(map[ids.ID]map[ids.ShortID]*ValidatorWeightDiff) // allychainID -> nodeID -> weightDiff
+	weightDiffs := make(map[ids.ID]map[ids.ShortID]*ValidatorWeightDiff) // subnetID -> nodeID -> weightDiff
 	for _, currentStaker := range st.addedCurrentStakers {
 		txID := currentStaker.addStakerTx.ID()
 		potentialReward := currentStaker.potentialReward
 
 		var (
-			allychainID ids.ID
+			subnetID ids.ID
 			nodeID   ids.ShortID
 			weight   uint64
 		)
@@ -895,7 +895,7 @@ func (st *internalStateImpl) writeCurrentStakers() error {
 			}
 			st.uptimes[tx.Validator.NodeID] = vdr
 
-			allychainID = constants.PrimaryNetworkID
+			subnetID = constants.PrimaryNetworkID
 			nodeID = tx.Validator.NodeID
 			weight = tx.Validator.Wght
 		case *UnsignedAddDelegatorTx:
@@ -903,31 +903,31 @@ func (st *internalStateImpl) writeCurrentStakers() error {
 				return err
 			}
 
-			allychainID = constants.PrimaryNetworkID
+			subnetID = constants.PrimaryNetworkID
 			nodeID = tx.Validator.NodeID
 			weight = tx.Validator.Wght
-		case *UnsignedAddAllychainValidatorTx:
-			if err := st.currentAllychainValidatorList.Put(txID[:], nil); err != nil {
+		case *UnsignedAddSubnetValidatorTx:
+			if err := st.currentSubnetValidatorList.Put(txID[:], nil); err != nil {
 				return err
 			}
 
-			allychainID = tx.Validator.Allychain
+			subnetID = tx.Validator.Subnet
 			nodeID = tx.Validator.NodeID
 			weight = tx.Validator.Wght
 		default:
 			return errWrongTxType
 		}
 
-		allychainDiffs, ok := weightDiffs[allychainID]
+		subnetDiffs, ok := weightDiffs[subnetID]
 		if !ok {
-			allychainDiffs = make(map[ids.ShortID]*ValidatorWeightDiff)
-			weightDiffs[allychainID] = allychainDiffs
+			subnetDiffs = make(map[ids.ShortID]*ValidatorWeightDiff)
+			weightDiffs[subnetID] = subnetDiffs
 		}
 
-		nodeDiff, ok := allychainDiffs[nodeID]
+		nodeDiff, ok := subnetDiffs[nodeID]
 		if !ok {
 			nodeDiff = &ValidatorWeightDiff{}
-			allychainDiffs[nodeID] = nodeDiff
+			subnetDiffs[nodeID] = nodeDiff
 		}
 
 		newWeight, err := safemath.Add64(nodeDiff.Amount, weight)
@@ -941,7 +941,7 @@ func (st *internalStateImpl) writeCurrentStakers() error {
 	for _, tx := range st.deletedCurrentStakers {
 		var (
 			db       database.KeyValueDeleter
-			allychainID ids.ID
+			subnetID ids.ID
 			nodeID   ids.ShortID
 			weight   uint64
 		)
@@ -952,19 +952,19 @@ func (st *internalStateImpl) writeCurrentStakers() error {
 			delete(st.uptimes, tx.Validator.NodeID)
 			delete(st.updatedUptimes, tx.Validator.NodeID)
 
-			allychainID = constants.PrimaryNetworkID
+			subnetID = constants.PrimaryNetworkID
 			nodeID = tx.Validator.NodeID
 			weight = tx.Validator.Wght
 		case *UnsignedAddDelegatorTx:
 			db = st.currentDelegatorList
 
-			allychainID = constants.PrimaryNetworkID
+			subnetID = constants.PrimaryNetworkID
 			nodeID = tx.Validator.NodeID
 			weight = tx.Validator.Wght
-		case *UnsignedAddAllychainValidatorTx:
-			db = st.currentAllychainValidatorList
+		case *UnsignedAddSubnetValidatorTx:
+			db = st.currentSubnetValidatorList
 
-			allychainID = tx.Validator.Allychain
+			subnetID = tx.Validator.Subnet
 			nodeID = tx.Validator.NodeID
 			weight = tx.Validator.Wght
 		default:
@@ -976,16 +976,16 @@ func (st *internalStateImpl) writeCurrentStakers() error {
 			return err
 		}
 
-		allychainDiffs, ok := weightDiffs[allychainID]
+		subnetDiffs, ok := weightDiffs[subnetID]
 		if !ok {
-			allychainDiffs = make(map[ids.ShortID]*ValidatorWeightDiff)
-			weightDiffs[allychainID] = allychainDiffs
+			subnetDiffs = make(map[ids.ShortID]*ValidatorWeightDiff)
+			weightDiffs[subnetID] = subnetDiffs
 		}
 
-		nodeDiff, ok := allychainDiffs[nodeID]
+		nodeDiff, ok := subnetDiffs[nodeID]
 		if !ok {
 			nodeDiff = &ValidatorWeightDiff{}
-			allychainDiffs[nodeID] = nodeDiff
+			subnetDiffs[nodeID] = nodeDiff
 		}
 
 		if nodeDiff.Decrease {
@@ -1001,10 +1001,10 @@ func (st *internalStateImpl) writeCurrentStakers() error {
 	}
 	st.deletedCurrentStakers = nil
 
-	for allychainID, nodeUpdates := range weightDiffs {
-		prefixStruct := heightWithAllychain{
+	for subnetID, nodeUpdates := range weightDiffs {
+		prefixStruct := heightWithSubnet{
 			Height:   st.currentHeight,
-			AllychainID: allychainID,
+			SubnetID: subnetID,
 		}
 		prefixBytes, err := GenesisCodec.Marshal(CodecVersion, prefixStruct)
 		if err != nil {
@@ -1018,12 +1018,12 @@ func (st *internalStateImpl) writeCurrentStakers() error {
 				continue
 			}
 
-			if allychainID == constants.PrimaryNetworkID || st.vm.WhitelistedAllychains.Contains(allychainID) {
+			if subnetID == constants.PrimaryNetworkID || st.vm.WhitelistedSubnets.Contains(subnetID) {
 				var err error
 				if nodeDiff.Decrease {
-					err = st.vm.Validators.RemoveWeight(allychainID, nodeID, nodeDiff.Amount)
+					err = st.vm.Validators.RemoveWeight(subnetID, nodeID, nodeDiff.Amount)
 				} else {
-					err = st.vm.Validators.AddWeight(allychainID, nodeID, nodeDiff.Amount)
+					err = st.vm.Validators.AddWeight(subnetID, nodeID, nodeDiff.Amount)
 				}
 				if err != nil {
 					return err
@@ -1063,8 +1063,8 @@ func (st *internalStateImpl) writePendingStakers() error {
 			db = st.pendingValidatorList
 		case *UnsignedAddDelegatorTx:
 			db = st.pendingDelegatorList
-		case *UnsignedAddAllychainValidatorTx:
-			db = st.pendingAllychainValidatorList
+		case *UnsignedAddSubnetValidatorTx:
+			db = st.pendingSubnetValidatorList
 		default:
 			return errWrongTxType
 		}
@@ -1083,8 +1083,8 @@ func (st *internalStateImpl) writePendingStakers() error {
 			db = st.pendingValidatorList
 		case *UnsignedAddDelegatorTx:
 			db = st.pendingDelegatorList
-		case *UnsignedAddAllychainValidatorTx:
-			db = st.pendingAllychainValidatorList
+		case *UnsignedAddSubnetValidatorTx:
+			db = st.pendingSubnetValidatorList
 		default:
 			return errWrongTxType
 		}
@@ -1201,29 +1201,29 @@ func (st *internalStateImpl) writeUTXOs() error {
 	return nil
 }
 
-func (st *internalStateImpl) writeAllychains() error {
-	for _, allychain := range st.addedAllychains {
-		allychainID := allychain.ID()
+func (st *internalStateImpl) writeSubnets() error {
+	for _, subnet := range st.addedSubnets {
+		subnetID := subnet.ID()
 
-		if err := st.allychainDB.Put(allychainID[:], nil); err != nil {
+		if err := st.subnetDB.Put(subnetID[:], nil); err != nil {
 			return err
 		}
 	}
-	st.addedAllychains = nil
+	st.addedSubnets = nil
 	return nil
 }
 
 func (st *internalStateImpl) writeChains() error {
-	for allychainID, chains := range st.addedChains {
+	for subnetID, chains := range st.addedChains {
 		for _, chain := range chains {
-			chainDB := st.getChainDB(allychainID)
+			chainDB := st.getChainDB(subnetID)
 
 			chainID := chain.ID()
 			if err := chainDB.Put(chainID[:], nil); err != nil {
 				return err
 			}
 		}
-		delete(st.addedChains, allychainID)
+		delete(st.addedChains, subnetID)
 	}
 	return nil
 }
@@ -1321,7 +1321,7 @@ func (st *internalStateImpl) loadCurrentValidators() error {
 		cs.validators = append(cs.validators, tx)
 		cs.validatorsByNodeID[addValidatorTx.Validator.NodeID] = &currentValidatorImpl{
 			validatorImpl: validatorImpl{
-				allychains: make(map[ids.ID]*UnsignedAddAllychainValidatorTx),
+				subnets: make(map[ids.ID]*UnsignedAddSubnetValidatorTx),
 			},
 			addValidatorTx:  addValidatorTx,
 			potentialReward: uptime.PotentialReward,
@@ -1378,10 +1378,10 @@ func (st *internalStateImpl) loadCurrentValidators() error {
 		return err
 	}
 
-	allychainValidatorIt := st.currentAllychainValidatorList.NewIterator()
-	defer allychainValidatorIt.Release()
-	for allychainValidatorIt.Next() {
-		txIDBytes := allychainValidatorIt.Key()
+	subnetValidatorIt := st.currentSubnetValidatorList.NewIterator()
+	defer subnetValidatorIt.Release()
+	for subnetValidatorIt.Next() {
+		txIDBytes := subnetValidatorIt.Key()
 		txID, err := ids.ToID(txIDBytes)
 		if err != nil {
 			return err
@@ -1391,22 +1391,22 @@ func (st *internalStateImpl) loadCurrentValidators() error {
 			return err
 		}
 
-		addAllychainValidatorTx, ok := tx.UnsignedTx.(*UnsignedAddAllychainValidatorTx)
+		addSubnetValidatorTx, ok := tx.UnsignedTx.(*UnsignedAddSubnetValidatorTx)
 		if !ok {
 			return errWrongTxType
 		}
 
 		cs.validators = append(cs.validators, tx)
-		vdr, exists := cs.validatorsByNodeID[addAllychainValidatorTx.Validator.NodeID]
+		vdr, exists := cs.validatorsByNodeID[addSubnetValidatorTx.Validator.NodeID]
 		if !exists {
 			return errDSValidatorSubset
 		}
-		vdr.allychains[addAllychainValidatorTx.Validator.Allychain] = addAllychainValidatorTx
+		vdr.subnets[addSubnetValidatorTx.Validator.Subnet] = addSubnetValidatorTx
 		cs.validatorsByTxID[txID] = &validatorReward{
 			addStakerTx: tx,
 		}
 	}
-	if err := allychainValidatorIt.Error(); err != nil {
+	if err := subnetValidatorIt.Error(); err != nil {
 		return err
 	}
 
@@ -1475,7 +1475,7 @@ func (st *internalStateImpl) loadPendingValidators() error {
 		} else {
 			ps.validatorExtrasByNodeID[addDelegatorTx.Validator.NodeID] = &validatorImpl{
 				delegators: []*UnsignedAddDelegatorTx{addDelegatorTx},
-				allychains:    make(map[ids.ID]*UnsignedAddAllychainValidatorTx),
+				subnets:    make(map[ids.ID]*UnsignedAddSubnetValidatorTx),
 			}
 		}
 	}
@@ -1483,10 +1483,10 @@ func (st *internalStateImpl) loadPendingValidators() error {
 		return err
 	}
 
-	allychainValidatorIt := st.pendingAllychainValidatorList.NewIterator()
-	defer allychainValidatorIt.Release()
-	for allychainValidatorIt.Next() {
-		txIDBytes := allychainValidatorIt.Key()
+	subnetValidatorIt := st.pendingSubnetValidatorList.NewIterator()
+	defer subnetValidatorIt.Release()
+	for subnetValidatorIt.Next() {
+		txIDBytes := subnetValidatorIt.Key()
 		txID, err := ids.ToID(txIDBytes)
 		if err != nil {
 			return err
@@ -1496,23 +1496,23 @@ func (st *internalStateImpl) loadPendingValidators() error {
 			return err
 		}
 
-		addAllychainValidatorTx, ok := tx.UnsignedTx.(*UnsignedAddAllychainValidatorTx)
+		addSubnetValidatorTx, ok := tx.UnsignedTx.(*UnsignedAddSubnetValidatorTx)
 		if !ok {
 			return errWrongTxType
 		}
 
 		ps.validators = append(ps.validators, tx)
-		if vdr, exists := ps.validatorExtrasByNodeID[addAllychainValidatorTx.Validator.NodeID]; exists {
-			vdr.allychains[addAllychainValidatorTx.Validator.Allychain] = addAllychainValidatorTx
+		if vdr, exists := ps.validatorExtrasByNodeID[addSubnetValidatorTx.Validator.NodeID]; exists {
+			vdr.subnets[addSubnetValidatorTx.Validator.Subnet] = addSubnetValidatorTx
 		} else {
-			ps.validatorExtrasByNodeID[addAllychainValidatorTx.Validator.NodeID] = &validatorImpl{
-				allychains: map[ids.ID]*UnsignedAddAllychainValidatorTx{
-					addAllychainValidatorTx.Validator.Allychain: addAllychainValidatorTx,
+			ps.validatorExtrasByNodeID[addSubnetValidatorTx.Validator.NodeID] = &validatorImpl{
+				subnets: map[ids.ID]*UnsignedAddSubnetValidatorTx{
+					addSubnetValidatorTx.Validator.Subnet: addSubnetValidatorTx,
 				},
 			}
 		}
 	}
-	if err := allychainValidatorIt.Error(); err != nil {
+	if err := subnetValidatorIt.Error(); err != nil {
 		return err
 	}
 

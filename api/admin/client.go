@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package admin
@@ -14,7 +14,7 @@ import (
 // Interface compliance
 var _ Client = &client{}
 
-// Client interface for the Axia Platform Info API Endpoint
+// Client interface for the Avalanche Platform Info API Endpoint
 type Client interface {
 	StartCPUProfiler(context.Context, ...rpc.Option) (bool, error)
 	StopCPUProfiler(context.Context, ...rpc.Option) (bool, error)
@@ -27,7 +27,7 @@ type Client interface {
 	LoadVMs(context.Context, ...rpc.Option) (map[ids.ID][]string, map[ids.ID]string, error)
 }
 
-// Client implementation for the Axia Platform Info API Endpoint
+// Client implementation for the Avalanche Platform Info API Endpoint
 type client struct {
 	requester rpc.EndpointRequester
 }

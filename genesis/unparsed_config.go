@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package genesis
@@ -16,7 +16,7 @@ var errInvalidETHAddress = errors.New("invalid eth address")
 
 type UnparsedAllocation struct {
 	ETHAddr        string         `json:"ethAddr"`
-	AXCAddr       string         `json:"axcAddr"`
+	AVAXAddr       string         `json:"avaxAddr"`
 	InitialAmount  uint64         `json:"initialAmount"`
 	UnlockSchedule []LockedAmount `json:"unlockSchedule"`
 }
@@ -41,15 +41,15 @@ func (ua UnparsedAllocation) Parse() (Allocation, error) {
 	}
 	a.ETHAddr = ethAddr
 
-	_, _, axcAddrBytes, err := formatting.ParseAddress(ua.AXCAddr)
+	_, _, avaxAddrBytes, err := formatting.ParseAddress(ua.AVAXAddr)
 	if err != nil {
 		return a, err
 	}
-	axcAddr, err := ids.ToShortID(axcAddrBytes)
+	avaxAddr, err := ids.ToShortID(avaxAddrBytes)
 	if err != nil {
 		return a, err
 	}
-	a.AXCAddr = axcAddr
+	a.AVAXAddr = avaxAddr
 
 	return a, nil
 }
@@ -71,15 +71,15 @@ func (us UnparsedStaker) Parse() (Staker, error) {
 	}
 	s.NodeID = nodeID
 
-	_, _, axcAddrBytes, err := formatting.ParseAddress(us.RewardAddress)
+	_, _, avaxAddrBytes, err := formatting.ParseAddress(us.RewardAddress)
 	if err != nil {
 		return s, err
 	}
-	axcAddr, err := ids.ToShortID(axcAddrBytes)
+	avaxAddr, err := ids.ToShortID(avaxAddrBytes)
 	if err != nil {
 		return s, err
 	}
-	s.RewardAddress = axcAddr
+	s.RewardAddress = avaxAddr
 	return s, nil
 }
 
@@ -95,7 +95,7 @@ type UnparsedConfig struct {
 	InitialStakedFunds         []string         `json:"initialStakedFunds"`
 	InitialStakers             []UnparsedStaker `json:"initialStakers"`
 
-	AXCChainGenesis string `json:"axcChainGenesis"`
+	CChainGenesis string `json:"cChainGenesis"`
 
 	Message string `json:"message"`
 }
@@ -109,7 +109,7 @@ func (uc UnparsedConfig) Parse() (Config, error) {
 		InitialStakeDurationOffset: uc.InitialStakeDurationOffset,
 		InitialStakedFunds:         make([]ids.ShortID, len(uc.InitialStakedFunds)),
 		InitialStakers:             make([]Staker, len(uc.InitialStakers)),
-		AXCChainGenesis:              uc.AXCChainGenesis,
+		CChainGenesis:              uc.CChainGenesis,
 		Message:                    uc.Message,
 	}
 	for i, ua := range uc.Allocations {
@@ -120,15 +120,15 @@ func (uc UnparsedConfig) Parse() (Config, error) {
 		c.Allocations[i] = a
 	}
 	for i, isa := range uc.InitialStakedFunds {
-		_, _, axcAddrBytes, err := formatting.ParseAddress(isa)
+		_, _, avaxAddrBytes, err := formatting.ParseAddress(isa)
 		if err != nil {
 			return c, err
 		}
-		axcAddr, err := ids.ToShortID(axcAddrBytes)
+		avaxAddr, err := ids.ToShortID(avaxAddrBytes)
 		if err != nil {
 			return c, err
 		}
-		c.InitialStakedFunds[i] = axcAddr
+		c.InitialStakedFunds[i] = avaxAddr
 	}
 	for i, uis := range uc.InitialStakers {
 		is, err := uis.Parse()

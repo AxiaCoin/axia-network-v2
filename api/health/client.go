@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package health
@@ -13,7 +13,7 @@ import (
 // Interface compliance
 var _ Client = &client{}
 
-// Client interface for Axia Health API Endpoint
+// Client interface for Avalanche Health API Endpoint
 type Client interface {
 	// Readiness returns if the node has finished initialization
 	Readiness(context.Context, ...rpc.Option) (*APIHealthReply, error)
@@ -26,7 +26,7 @@ type Client interface {
 	AwaitHealthy(ctx context.Context, freq time.Duration, options ...rpc.Option) (bool, error)
 }
 
-// Client implementation for Axia Health API Endpoint
+// Client implementation for Avalanche Health API Endpoint
 type client struct {
 	requester rpc.EndpointRequester
 }

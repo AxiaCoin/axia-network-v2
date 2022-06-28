@@ -1,7 +1,7 @@
-// Copyright (C) 2019-2022, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
-// Implements Swap-Chain whitelist vtx (stop vertex) tests.
+// Implements X-Chain whitelist vtx (stop vertex) tests.
 package whitelistvtx
 
 import (
@@ -20,15 +20,15 @@ import (
 	"github.com/axiacoin/axia-network-v2/tests/e2e"
 	"github.com/axiacoin/axia-network-v2/utils/crypto"
 	"github.com/axiacoin/axia-network-v2/vms/avm"
-	"github.com/axiacoin/axia-network-v2/vms/components/axc"
+	"github.com/axiacoin/axia-network-v2/vms/components/avax"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
-	"github.com/axiacoin/axia-network-v2/wallet/allychain/primary"
-	"github.com/axiacoin/axia-network-v2/wallet/allychain/primary/common"
+	"github.com/axiacoin/axia-network-v2/wallet/subnet/primary"
+	"github.com/axiacoin/axia-network-v2/wallet/subnet/primary/common"
 )
 
 var keyFactory crypto.FactorySECP256K1R
 
-var _ = e2e.DescribeSwapChain("[WhitelistTx]", func() {
+var _ = e2e.DescribeXChain("[WhitelistTx]", func() {
 	ginkgo.It("can issue whitelist vtx", func() {
 		if !e2e.GetEnableWhitelistTxTests() {
 			ginkgo.Skip("whitelist vtx tests are disabled; skipping")
@@ -59,13 +59,13 @@ var _ = e2e.DescribeSwapChain("[WhitelistTx]", func() {
 		})
 
 		allMetrics := []string{
-			"axia_X_whitelist_vtx_issue_success",
-			"axia_X_whitelist_vtx_issue_failure",
-			"axia_X_whitelist_tx_processing",
-			"axia_X_whitelist_tx_accepted_count",
-			"axia_X_whitelist_tx_polls_accepted_count",
-			"axia_X_whitelist_tx_rejected_count",
-			"axia_X_whitelist_tx_polls_rejected_count",
+			"avalanche_X_whitelist_vtx_issue_success",
+			"avalanche_X_whitelist_vtx_issue_failure",
+			"avalanche_X_whitelist_tx_processing",
+			"avalanche_X_whitelist_tx_accepted_count",
+			"avalanche_X_whitelist_tx_polls_accepted_count",
+			"avalanche_X_whitelist_tx_rejected_count",
+			"avalanche_X_whitelist_tx_polls_rejected_count",
 		}
 
 		// URI -> "metric name" -> "metric value"
@@ -78,7 +78,7 @@ var _ = e2e.DescribeSwapChain("[WhitelistTx]", func() {
 				gomega.Expect(err).Should(gomega.BeNil())
 				tests.Outf("{{green}}metrics at %q:{{/}} %v\n", ep, mm)
 
-				if mm["axia_X_whitelist_tx_accepted_count"] > 0 {
+				if mm["avalanche_X_whitelist_tx_accepted_count"] > 0 {
 					tests.Outf("{{red}}{{bold}}%q already has whitelist vtx!!!{{/}}\n", u)
 					ginkgo.Skip("the cluster has already accepted whitelist vtx thus skipping")
 				}
@@ -99,18 +99,18 @@ var _ = e2e.DescribeSwapChain("[WhitelistTx]", func() {
 				randomKey.PublicKey().Address(): struct{}{},
 			}),
 		)
-		ginkgo.By("issue regular, virtuous Swap-Chain tx, before whitelist vtx, should succeed", func() {
+		ginkgo.By("issue regular, virtuous X-Chain tx, before whitelist vtx, should succeed", func() {
 			balances, err := ewoqWallet.X().Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
 
-			axcAssetID := wallet.X().AXCAssetID()
-			ewoqPrevBalX := balances[axcAssetID]
+			avaxAssetID := wallet.X().AVAXAssetID()
+			ewoqPrevBalX := balances[avaxAssetID]
 			tests.Outf("{{green}}ewoq wallet balance:{{/}} %d\n", ewoqPrevBalX)
 
 			balances, err = randWallet.X().Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
 
-			randPrevBalX := balances[axcAssetID]
+			randPrevBalX := balances[avaxAssetID]
 			tests.Outf("{{green}}rand wallet balance:{{/}} %d\n", randPrevBalX)
 
 			amount := genRandUint64(ewoqPrevBalX)
@@ -119,9 +119,9 @@ var _ = e2e.DescribeSwapChain("[WhitelistTx]", func() {
 			tests.Outf("{{blue}}issuing regular, virtuous transaction at %q{{/}}\n", uris[0])
 			ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
 			_, err = ewoqWallet.X().IssueBaseTx(
-				[]*axc.TransferableOutput{{
-					Asset: axc.Asset{
-						ID: axcAssetID,
+				[]*avax.TransferableOutput{{
+					Asset: avax.Asset{
+						ID: avaxAssetID,
 					},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: amount,
@@ -140,12 +140,12 @@ var _ = e2e.DescribeSwapChain("[WhitelistTx]", func() {
 
 			balances, err = ewoqWallet.X().Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
-			ewoqCurBalX := balances[axcAssetID]
+			ewoqCurBalX := balances[avaxAssetID]
 			tests.Outf("{{green}}ewoq wallet balance:{{/}} %d\n", ewoqCurBalX)
 
 			balances, err = randWallet.X().Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
-			randCurBalX := balances[axcAssetID]
+			randCurBalX := balances[avaxAssetID]
 			tests.Outf("{{green}}ewoq wallet balance:{{/}} %d\n", randCurBalX)
 
 			gomega.Expect(ewoqCurBalX).Should(gomega.Equal(ewoqPrevBalX - amount - wallet.X().BaseTxFee()))
@@ -158,7 +158,7 @@ var _ = e2e.DescribeSwapChain("[WhitelistTx]", func() {
 		// SO THIS SHOULD SUCCEED WITH NO ERROR
 		ginkgo.By("issue whitelist vtx to the first node", func() {
 			tests.Outf("{{blue}}{{bold}}issuing whitelist vtx at URI %q at the very first time{{/}}\n", uris[0])
-			client := avm.NewClient(uris[0], "Swap")
+			client := avm.NewClient(uris[0], "X")
 			ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 			err := client.IssueStopVertex(ctx)
 			cancel()
@@ -178,21 +178,21 @@ var _ = e2e.DescribeSwapChain("[WhitelistTx]", func() {
 				prev := curMetrics[u]
 
 				// +1 since the local node engine issues a new whitelist vtx
-				gomega.Expect(mm["axia_X_whitelist_vtx_issue_success"]).Should(gomega.Equal(prev["axia_X_whitelist_vtx_issue_success"] + 1))
+				gomega.Expect(mm["avalanche_X_whitelist_vtx_issue_success"]).Should(gomega.Equal(prev["avalanche_X_whitelist_vtx_issue_success"] + 1))
 
 				// +0 since no node ever failed to issue a whitelist vtx
-				gomega.Expect(mm["axia_X_whitelist_vtx_issue_failure"]).Should(gomega.Equal(prev["axia_X_whitelist_vtx_issue_failure"]))
+				gomega.Expect(mm["avalanche_X_whitelist_vtx_issue_failure"]).Should(gomega.Equal(prev["avalanche_X_whitelist_vtx_issue_failure"]))
 
 				// +0 since the local node snowstorm successfully issued the whitelist tx or received from the first node, and accepted
-				gomega.Expect(mm["axia_X_whitelist_tx_processing"]).Should(gomega.Equal(prev["axia_X_whitelist_tx_processing"]))
+				gomega.Expect(mm["avalanche_X_whitelist_tx_processing"]).Should(gomega.Equal(prev["avalanche_X_whitelist_tx_processing"]))
 
 				// +1 since the local node snowstorm successfully accepted the whitelist tx or received from the first node
-				gomega.Expect(mm["axia_X_whitelist_tx_accepted_count"]).Should(gomega.Equal(prev["axia_X_whitelist_tx_accepted_count"] + 1))
-				gomega.Expect(mm["axia_X_whitelist_tx_polls_accepted_count"]).Should(gomega.Equal(prev["axia_X_whitelist_tx_polls_accepted_count"] + 1))
+				gomega.Expect(mm["avalanche_X_whitelist_tx_accepted_count"]).Should(gomega.Equal(prev["avalanche_X_whitelist_tx_accepted_count"] + 1))
+				gomega.Expect(mm["avalanche_X_whitelist_tx_polls_accepted_count"]).Should(gomega.Equal(prev["avalanche_X_whitelist_tx_polls_accepted_count"] + 1))
 
 				// +0 since no node ever rejected a whitelist tx
-				gomega.Expect(mm["axia_X_whitelist_tx_rejected_count"]).Should(gomega.Equal(prev["axia_X_whitelist_tx_rejected_count"]))
-				gomega.Expect(mm["axia_X_whitelist_tx_polls_rejected_count"]).Should(gomega.Equal(prev["axia_X_whitelist_tx_polls_rejected_count"]))
+				gomega.Expect(mm["avalanche_X_whitelist_tx_rejected_count"]).Should(gomega.Equal(prev["avalanche_X_whitelist_tx_rejected_count"]))
+				gomega.Expect(mm["avalanche_X_whitelist_tx_polls_rejected_count"]).Should(gomega.Equal(prev["avalanche_X_whitelist_tx_polls_rejected_count"]))
 
 				curMetrics[u] = mm
 			}
@@ -204,7 +204,7 @@ var _ = e2e.DescribeSwapChain("[WhitelistTx]", func() {
 		ginkgo.By("whitelist vtx can't be issued twice in all nodes", func() {
 			for _, u := range uris {
 				tests.Outf("{{red}}issuing second whitelist vtx to URI %q{{/}}\n", u)
-				client := avm.NewClient(u, "Swap")
+				client := avm.NewClient(u, "X")
 				ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 				err := client.IssueStopVertex(ctx)
 				cancel()
@@ -220,41 +220,41 @@ var _ = e2e.DescribeSwapChain("[WhitelistTx]", func() {
 				prev := curMetrics[u]
 
 				// +0 since no node should ever successfully issue another whitelist vtx
-				gomega.Expect(mm["axia_X_whitelist_vtx_issue_success"]).Should(gomega.Equal(prev["axia_X_whitelist_vtx_issue_success"]))
+				gomega.Expect(mm["avalanche_X_whitelist_vtx_issue_success"]).Should(gomega.Equal(prev["avalanche_X_whitelist_vtx_issue_success"]))
 
 				// +1 since the local node engine failed the conflicting whitelist vtx issue request
-				gomega.Expect(mm["axia_X_whitelist_vtx_issue_failure"]).Should(gomega.Equal(prev["axia_X_whitelist_vtx_issue_failure"] + 1))
+				gomega.Expect(mm["avalanche_X_whitelist_vtx_issue_failure"]).Should(gomega.Equal(prev["avalanche_X_whitelist_vtx_issue_failure"] + 1))
 
 				// +0 since the local node snowstorm successfully issued the whitelist tx "before", and no whitelist tx is being processed
-				gomega.Expect(mm["axia_X_whitelist_tx_processing"]).Should(gomega.Equal(prev["axia_X_whitelist_tx_processing"]))
+				gomega.Expect(mm["avalanche_X_whitelist_tx_processing"]).Should(gomega.Equal(prev["avalanche_X_whitelist_tx_processing"]))
 
 				// +0 since the local node snowstorm successfully accepted the whitelist tx "before"
-				gomega.Expect(mm["axia_X_whitelist_tx_accepted_count"]).Should(gomega.Equal(prev["axia_X_whitelist_tx_accepted_count"]))
-				gomega.Expect(mm["axia_X_whitelist_tx_polls_accepted_count"]).Should(gomega.Equal(prev["axia_X_whitelist_tx_polls_accepted_count"]))
+				gomega.Expect(mm["avalanche_X_whitelist_tx_accepted_count"]).Should(gomega.Equal(prev["avalanche_X_whitelist_tx_accepted_count"]))
+				gomega.Expect(mm["avalanche_X_whitelist_tx_polls_accepted_count"]).Should(gomega.Equal(prev["avalanche_X_whitelist_tx_polls_accepted_count"]))
 
 				// +0 since the local node snowstorm never rejected a whitelist tx
-				gomega.Expect(mm["axia_X_whitelist_tx_rejected_count"]).Should(gomega.Equal(prev["axia_X_whitelist_tx_rejected_count"]))
-				gomega.Expect(mm["axia_X_whitelist_tx_polls_rejected_count"]).Should(gomega.Equal(prev["axia_X_whitelist_tx_polls_rejected_count"]))
+				gomega.Expect(mm["avalanche_X_whitelist_tx_rejected_count"]).Should(gomega.Equal(prev["avalanche_X_whitelist_tx_rejected_count"]))
+				gomega.Expect(mm["avalanche_X_whitelist_tx_polls_rejected_count"]).Should(gomega.Equal(prev["avalanche_X_whitelist_tx_polls_rejected_count"]))
 
 				curMetrics[u] = mm
 			}
 		})
 
-		ginkgo.By("issue regular, virtuous Swap-Chain tx, after whitelist vtx, should fail", func() {
+		ginkgo.By("issue regular, virtuous X-Chain tx, after whitelist vtx, should fail", func() {
 			balances, err := ewoqWallet.X().Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
 
-			axcAssetID := wallet.X().AXCAssetID()
-			ewoqPrevBalX := balances[axcAssetID]
+			avaxAssetID := wallet.X().AVAXAssetID()
+			ewoqPrevBalX := balances[avaxAssetID]
 			tests.Outf("{{green}}ewoq wallet balance:{{/}} %d\n", ewoqPrevBalX)
 
 			amount := genRandUint64(ewoqPrevBalX)
 			tests.Outf("{{blue}}issuing regular, virtuous transaction at %q{{/}}\n", uris[0])
 			ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
 			_, err = ewoqWallet.X().IssueBaseTx(
-				[]*axc.TransferableOutput{{
-					Asset: axc.Asset{
-						ID: axcAssetID,
+				[]*avax.TransferableOutput{{
+					Asset: avax.Asset{
+						ID: avaxAssetID,
 					},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: amount,

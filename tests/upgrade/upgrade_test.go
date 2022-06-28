@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 // Runs upgrade tests.
@@ -49,15 +49,15 @@ func init() {
 
 	flag.StringVar(
 		&execPath,
-		"axia-path",
+		"avalanchego-path",
 		"",
-		"axia executable path",
+		"avalanchego executable path",
 	)
 	flag.StringVar(
 		&execPathToUpgrade,
-		"axia-path-to-upgrade",
+		"avalanchego-path-to-upgrade",
 		"",
-		"axia executable path (to upgrade to, only required for upgrade tests with local network-runner)",
+		"avalanchego executable path (to upgrade to, only required for upgrade tests with local network-runner)",
 	)
 }
 

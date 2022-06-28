@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package rpcchainvm
@@ -31,7 +31,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/version"
 	"github.com/axiacoin/axia-network-v2/vms/rpcchainvm/ghttp"
 	"github.com/axiacoin/axia-network-v2/vms/rpcchainvm/grpcutils"
-	"github.com/axiacoin/axia-network-v2/vms/rpcchainvm/gallychainlookup"
+	"github.com/axiacoin/axia-network-v2/vms/rpcchainvm/gsubnetlookup"
 	"github.com/axiacoin/axia-network-v2/vms/rpcchainvm/messenger"
 
 	aliasreaderpb "github.com/axiacoin/axia-network-v2/proto/pb/aliasreader"
@@ -41,7 +41,7 @@ import (
 	messengerpb "github.com/axiacoin/axia-network-v2/proto/pb/messenger"
 	rpcdbpb "github.com/axiacoin/axia-network-v2/proto/pb/rpcdb"
 	sharedmemorypb "github.com/axiacoin/axia-network-v2/proto/pb/sharedmemory"
-	allychainlookuppb "github.com/axiacoin/axia-network-v2/proto/pb/allychainlookup"
+	subnetlookuppb "github.com/axiacoin/axia-network-v2/proto/pb/subnetlookup"
 	vmpb "github.com/axiacoin/axia-network-v2/proto/pb/vm"
 )
 
@@ -71,7 +71,7 @@ func NewServer(vm block.ChainVM) *VMServer {
 }
 
 func (vm *VMServer) Initialize(_ context.Context, req *vmpb.InitializeRequest) (*vmpb.InitializeResponse, error) {
-	allychainID, err := ids.ToID(req.AllychainId)
+	subnetID, err := ids.ToID(req.SubnetId)
 	if err != nil {
 		return nil, err
 	}
@@ -83,11 +83,11 @@ func (vm *VMServer) Initialize(_ context.Context, req *vmpb.InitializeRequest) (
 	if err != nil {
 		return nil, err
 	}
-	swapChainID, err := ids.ToID(req.CoreChainId)
+	xChainID, err := ids.ToID(req.XChainId)
 	if err != nil {
 		return nil, err
 	}
-	axcAssetID, err := ids.ToID(req.AxcAssetId)
+	avaxAssetID, err := ids.ToID(req.AvaxAssetId)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +136,7 @@ func (vm *VMServer) Initialize(_ context.Context, req *vmpb.InitializeRequest) (
 	keystoreClient := gkeystore.NewClient(keystorepb.NewKeystoreClient(clientConn))
 	sharedMemoryClient := gsharedmemory.NewClient(sharedmemorypb.NewSharedMemoryClient(clientConn))
 	bcLookupClient := galiasreader.NewClient(aliasreaderpb.NewAliasReaderClient(clientConn))
-	snLookupClient := gallychainlookup.NewClient(allychainlookuppb.NewAllychainLookupClient(clientConn))
+	snLookupClient := gsubnetlookup.NewClient(subnetlookuppb.NewSubnetLookupClient(clientConn))
 	appSenderClient := appsender.NewClient(appsenderpb.NewAppSenderClient(clientConn))
 
 	toEngine := make(chan common.Message, 1)
@@ -158,12 +158,12 @@ func (vm *VMServer) Initialize(_ context.Context, req *vmpb.InitializeRequest) (
 
 	vm.ctx = &snow.Context{
 		NetworkID: req.NetworkId,
-		AllychainID:  allychainID,
+		SubnetID:  subnetID,
 		ChainID:   chainID,
 		NodeID:    nodeID,
 
-		SwapChainID:    swapChainID,
-		AXCAssetID: axcAssetID,
+		XChainID:    xChainID,
+		AVAXAssetID: avaxAssetID,
 
 		Log:          logging.NoLog{},
 		Keystore:     keystoreClient,

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package validators
@@ -11,19 +11,19 @@ import (
 
 var _ State = &lockedState{}
 
-// State allows the lookup of validator sets on specified allychains at the
-// requested Core-chain height.
+// State allows the lookup of validator sets on specified subnets at the
+// requested P-chain height.
 type State interface {
 	// GetMinimumHeight returns the minimum height of the block still in the
 	// proposal window.
 	GetMinimumHeight() (uint64, error)
-	// GetCurrentHeight returns the current height of the Core-chain.
+	// GetCurrentHeight returns the current height of the P-chain.
 	GetCurrentHeight() (uint64, error)
 
 	// GetValidatorSet returns the weights of the nodeIDs for the provided
-	// allychain at the requested Core-chain height.
+	// subnet at the requested P-chain height.
 	// The returned map should not be modified.
-	GetValidatorSet(height uint64, allychainID ids.ID) (map[ids.ShortID]uint64, error)
+	GetValidatorSet(height uint64, subnetID ids.ID) (map[ids.ShortID]uint64, error)
 }
 
 type lockedState struct {
@@ -52,11 +52,11 @@ func (s *lockedState) GetCurrentHeight() (uint64, error) {
 	return s.s.GetCurrentHeight()
 }
 
-func (s *lockedState) GetValidatorSet(height uint64, allychainID ids.ID) (map[ids.ShortID]uint64, error) {
+func (s *lockedState) GetValidatorSet(height uint64, subnetID ids.ID) (map[ids.ShortID]uint64, error) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
-	return s.s.GetValidatorSet(height, allychainID)
+	return s.s.GetValidatorSet(height, subnetID)
 }
 
 type noState struct{}
@@ -73,6 +73,6 @@ func (s *noState) GetCurrentHeight() (uint64, error) {
 	return 0, nil
 }
 
-func (s *noState) GetValidatorSet(height uint64, allychainID ids.ID) (map[ids.ShortID]uint64, error) {
+func (s *noState) GetValidatorSet(height uint64, subnetID ids.ID) (map[ids.ShortID]uint64, error) {
 	return nil, nil
 }

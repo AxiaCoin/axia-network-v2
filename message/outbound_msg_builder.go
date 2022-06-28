@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package message
@@ -23,7 +23,7 @@ type OutboundMsgBuilder interface {
 		myVersion string,
 		myVersionTime uint64,
 		sig []byte,
-		trackedAllychains []ids.ID,
+		trackedSubnets []ids.ID,
 	) (OutboundMessage, error)
 
 	PeerList(
@@ -146,12 +146,12 @@ func (b *outMsgBuilder) Version(
 	myVersion string,
 	myVersionTime uint64,
 	sig []byte,
-	trackedAllychains []ids.ID,
+	trackedSubnets []ids.ID,
 ) (OutboundMessage, error) {
-	allychainIDBytes := make([][]byte, len(trackedAllychains))
-	for i, containerID := range trackedAllychains {
+	subnetIDBytes := make([][]byte, len(trackedSubnets))
+	for i, containerID := range trackedSubnets {
 		copy := containerID
-		allychainIDBytes[i] = copy[:]
+		subnetIDBytes[i] = copy[:]
 	}
 	return b.c.Pack(
 		Version,
@@ -163,7 +163,7 @@ func (b *outMsgBuilder) Version(
 			VersionStr:     myVersion,
 			VersionTime:    myVersionTime,
 			SigBytes:       sig,
-			TrackedAllychains: allychainIDBytes,
+			TrackedSubnets: subnetIDBytes,
 		},
 		Version.Compressible(), // Version Messages can't be compressed
 		true,

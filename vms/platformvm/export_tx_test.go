@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package platformvm
@@ -37,7 +37,7 @@ func TestNewExportTx(t *testing.T) {
 	tests := []test{
 		{
 			description:        "P->X export",
-			destinationChainID: swapChainID,
+			destinationChainID: xChainID,
 			sourceKeys:         []*crypto.PrivateKeySECP256K1R{sourceKey},
 			timestamp:          defaultValidateStartTime,
 			shouldErr:          false,
@@ -45,7 +45,7 @@ func TestNewExportTx(t *testing.T) {
 		},
 		{
 			description:        "P->C export",
-			destinationChainID: axcChainID,
+			destinationChainID: cChainID,
 			sourceKeys:         []*crypto.PrivateKeySECP256K1R{sourceKey},
 			timestamp:          vm.ApricotPhase5Time,
 			shouldErr:          false,

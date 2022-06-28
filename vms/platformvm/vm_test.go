@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package platformvm
@@ -44,7 +44,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/utils/units"
 	"github.com/axiacoin/axia-network-v2/utils/wrappers"
 	"github.com/axiacoin/axia-network-v2/version"
-	"github.com/axiacoin/axia-network-v2/vms/components/axc"
+	"github.com/axiacoin/axia-network-v2/vms/components/avax"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/reward"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/status"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
@@ -62,11 +62,11 @@ var (
 		MaxConsumptionRate: .12 * reward.PercentDenominator,
 		MinConsumptionRate: .10 * reward.PercentDenominator,
 		MintingPeriod:      365 * 24 * time.Hour,
-		SupplyCap:          720 * units.MegaAxc,
+		SupplyCap:          720 * units.MegaAvax,
 	}
 
-	// AXC asset ID in tests
-	axcAssetID = ids.ID{'y', 'e', 'e', 't'}
+	// AVAX asset ID in tests
+	avaxAssetID = ids.ID{'y', 'e', 'e', 't'}
 
 	defaultTxFee = uint64(100)
 
@@ -79,24 +79,24 @@ var (
 	// time that genesis validators stop validating
 	defaultValidateEndTime = defaultValidateStartTime.Add(10 * defaultMinStakingDuration)
 
-	// each key controls an address that has [defaultBalance] AXC at genesis
+	// each key controls an address that has [defaultBalance] AVAX at genesis
 	keys []*crypto.PrivateKeySECP256K1R
 
-	defaultMinValidatorStake = 5 * units.MilliAxc
-	defaultMaxValidatorStake = 500 * units.MilliAxc
-	defaultMinDelegatorStake = 1 * units.MilliAxc
+	defaultMinValidatorStake = 5 * units.MilliAvax
+	defaultMaxValidatorStake = 500 * units.MilliAvax
+	defaultMinDelegatorStake = 1 * units.MilliAvax
 
 	// amount all genesis validators have in defaultVM
 	defaultBalance = 100 * defaultMinValidatorStake
 
-	// allychain that exists at genesis in defaultVM
+	// subnet that exists at genesis in defaultVM
 	// Its controlKeys are keys[0], keys[1], keys[2]
 	// Its threshold is 2
-	testAllychain1            *UnsignedCreateAllychainTx
-	testAllychain1ControlKeys []*crypto.PrivateKeySECP256K1R
+	testSubnet1            *UnsignedCreateSubnetTx
+	testSubnet1ControlKeys []*crypto.PrivateKeySECP256K1R
 
-	swapChainID = ids.Empty.Prefix(0)
-	axcChainID = ids.Empty.Prefix(1)
+	xChainID = ids.Empty.Prefix(0)
+	cChainID = ids.Empty.Prefix(1)
 )
 
 var (
@@ -125,36 +125,36 @@ func init() {
 		ctx.Log.AssertNoError(err)
 		keys = append(keys, pk.(*crypto.PrivateKeySECP256K1R))
 	}
-	testAllychain1ControlKeys = keys[0:3]
+	testSubnet1ControlKeys = keys[0:3]
 }
 
 type snLookup struct {
-	chainsToAllychain map[ids.ID]ids.ID
+	chainsToSubnet map[ids.ID]ids.ID
 }
 
-func (sn *snLookup) AllychainID(chainID ids.ID) (ids.ID, error) {
-	allychainID, ok := sn.chainsToAllychain[chainID]
+func (sn *snLookup) SubnetID(chainID ids.ID) (ids.ID, error) {
+	subnetID, ok := sn.chainsToSubnet[chainID]
 	if !ok {
 		return ids.ID{}, errors.New("")
 	}
-	return allychainID, nil
+	return subnetID, nil
 }
 
 func defaultContext() *snow.Context {
 	ctx := snow.DefaultContextTest()
 	ctx.NetworkID = testNetworkID
-	ctx.SwapChainID = swapChainID
-	ctx.AXCAssetID = axcAssetID
+	ctx.XChainID = xChainID
+	ctx.AVAXAssetID = avaxAssetID
 	aliaser := ids.NewAliaser()
 
 	errs := wrappers.Errs{}
 	errs.Add(
-		aliaser.Alias(constants.PlatformChainID, "Core"),
+		aliaser.Alias(constants.PlatformChainID, "P"),
 		aliaser.Alias(constants.PlatformChainID, constants.PlatformChainID.String()),
-		aliaser.Alias(swapChainID, "Swap"),
-		aliaser.Alias(swapChainID, swapChainID.String()),
-		aliaser.Alias(axcChainID, "AXC"),
-		aliaser.Alias(axcChainID, axcChainID.String()),
+		aliaser.Alias(xChainID, "X"),
+		aliaser.Alias(xChainID, xChainID.String()),
+		aliaser.Alias(cChainID, "C"),
+		aliaser.Alias(cChainID, cChainID.String()),
 	)
 	if errs.Errored() {
 		panic(errs.Err)
@@ -162,10 +162,10 @@ func defaultContext() *snow.Context {
 	ctx.BCLookup = aliaser
 
 	ctx.SNLookup = &snLookup{
-		chainsToAllychain: map[ids.ID]ids.ID{
+		chainsToSubnet: map[ids.ID]ids.ID{
 			constants.PlatformChainID: constants.PrimaryNetworkID,
-			swapChainID:                  constants.PrimaryNetworkID,
-			axcChainID:                  constants.PrimaryNetworkID,
+			xChainID:                  constants.PrimaryNetworkID,
+			cChainID:                  constants.PrimaryNetworkID,
 		},
 	}
 	return ctx
@@ -217,12 +217,12 @@ func defaultGenesis() (*BuildGenesisArgs, []byte) {
 	buildGenesisArgs := BuildGenesisArgs{
 		Encoding:      formatting.Hex,
 		NetworkID:     json.Uint32(testNetworkID),
-		AxcAssetID:   axcAssetID,
+		AvaxAssetID:   avaxAssetID,
 		UTXOs:         genesisUTXOs,
 		Validators:    genesisValidators,
 		Chains:        nil,
 		Time:          json.Uint64(defaultGenesisTime.Unix()),
-		InitialSupply: json.Uint64(360 * units.MegaAxc),
+		InitialSupply: json.Uint64(360 * units.MegaAvax),
 	}
 
 	buildGenesisResponse := BuildGenesisReply{}
@@ -291,12 +291,12 @@ func BuildGenesisTestWithArgs(t *testing.T, args *BuildGenesisArgs) (*BuildGenes
 
 	buildGenesisArgs := BuildGenesisArgs{
 		NetworkID:     json.Uint32(testNetworkID),
-		AxcAssetID:   axcAssetID,
+		AvaxAssetID:   avaxAssetID,
 		UTXOs:         genesisUTXOs,
 		Validators:    genesisValidators,
 		Chains:        nil,
 		Time:          json.Uint64(defaultGenesisTime.Unix()),
-		InitialSupply: json.Uint64(360 * units.MegaAxc),
+		InitialSupply: json.Uint64(360 * units.MegaAvax),
 		Encoding:      formatting.CB58,
 	}
 
@@ -324,7 +324,7 @@ func defaultVM() (*VM, database.Database, *common.SenderTest) {
 		UptimeLockedCalculator: uptime.NewLockedCalculator(),
 		Validators:             validators.NewManager(),
 		TxFee:                  defaultTxFee,
-		CreateAllychainTxFee:      100 * defaultTxFee,
+		CreateSubnetTxFee:      100 * defaultTxFee,
 		CreateBlockchainTxFee:  100 * defaultTxFee,
 		MinValidatorStake:      defaultMinValidatorStake,
 		MaxValidatorStake:      defaultMaxValidatorStake,
@@ -366,9 +366,9 @@ func defaultVM() (*VM, database.Database, *common.SenderTest) {
 		panic(err)
 	}
 
-	// Create a allychain and store it in testAllychain1
-	if tx, err := vm.newCreateAllychainTx(
-		2, // threshold; 2 sigs from keys[0], keys[1], keys[2] needed to add validator to this allychain
+	// Create a subnet and store it in testSubnet1
+	if tx, err := vm.newCreateSubnetTx(
+		2, // threshold; 2 sigs from keys[0], keys[1], keys[2] needed to add validator to this subnet
 		// control keys are keys[0], keys[1], keys[2]
 		[]ids.ShortID{keys[0].PublicKey().Address(), keys[1].PublicKey().Address(), keys[2].PublicKey().Address()},
 		[]*crypto.PrivateKeySECP256K1R{keys[0]}, // pays tx fee
@@ -384,7 +384,7 @@ func defaultVM() (*VM, database.Database, *common.SenderTest) {
 	} else if err := blk.Accept(); err != nil {
 		panic(err)
 	} else {
-		testAllychain1 = tx.UnsignedTx.(*UnsignedCreateAllychainTx)
+		testSubnet1 = tx.UnsignedTx.(*UnsignedCreateSubnetTx)
 	}
 
 	return vm, baseDBManager.Current().Database, appSender
@@ -440,9 +440,9 @@ func GenesisVMWithArgs(t *testing.T, args *BuildGenesisArgs) ([]byte, chan commo
 		panic(err)
 	}
 
-	// Create a allychain and store it in testAllychain1
-	if tx, err := vm.newCreateAllychainTx(
-		2, // threshold; 2 sigs from keys[0], keys[1], keys[2] needed to add validator to this allychain
+	// Create a subnet and store it in testSubnet1
+	if tx, err := vm.newCreateSubnetTx(
+		2, // threshold; 2 sigs from keys[0], keys[1], keys[2] needed to add validator to this subnet
 		// control keys are keys[0], keys[1], keys[2]
 		[]ids.ShortID{keys[0].PublicKey().Address(), keys[1].PublicKey().Address(), keys[2].PublicKey().Address()},
 		[]*crypto.PrivateKeySECP256K1R{keys[0]}, // pays tx fee
@@ -458,7 +458,7 @@ func GenesisVMWithArgs(t *testing.T, args *BuildGenesisArgs) ([]byte, chan commo
 	} else if err := blk.Accept(); err != nil {
 		panic(err)
 	} else {
-		testAllychain1 = tx.UnsignedTx.(*UnsignedCreateAllychainTx)
+		testSubnet1 = tx.UnsignedTx.(*UnsignedCreateSubnetTx)
 	}
 
 	return genesisBytes, msgChan, vm, m
@@ -499,7 +499,7 @@ func TestGenesis(t *testing.T) {
 		}
 		addrs := ids.ShortSet{}
 		addrs.Add(addr)
-		utxos, err := axc.GetAllUTXOs(vm.internalState, addrs)
+		utxos, err := avax.GetAllUTXOs(vm.internalState, addrs)
 		if err != nil {
 			t.Fatal("couldn't find UTXO")
 		} else if len(utxos) != 1 {
@@ -513,7 +513,7 @@ func TestGenesis(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if utxo.Address == addr { // Address that paid tx fee to create testAllychain1 has less tokens
+			if utxo.Address == addr { // Address that paid tx fee to create testSubnet1 has less tokens
 				if out.Amount() != uint64(utxo.Amount)-vm.TxFee {
 					t.Fatalf("expected UTXO to have value %d but has value %d", uint64(utxo.Amount)-vm.TxFee, out.Amount())
 				}
@@ -543,9 +543,9 @@ func TestGenesis(t *testing.T) {
 		t.Fatalf("vm's time is incorrect. Expected %v got %v", genesisState.Time, timestamp)
 	}
 
-	// Ensure the new allychain we created exists
-	if _, _, err := vm.internalState.GetTx(testAllychain1.ID()); err != nil {
-		t.Fatalf("expected allychain %s to exist", testAllychain1.ID())
+	// Ensure the new subnet we created exists
+	if _, _, err := vm.internalState.GetTx(testSubnet1.ID()); err != nil {
+		t.Fatalf("expected subnet %s to exist", testSubnet1.ID())
 	}
 }
 
@@ -798,8 +798,8 @@ func TestAddValidatorInvalidNotReissued(t *testing.T) {
 	}
 }
 
-// Accept proposal to add validator to allychain
-func TestAddAllychainValidatorAccept(t *testing.T) {
+// Accept proposal to add validator to subnet
+func TestAddSubnetValidatorAccept(t *testing.T) {
 	vm, _, _ := defaultVM()
 	vm.ctx.Lock.Lock()
 	defer func() {
@@ -816,13 +816,13 @@ func TestAddAllychainValidatorAccept(t *testing.T) {
 	// create valid tx
 	// note that [startTime, endTime] is a subset of time that keys[0]
 	// validates primary network ([defaultValidateStartTime, defaultValidateEndTime])
-	tx, err := vm.newAddAllychainValidatorTx(
+	tx, err := vm.newAddSubnetValidatorTx(
 		defaultWeight,
 		uint64(startTime.Unix()),
 		uint64(endTime.Unix()),
 		nodeID,
-		testAllychain1.ID(),
-		[]*crypto.PrivateKeySECP256K1R{testAllychain1ControlKeys[0], testAllychain1ControlKeys[1]},
+		testSubnet1.ID(),
+		[]*crypto.PrivateKeySECP256K1R{testSubnet1ControlKeys[0], testSubnet1ControlKeys[1]},
 		ids.ShortEmpty, // change addr
 	)
 	if err != nil {
@@ -873,7 +873,7 @@ func TestAddAllychainValidatorAccept(t *testing.T) {
 
 	pendingStakers := vm.internalState.PendingStakerChainState()
 	vdr := pendingStakers.GetValidator(nodeID)
-	_, exists := vdr.AllychainValidators()[testAllychain1.ID()]
+	_, exists := vdr.SubnetValidators()[testSubnet1.ID()]
 
 	// Verify that new validator is in pending validator set
 	if !exists {
@@ -881,8 +881,8 @@ func TestAddAllychainValidatorAccept(t *testing.T) {
 	}
 }
 
-// Reject proposal to add validator to allychain
-func TestAddAllychainValidatorReject(t *testing.T) {
+// Reject proposal to add validator to subnet
+func TestAddSubnetValidatorReject(t *testing.T) {
 	vm, _, _ := defaultVM()
 	vm.ctx.Lock.Lock()
 	defer func() {
@@ -899,13 +899,13 @@ func TestAddAllychainValidatorReject(t *testing.T) {
 	// create valid tx
 	// note that [startTime, endTime] is a subset of time that keys[0]
 	// validates primary network ([defaultValidateStartTime, defaultValidateEndTime])
-	tx, err := vm.newAddAllychainValidatorTx(
+	tx, err := vm.newAddSubnetValidatorTx(
 		defaultWeight,
 		uint64(startTime.Unix()),
 		uint64(endTime.Unix()),
 		nodeID,
-		testAllychain1.ID(),
-		[]*crypto.PrivateKeySECP256K1R{testAllychain1ControlKeys[1], testAllychain1ControlKeys[2]},
+		testSubnet1.ID(),
+		[]*crypto.PrivateKeySECP256K1R{testSubnet1ControlKeys[1], testSubnet1ControlKeys[2]},
 		ids.ShortEmpty, // change addr
 	)
 	if err != nil {
@@ -956,7 +956,7 @@ func TestAddAllychainValidatorReject(t *testing.T) {
 
 	pendingStakers := vm.internalState.PendingStakerChainState()
 	vdr := pendingStakers.GetValidator(nodeID)
-	_, exists := vdr.AllychainValidators()[testAllychain1.ID()]
+	_, exists := vdr.SubnetValidators()[testSubnet1.ID()]
 
 	// Verify that new validator NOT in pending validator set
 	if exists {
@@ -1264,12 +1264,12 @@ func TestCreateChain(t *testing.T) {
 	}()
 
 	tx, err := vm.newCreateChainTx(
-		testAllychain1.ID(),
+		testSubnet1.ID(),
 		nil,
 		ids.ID{'t', 'e', 's', 't', 'v', 'm'},
 		nil,
 		"name",
-		[]*crypto.PrivateKeySECP256K1R{testAllychain1ControlKeys[0], testAllychain1ControlKeys[1]},
+		[]*crypto.PrivateKeySECP256K1R{testSubnet1ControlKeys[0], testSubnet1ControlKeys[1]},
 		ids.ShortEmpty, // change addr
 	)
 	if err != nil {
@@ -1289,7 +1289,7 @@ func TestCreateChain(t *testing.T) {
 	}
 
 	// Verify chain was created
-	chains, err := vm.internalState.GetChains(testAllychain1.ID())
+	chains, err := vm.internalState.GetChains(testSubnet1.ID())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1305,11 +1305,11 @@ func TestCreateChain(t *testing.T) {
 }
 
 // test where we:
-// 1) Create a allychain
-// 2) Add a validator to the allychain's pending validator set
+// 1) Create a subnet
+// 2) Add a validator to the subnet's pending validator set
 // 3) Advance timestamp to validator's start time (moving the validator from pending to current)
 // 4) Advance timestamp to validator's end time (removing validator from current)
-func TestCreateAllychain(t *testing.T) {
+func TestCreateSubnet(t *testing.T) {
 	vm, _, _ := defaultVM()
 	vm.ctx.Lock.Lock()
 	defer func() {
@@ -1321,7 +1321,7 @@ func TestCreateAllychain(t *testing.T) {
 
 	nodeID := keys[0].PublicKey().Address()
 
-	createAllychainTx, err := vm.newCreateAllychainTx(
+	createSubnetTx, err := vm.newCreateSubnetTx(
 		1, // threshold
 		[]ids.ShortID{ // control keys
 			keys[0].PublicKey().Address(),
@@ -1332,46 +1332,46 @@ func TestCreateAllychain(t *testing.T) {
 	)
 	if err != nil {
 		t.Fatal(err)
-	} else if err := vm.blockBuilder.AddUnverifiedTx(createAllychainTx); err != nil {
+	} else if err := vm.blockBuilder.AddUnverifiedTx(createSubnetTx); err != nil {
 		t.Fatal(err)
-	} else if blk, err := vm.BuildBlock(); err != nil { // should contain proposal to create allychain
+	} else if blk, err := vm.BuildBlock(); err != nil { // should contain proposal to create subnet
 		t.Fatal(err)
 	} else if err := blk.Verify(); err != nil {
 		t.Fatal(err)
 	} else if err := blk.Accept(); err != nil {
 		t.Fatal(err)
-	} else if _, txStatus, err := vm.internalState.GetTx(createAllychainTx.ID()); err != nil {
+	} else if _, txStatus, err := vm.internalState.GetTx(createSubnetTx.ID()); err != nil {
 		t.Fatal(err)
 	} else if txStatus != status.Committed {
 		t.Fatalf("status should be Committed but is %s", txStatus)
 	}
 
-	allychains, err := vm.internalState.GetAllychains()
+	subnets, err := vm.internalState.GetSubnets()
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	found := false
-	for _, allychain := range allychains {
-		if allychain.ID() == createAllychainTx.ID() {
+	for _, subnet := range subnets {
+		if subnet.ID() == createSubnetTx.ID() {
 			found = true
 			break
 		}
 	}
 	if !found {
-		t.Fatalf("should have registered new allychain")
+		t.Fatalf("should have registered new subnet")
 	}
 
-	// Now that we've created a new allychain, add a validator to that allychain
+	// Now that we've created a new subnet, add a validator to that subnet
 	startTime := defaultValidateStartTime.Add(syncBound).Add(1 * time.Second)
 	endTime := startTime.Add(defaultMinStakingDuration)
 	// [startTime, endTime] is subset of time keys[0] validates default subent so tx is valid
-	if addValidatorTx, err := vm.newAddAllychainValidatorTx(
+	if addValidatorTx, err := vm.newAddSubnetValidatorTx(
 		defaultWeight,
 		uint64(startTime.Unix()),
 		uint64(endTime.Unix()),
 		nodeID,
-		createAllychainTx.ID(),
+		createSubnetTx.ID(),
 		[]*crypto.PrivateKeySECP256K1R{keys[0]},
 		ids.ShortEmpty, // change addr
 	); err != nil {
@@ -1380,7 +1380,7 @@ func TestCreateAllychain(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	blk, err := vm.BuildBlock() // should add validator to the new allychain
+	blk, err := vm.BuildBlock() // should add validator to the new subnet
 	if err != nil {
 		t.Fatal(err)
 	} else if err := blk.Verify(); err != nil {
@@ -1419,7 +1419,7 @@ func TestCreateAllychain(t *testing.T) {
 
 	pendingStakers := vm.internalState.PendingStakerChainState()
 	vdr := pendingStakers.GetValidator(nodeID)
-	_, exists := vdr.AllychainValidators()[createAllychainTx.ID()]
+	_, exists := vdr.SubnetValidators()[createSubnetTx.ID()]
 	if !exists {
 		t.Fatal("should have added a pending validator")
 	}
@@ -1467,7 +1467,7 @@ func TestCreateAllychain(t *testing.T) {
 
 	pendingStakers = vm.internalState.PendingStakerChainState()
 	vdr = pendingStakers.GetValidator(nodeID)
-	_, exists = vdr.AllychainValidators()[createAllychainTx.ID()]
+	_, exists = vdr.SubnetValidators()[createSubnetTx.ID()]
 	if exists {
 		t.Fatal("should have removed the pending validator")
 	}
@@ -1477,7 +1477,7 @@ func TestCreateAllychain(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, exists = cVDR.AllychainValidators()[createAllychainTx.ID()]
+	_, exists = cVDR.SubnetValidators()[createSubnetTx.ID()]
 	if !exists {
 		t.Fatal("should have been added to the validator set")
 	}
@@ -1523,7 +1523,7 @@ func TestCreateAllychain(t *testing.T) {
 
 	pendingStakers = vm.internalState.PendingStakerChainState()
 	vdr = pendingStakers.GetValidator(nodeID)
-	_, exists = vdr.AllychainValidators()[createAllychainTx.ID()]
+	_, exists = vdr.SubnetValidators()[createSubnetTx.ID()]
 	if exists {
 		t.Fatal("should have removed the pending validator")
 	}
@@ -1533,7 +1533,7 @@ func TestCreateAllychain(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, exists = cVDR.AllychainValidators()[createAllychainTx.ID()]
+	_, exists = cVDR.SubnetValidators()[createSubnetTx.ID()]
 	if exists {
 		t.Fatal("should have removed from the validator set")
 	}
@@ -1550,7 +1550,7 @@ func TestAtomicImport(t *testing.T) {
 		vm.ctx.Lock.Unlock()
 	}()
 
-	utxoID := axc.UTXOID{
+	utxoID := avax.UTXOID{
 		TxID:        ids.Empty.Prefix(1),
 		OutputIndex: 1,
 	}
@@ -1563,11 +1563,11 @@ func TestAtomicImport(t *testing.T) {
 		t.Fatal(err)
 	}
 	vm.ctx.SharedMemory = m.NewSharedMemory(vm.ctx.ChainID)
-	vm.AtomicUTXOManager = axc.NewAtomicUTXOManager(vm.ctx.SharedMemory, Codec)
-	peerSharedMemory := m.NewSharedMemory(vm.ctx.SwapChainID)
+	vm.AtomicUTXOManager = avax.NewAtomicUTXOManager(vm.ctx.SharedMemory, Codec)
+	peerSharedMemory := m.NewSharedMemory(vm.ctx.XChainID)
 
 	if _, err := vm.newImportTx(
-		vm.ctx.SwapChainID,
+		vm.ctx.XChainID,
 		recipientKey.PublicKey().Address(),
 		[]*crypto.PrivateKeySECP256K1R{keys[0]},
 		ids.ShortEmpty, // change addr
@@ -1577,9 +1577,9 @@ func TestAtomicImport(t *testing.T) {
 
 	// Provide the avm UTXO
 
-	utxo := &axc.UTXO{
+	utxo := &avax.UTXO{
 		UTXOID: utxoID,
-		Asset:  axc.Asset{ID: axcAssetID},
+		Asset:  avax.Asset{ID: avaxAssetID},
 		Out: &secp256k1fx.TransferOutput{
 			Amt: amount,
 			OutputOwners: secp256k1fx.OutputOwners{
@@ -1604,7 +1604,7 @@ func TestAtomicImport(t *testing.T) {
 	}
 
 	tx, err := vm.newImportTx(
-		vm.ctx.SwapChainID,
+		vm.ctx.XChainID,
 		recipientKey.PublicKey().Address(),
 		[]*crypto.PrivateKeySECP256K1R{recipientKey},
 		ids.ShortEmpty, // change addr
@@ -1627,7 +1627,7 @@ func TestAtomicImport(t *testing.T) {
 		t.Fatalf("status should be Committed but is %s", txStatus)
 	}
 	inputID = utxoID.InputID()
-	if _, err := vm.ctx.SharedMemory.Get(vm.ctx.SwapChainID, [][]byte{inputID[:]}); err == nil {
+	if _, err := vm.ctx.SharedMemory.Get(vm.ctx.XChainID, [][]byte{inputID[:]}); err == nil {
 		t.Fatalf("shouldn't have been able to read the utxo")
 	}
 }
@@ -1644,17 +1644,17 @@ func TestOptimisticAtomicImport(t *testing.T) {
 	}()
 
 	tx := Tx{UnsignedTx: &UnsignedImportTx{
-		BaseTx: BaseTx{BaseTx: axc.BaseTx{
+		BaseTx: BaseTx{BaseTx: avax.BaseTx{
 			NetworkID:    vm.ctx.NetworkID,
 			BlockchainID: vm.ctx.ChainID,
 		}},
-		SourceChain: vm.ctx.SwapChainID,
-		ImportedInputs: []*axc.TransferableInput{{
-			UTXOID: axc.UTXOID{
+		SourceChain: vm.ctx.XChainID,
+		ImportedInputs: []*avax.TransferableInput{{
+			UTXOID: avax.UTXOID{
 				TxID:        ids.Empty.Prefix(1),
 				OutputIndex: 1,
 			},
-			Asset: axc.Asset{ID: vm.ctx.AXCAssetID},
+			Asset: avax.Asset{ID: vm.ctx.AVAXAssetID},
 			In: &secp256k1fx.TransferInput{
 				Amt: 50000,
 			},
@@ -2054,7 +2054,7 @@ func TestBootstrapPartiallyAccepted(t *testing.T) {
 	assert.NoError(t, err)
 
 	var reqID uint32
-	externalSender.SendF = func(msg message.OutboundMessage, nodeIDs ids.ShortSet, allychainID ids.ID, validatorOnly bool) ids.ShortSet {
+	externalSender.SendF = func(msg message.OutboundMessage, nodeIDs ids.ShortSet, subnetID ids.ID, validatorOnly bool) ids.ShortSet {
 		inMsg, err := mc.Parse(msg.Bytes(), ctx.NodeID, func() {})
 		assert.NoError(t, err)
 		assert.Equal(t, message.GetAcceptedFrontier, inMsg.Op())
@@ -2068,7 +2068,7 @@ func TestBootstrapPartiallyAccepted(t *testing.T) {
 	}
 
 	isBootstrapped := false
-	allychain := &common.AllychainTest{
+	subnet := &common.SubnetTest{
 		T:               t,
 		IsBootstrappedF: func() bool { return isBootstrapped },
 		BootstrappedF:   func(ids.ID) { isBootstrapped = true },
@@ -2084,7 +2084,7 @@ func TestBootstrapPartiallyAccepted(t *testing.T) {
 		StartupAlpha:                   (beacons.Weight() + 1) / 2,
 		Alpha:                          (beacons.Weight() + 1) / 2,
 		Sender:                         sender,
-		Allychain:                         allychain,
+		Subnet:                         subnet,
 		AncestorsMaxContainersSent:     2000,
 		AncestorsMaxContainersReceived: 2000,
 		SharedCfg:                      &common.SharedConfig{},
@@ -2160,7 +2160,7 @@ func TestBootstrapPartiallyAccepted(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	externalSender.SendF = func(msg message.OutboundMessage, nodeIDs ids.ShortSet, allychainID ids.ID, validatorOnly bool) ids.ShortSet {
+	externalSender.SendF = func(msg message.OutboundMessage, nodeIDs ids.ShortSet, subnetID ids.ID, validatorOnly bool) ids.ShortSet {
 		inMsg, err := mc.Parse(msg.Bytes(), ctx.NodeID, func() {})
 		assert.NoError(t, err)
 		assert.Equal(t, message.GetAccepted, inMsg.Op())
@@ -2178,7 +2178,7 @@ func TestBootstrapPartiallyAccepted(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	externalSender.SendF = func(msg message.OutboundMessage, nodeIDs ids.ShortSet, allychainID ids.ID, validatorOnly bool) ids.ShortSet {
+	externalSender.SendF = func(msg message.OutboundMessage, nodeIDs ids.ShortSet, subnetID ids.ID, validatorOnly bool) ids.ShortSet {
 		inMsg, err := mc.Parse(msg.Bytes(), ctx.NodeID, func() {})
 		assert.NoError(t, err)
 		assert.Equal(t, message.GetAncestors, inMsg.Op())
@@ -2365,7 +2365,7 @@ func TestMaxStakeAmount(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.description, func(t *testing.T) {
-			amount, err := vm.maxStakeAmount(vm.ctx.AllychainID, test.validatorID, test.startTime, test.endTime)
+			amount, err := vm.maxStakeAmount(vm.ctx.SubnetID, test.validatorID, test.startTime, test.endTime)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -2419,15 +2419,15 @@ func TestUnverifiedParentPanic(t *testing.T) {
 	addr0 := key0.PublicKey().Address()
 	addr1 := key1.PublicKey().Address()
 
-	addAllychainTx0, err := vm.newCreateAllychainTx(1, []ids.ShortID{addr0}, []*crypto.PrivateKeySECP256K1R{key0}, addr0)
+	addSubnetTx0, err := vm.newCreateSubnetTx(1, []ids.ShortID{addr0}, []*crypto.PrivateKeySECP256K1R{key0}, addr0)
 	if err != nil {
 		t.Fatal(err)
 	}
-	addAllychainTx1, err := vm.newCreateAllychainTx(1, []ids.ShortID{addr1}, []*crypto.PrivateKeySECP256K1R{key1}, addr1)
+	addSubnetTx1, err := vm.newCreateSubnetTx(1, []ids.ShortID{addr1}, []*crypto.PrivateKeySECP256K1R{key1}, addr1)
 	if err != nil {
 		t.Fatal(err)
 	}
-	addAllychainTx2, err := vm.newCreateAllychainTx(1, []ids.ShortID{addr1}, []*crypto.PrivateKeySECP256K1R{key1}, addr0)
+	addSubnetTx2, err := vm.newCreateSubnetTx(1, []ids.ShortID{addr1}, []*crypto.PrivateKeySECP256K1R{key1}, addr0)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2439,37 +2439,37 @@ func TestUnverifiedParentPanic(t *testing.T) {
 	preferredID := preferred.ID()
 	preferredHeight := preferred.Height()
 
-	addAllychainBlk0, err := vm.newStandardBlock(preferredID, preferredHeight+1, []*Tx{addAllychainTx0})
+	addSubnetBlk0, err := vm.newStandardBlock(preferredID, preferredHeight+1, []*Tx{addSubnetTx0})
 	if err != nil {
 		t.Fatal(err)
 	}
-	addAllychainBlk1, err := vm.newStandardBlock(preferredID, preferredHeight+1, []*Tx{addAllychainTx1})
+	addSubnetBlk1, err := vm.newStandardBlock(preferredID, preferredHeight+1, []*Tx{addSubnetTx1})
 	if err != nil {
 		t.Fatal(err)
 	}
-	addAllychainBlk2, err := vm.newStandardBlock(addAllychainBlk1.ID(), preferredHeight+2, []*Tx{addAllychainTx2})
+	addSubnetBlk2, err := vm.newStandardBlock(addSubnetBlk1.ID(), preferredHeight+2, []*Tx{addSubnetTx2})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if _, err := vm.ParseBlock(addAllychainBlk0.Bytes()); err != nil {
+	if _, err := vm.ParseBlock(addSubnetBlk0.Bytes()); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := vm.ParseBlock(addAllychainBlk1.Bytes()); err != nil {
+	if _, err := vm.ParseBlock(addSubnetBlk1.Bytes()); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := vm.ParseBlock(addAllychainBlk2.Bytes()); err != nil {
+	if _, err := vm.ParseBlock(addSubnetBlk2.Bytes()); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := addAllychainBlk0.Verify(); err != nil {
+	if err := addSubnetBlk0.Verify(); err != nil {
 		t.Fatal(err)
 	}
-	if err := addAllychainBlk0.Accept(); err != nil {
+	if err := addSubnetBlk0.Accept(); err != nil {
 		t.Fatal(err)
 	}
 	// Doesn't matter what verify returns as long as it's not panicking.
-	_ = addAllychainBlk2.Verify()
+	_ = addSubnetBlk2.Verify()
 }
 
 func TestRejectedStateRegressionInvalidValidatorTimestamp(t *testing.T) {
@@ -2539,12 +2539,12 @@ func TestRejectedStateRegressionInvalidValidatorTimestamp(t *testing.T) {
 	}
 
 	// Create the UTXO that will be added to shared memory
-	utxo := &axc.UTXO{
-		UTXOID: axc.UTXOID{
+	utxo := &avax.UTXO{
+		UTXOID: avax.UTXOID{
 			TxID: ids.GenerateTestID(),
 		},
-		Asset: axc.Asset{
-			ID: vm.ctx.AXCAssetID,
+		Asset: avax.Asset{
+			ID: vm.ctx.AVAXAssetID,
 		},
 		Out: &secp256k1fx.TransferOutput{
 			Amt:          vm.TxFee,
@@ -2554,12 +2554,12 @@ func TestRejectedStateRegressionInvalidValidatorTimestamp(t *testing.T) {
 
 	// Create the import tx that will fail verification
 	unsignedImportTx := &UnsignedImportTx{
-		BaseTx: BaseTx{BaseTx: axc.BaseTx{
+		BaseTx: BaseTx{BaseTx: avax.BaseTx{
 			NetworkID:    vm.ctx.NetworkID,
 			BlockchainID: vm.ctx.ChainID,
 		}},
-		SourceChain: vm.ctx.SwapChainID,
-		ImportedInputs: []*axc.TransferableInput{
+		SourceChain: vm.ctx.XChainID,
+		ImportedInputs: []*avax.TransferableInput{
 			{
 				UTXOID: utxo.UTXOID,
 				Asset:  utxo.Asset,
@@ -2599,8 +2599,8 @@ func TestRejectedStateRegressionInvalidValidatorTimestamp(t *testing.T) {
 	assert.NoError(err)
 
 	vm.ctx.SharedMemory = m.NewSharedMemory(vm.ctx.ChainID)
-	vm.AtomicUTXOManager = axc.NewAtomicUTXOManager(vm.ctx.SharedMemory, Codec)
-	peerSharedMemory := m.NewSharedMemory(vm.ctx.SwapChainID)
+	vm.AtomicUTXOManager = avax.NewAtomicUTXOManager(vm.ctx.SharedMemory, Codec)
+	peerSharedMemory := m.NewSharedMemory(vm.ctx.XChainID)
 
 	utxoBytes, err := Codec.Marshal(CodecVersion, utxo)
 	assert.NoError(err)
@@ -2811,12 +2811,12 @@ func TestRejectedStateRegressionInvalidValidatorReward(t *testing.T) {
 	}
 
 	// Create the UTXO that will be added to shared memory
-	utxo := &axc.UTXO{
-		UTXOID: axc.UTXOID{
+	utxo := &avax.UTXO{
+		UTXOID: avax.UTXOID{
 			TxID: ids.GenerateTestID(),
 		},
-		Asset: axc.Asset{
-			ID: vm.ctx.AXCAssetID,
+		Asset: avax.Asset{
+			ID: vm.ctx.AVAXAssetID,
 		},
 		Out: &secp256k1fx.TransferOutput{
 			Amt:          vm.TxFee,
@@ -2826,12 +2826,12 @@ func TestRejectedStateRegressionInvalidValidatorReward(t *testing.T) {
 
 	// Create the import tx that will fail verification
 	unsignedImportTx := &UnsignedImportTx{
-		BaseTx: BaseTx{BaseTx: axc.BaseTx{
+		BaseTx: BaseTx{BaseTx: avax.BaseTx{
 			NetworkID:    vm.ctx.NetworkID,
 			BlockchainID: vm.ctx.ChainID,
 		}},
-		SourceChain: vm.ctx.SwapChainID,
-		ImportedInputs: []*axc.TransferableInput{
+		SourceChain: vm.ctx.XChainID,
+		ImportedInputs: []*avax.TransferableInput{
 			{
 				UTXOID: utxo.UTXOID,
 				Asset:  utxo.Asset,
@@ -2871,8 +2871,8 @@ func TestRejectedStateRegressionInvalidValidatorReward(t *testing.T) {
 	assert.NoError(err)
 
 	vm.ctx.SharedMemory = m.NewSharedMemory(vm.ctx.ChainID)
-	vm.AtomicUTXOManager = axc.NewAtomicUTXOManager(vm.ctx.SharedMemory, Codec)
-	peerSharedMemory := m.NewSharedMemory(vm.ctx.SwapChainID)
+	vm.AtomicUTXOManager = avax.NewAtomicUTXOManager(vm.ctx.SharedMemory, Codec)
+	peerSharedMemory := m.NewSharedMemory(vm.ctx.XChainID)
 
 	utxoBytes, err := Codec.Marshal(CodecVersion, utxo)
 	assert.NoError(err)

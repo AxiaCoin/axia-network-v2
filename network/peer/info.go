@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package peer
@@ -18,5 +18,5 @@ type Info struct {
 	LastSent       time.Time  `json:"lastSent"`
 	LastReceived   time.Time  `json:"lastReceived"`
 	ObservedUptime json.Uint8 `json:"observedUptime"`
-	TrackedAllychains []ids.ID   `json:"trackedAllychains"`
+	TrackedSubnets []ids.ID   `json:"trackedSubnets"`
 }

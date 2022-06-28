@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package proposer
@@ -26,37 +26,37 @@ var _ Windower = &windower{}
 type Windower interface {
 	Delay(
 		chainHeight,
-		coreChainHeight uint64,
+		pChainHeight uint64,
 		validatorID ids.ShortID,
 	) (time.Duration, error)
 }
 
-// windower interfaces with Core-Chain and it is responsible for calculating the
+// windower interfaces with P-Chain and it is responsible for calculating the
 // delay for the block submission window of a given validator
 type windower struct {
 	state       validators.State
-	allychainID    ids.ID
+	subnetID    ids.ID
 	chainSource uint64
 	sampler     sampler.WeightedWithoutReplacement
 }
 
-func New(state validators.State, allychainID, chainID ids.ID) Windower {
+func New(state validators.State, subnetID, chainID ids.ID) Windower {
 	w := wrappers.Packer{Bytes: chainID[:]}
 	return &windower{
 		state:       state,
-		allychainID:    allychainID,
+		subnetID:    subnetID,
 		chainSource: w.UnpackLong(),
 		sampler:     sampler.NewDeterministicWeightedWithoutReplacement(),
 	}
 }
 
-func (w *windower) Delay(chainHeight, coreChainHeight uint64, validatorID ids.ShortID) (time.Duration, error) {
+func (w *windower) Delay(chainHeight, pChainHeight uint64, validatorID ids.ShortID) (time.Duration, error) {
 	if validatorID == ids.ShortEmpty {
 		return MaxDelay, nil
 	}
 
-	// get the validator set by the core-chain height
-	validatorsMap, err := w.state.GetValidatorSet(coreChainHeight, w.allychainID)
+	// get the validator set by the p-chain height
+	validatorsMap, err := w.state.GetValidatorSet(pChainHeight, w.subnetID)
 	if err != nil {
 		return 0, err
 	}

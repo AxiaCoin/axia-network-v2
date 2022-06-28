@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package platformvm
@@ -11,7 +11,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/utils/constants"
 )
 
-var errBadAllychainID = errors.New("allychain ID can't be primary network ID")
+var errBadSubnetID = errors.New("subnet ID can't be primary network ID")
 
 // Validator is a validator.
 type Validator struct {
@@ -60,22 +60,22 @@ func (v *Validator) BoundedBy(startTime, endTime time.Time) bool {
 	return !v.StartTime().Before(startTime) && !v.EndTime().After(endTime)
 }
 
-// AllychainValidator validates a allychain on the Axia network.
-type AllychainValidator struct {
+// SubnetValidator validates a subnet on the Avalanche network.
+type SubnetValidator struct {
 	Validator `serialize:"true"`
 
-	// ID of the allychain this validator is validating
-	Allychain ids.ID `serialize:"true" json:"allychain"`
+	// ID of the subnet this validator is validating
+	Subnet ids.ID `serialize:"true" json:"subnet"`
 }
 
-// AllychainID is the ID of the allychain this validator is validating
-func (v *AllychainValidator) AllychainID() ids.ID { return v.Allychain }
+// SubnetID is the ID of the subnet this validator is validating
+func (v *SubnetValidator) SubnetID() ids.ID { return v.Subnet }
 
 // Verify this validator is valid
-func (v *AllychainValidator) Verify() error {
-	switch v.Allychain {
+func (v *SubnetValidator) Verify() error {
+	switch v.Subnet {
 	case constants.PrimaryNetworkID:
-		return errBadAllychainID
+		return errBadSubnetID
 	default:
 		return v.Validator.Verify()
 	}

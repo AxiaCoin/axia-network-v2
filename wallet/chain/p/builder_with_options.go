@@ -1,14 +1,14 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package p
 
 import (
 	"github.com/axiacoin/axia-network-v2/ids"
-	"github.com/axiacoin/axia-network-v2/vms/components/axc"
+	"github.com/axiacoin/axia-network-v2/vms/components/avax"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
-	"github.com/axiacoin/axia-network-v2/wallet/allychain/primary/common"
+	"github.com/axiacoin/axia-network-v2/wallet/subnet/primary/common"
 )
 
 var _ Builder = &builderWithOptions{}
@@ -64,11 +64,11 @@ func (b *builderWithOptions) NewAddValidatorTx(
 	)
 }
 
-func (b *builderWithOptions) NewAddAllychainValidatorTx(
-	validator *platformvm.AllychainValidator,
+func (b *builderWithOptions) NewAddSubnetValidatorTx(
+	validator *platformvm.SubnetValidator,
 	options ...common.Option,
-) (*platformvm.UnsignedAddAllychainValidatorTx, error) {
-	return b.Builder.NewAddAllychainValidatorTx(
+) (*platformvm.UnsignedAddSubnetValidatorTx, error) {
+	return b.Builder.NewAddSubnetValidatorTx(
 		validator,
 		common.UnionOptions(b.options, options)...,
 	)
@@ -87,7 +87,7 @@ func (b *builderWithOptions) NewAddDelegatorTx(
 }
 
 func (b *builderWithOptions) NewCreateChainTx(
-	allychainID ids.ID,
+	subnetID ids.ID,
 	genesis []byte,
 	vmID ids.ID,
 	fxIDs []ids.ID,
@@ -95,7 +95,7 @@ func (b *builderWithOptions) NewCreateChainTx(
 	options ...common.Option,
 ) (*platformvm.UnsignedCreateChainTx, error) {
 	return b.Builder.NewCreateChainTx(
-		allychainID,
+		subnetID,
 		genesis,
 		vmID,
 		fxIDs,
@@ -104,11 +104,11 @@ func (b *builderWithOptions) NewCreateChainTx(
 	)
 }
 
-func (b *builderWithOptions) NewCreateAllychainTx(
+func (b *builderWithOptions) NewCreateSubnetTx(
 	owner *secp256k1fx.OutputOwners,
 	options ...common.Option,
-) (*platformvm.UnsignedCreateAllychainTx, error) {
-	return b.Builder.NewCreateAllychainTx(
+) (*platformvm.UnsignedCreateSubnetTx, error) {
+	return b.Builder.NewCreateSubnetTx(
 		owner,
 		common.UnionOptions(b.options, options)...,
 	)
@@ -128,7 +128,7 @@ func (b *builderWithOptions) NewImportTx(
 
 func (b *builderWithOptions) NewExportTx(
 	chainID ids.ID,
-	outputs []*axc.TransferableOutput,
+	outputs []*avax.TransferableOutput,
 	options ...common.Option,
 ) (*platformvm.UnsignedExportTx, error) {
 	return b.Builder.NewExportTx(

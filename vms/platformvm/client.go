@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package platformvm
@@ -53,19 +53,19 @@ type Client interface {
 		startUTXOID string,
 		options ...rpc.Option,
 	) ([][]byte, api.Index, error)
-	// GetAllychains returns information about the specified allychains
-	GetAllychains(context.Context, []ids.ID, ...rpc.Option) ([]APIAllychain, error)
+	// GetSubnets returns information about the specified subnets
+	GetSubnets(context.Context, []ids.ID, ...rpc.Option) ([]APISubnet, error)
 	// GetStakingAssetID returns the assetID of the asset used for staking on
-	// allychain corresponding to [allychainID]
+	// subnet corresponding to [subnetID]
 	GetStakingAssetID(context.Context, ids.ID, ...rpc.Option) (ids.ID, error)
-	// GetCurrentValidators returns the list of current validators for allychain with ID [allychainID]
-	GetCurrentValidators(ctx context.Context, allychainID ids.ID, nodeIDs []ids.ShortID, options ...rpc.Option) ([]interface{}, error)
-	// GetPendingValidators returns the list of pending validators for allychain with ID [allychainID]
-	GetPendingValidators(ctx context.Context, allychainID ids.ID, nodeIDs []ids.ShortID, options ...rpc.Option) ([]interface{}, []interface{}, error)
-	// GetCurrentSupply returns an upper bound on the supply of AXC in the system
+	// GetCurrentValidators returns the list of current validators for subnet with ID [subnetID]
+	GetCurrentValidators(ctx context.Context, subnetID ids.ID, nodeIDs []ids.ShortID, options ...rpc.Option) ([]interface{}, error)
+	// GetPendingValidators returns the list of pending validators for subnet with ID [subnetID]
+	GetPendingValidators(ctx context.Context, subnetID ids.ID, nodeIDs []ids.ShortID, options ...rpc.Option) ([]interface{}, []interface{}, error)
+	// GetCurrentSupply returns an upper bound on the supply of AVAX in the system
 	GetCurrentSupply(ctx context.Context, options ...rpc.Option) (uint64, error)
-	// SampleValidators returns the nodeIDs of a sample of [sampleSize] validators from the current validator set for allychain with ID [allychainID]
-	SampleValidators(ctx context.Context, allychainID ids.ID, sampleSize uint16, options ...rpc.Option) ([]string, error)
+	// SampleValidators returns the nodeIDs of a sample of [sampleSize] validators from the current validator set for subnet with ID [subnetID]
+	SampleValidators(ctx context.Context, subnetID ids.ID, sampleSize uint16, options ...rpc.Option) ([]string, error)
 	// AddValidator issues a transaction to add a validator to the primary network
 	// and returns the txID
 	AddValidator(
@@ -95,22 +95,22 @@ type Client interface {
 		endTime uint64,
 		options ...rpc.Option,
 	) (ids.ID, error)
-	// AddAllychainValidator issues a transaction to add validator [nodeID] to allychain
-	// with ID [allychainID] and returns the txID
-	AddAllychainValidator(
+	// AddSubnetValidator issues a transaction to add validator [nodeID] to subnet
+	// with ID [subnetID] and returns the txID
+	AddSubnetValidator(
 		ctx context.Context,
 		user api.UserPass,
 		from []string,
 		changeAddr string,
-		allychainID,
+		subnetID,
 		nodeID string,
 		stakeAmount,
 		startTime,
 		endTime uint64,
 		options ...rpc.Option,
 	) (ids.ID, error)
-	// CreateAllychain issues a transaction to create [allychain] and returns the txID
-	CreateAllychain(
+	// CreateSubnet issues a transaction to create [subnet] and returns the txID
+	CreateSubnet(
 		ctx context.Context,
 		user api.UserPass,
 		from []string,
@@ -119,8 +119,8 @@ type Client interface {
 		threshold uint32,
 		options ...rpc.Option,
 	) (ids.ID, error)
-	// ExportAXC issues an ExportTx transaction and returns the txID
-	ExportAXC(
+	// ExportAVAX issues an ExportTx transaction and returns the txID
+	ExportAVAX(
 		ctx context.Context,
 		user api.UserPass,
 		from []string,
@@ -129,8 +129,8 @@ type Client interface {
 		amount uint64,
 		options ...rpc.Option,
 	) (ids.ID, error)
-	// ImportAXC issues an ImportTx transaction and returns the txID
-	ImportAXC(
+	// ImportAVAX issues an ImportTx transaction and returns the txID
+	ImportAVAX(
 		ctx context.Context,
 		user api.UserPass,
 		from []string,
@@ -145,7 +145,7 @@ type Client interface {
 		user api.UserPass,
 		from []string,
 		changeAddr string,
-		allychainID ids.ID,
+		subnetID ids.ID,
 		vmID string,
 		fxIDs []string,
 		name string,
@@ -154,10 +154,10 @@ type Client interface {
 	) (ids.ID, error)
 	// GetBlockchainStatus returns the current status of blockchain with ID: [blockchainID]
 	GetBlockchainStatus(ctx context.Context, blockchainID string, options ...rpc.Option) (status.BlockchainStatus, error)
-	// ValidatedBy returns the ID of the Allychain that validates [blockchainID]
+	// ValidatedBy returns the ID of the Subnet that validates [blockchainID]
 	ValidatedBy(ctx context.Context, blockchainID ids.ID, options ...rpc.Option) (ids.ID, error)
-	// Validates returns the list of blockchains that are validated by the allychain with ID [allychainID]
-	Validates(ctx context.Context, allychainID ids.ID, options ...rpc.Option) ([]ids.ID, error)
+	// Validates returns the list of blockchains that are validated by the subnet with ID [subnetID]
+	Validates(ctx context.Context, subnetID ids.ID, options ...rpc.Option) ([]ids.ID, error)
 	// GetBlockchains returns the list of blockchains on the platform
 	GetBlockchains(ctx context.Context, options ...rpc.Option) ([]APIBlockchain, error)
 	// IssueTx issues the transaction and returns its txID
@@ -175,19 +175,19 @@ type Client interface {
 		freq time.Duration,
 		options ...rpc.Option,
 	) (*GetTxStatusResponse, error)
-	// GetStake returns the amount of nAXC that [addresses] have cumulatively
+	// GetStake returns the amount of nAVAX that [addresses] have cumulatively
 	// staked on the Primary Network.
 	GetStake(ctx context.Context, addrs []string, options ...rpc.Option) (*GetStakeReply, error)
-	// GetMinStake returns the minimum staking amount in nAXC for validators
+	// GetMinStake returns the minimum staking amount in nAVAX for validators
 	// and delegators respectively
 	GetMinStake(ctx context.Context, options ...rpc.Option) (uint64, uint64, error)
-	// GetTotalStake returns the total amount (in nAXC) staked on the network
+	// GetTotalStake returns the total amount (in nAVAX) staked on the network
 	GetTotalStake(ctx context.Context, options ...rpc.Option) (uint64, error)
-	// GetMaxStakeAmount returns the maximum amount of nAXC staking to the named
+	// GetMaxStakeAmount returns the maximum amount of nAVAX staking to the named
 	// node during the time period.
 	GetMaxStakeAmount(
 		ctx context.Context,
-		allychainID ids.ID,
+		subnetID ids.ID,
 		nodeID string,
 		startTime uint64,
 		endTime uint64,
@@ -197,9 +197,9 @@ type Client interface {
 	GetRewardUTXOs(context.Context, *api.GetTxArgs, ...rpc.Option) ([][]byte, error)
 	// GetTimestamp returns the current chain timestamp
 	GetTimestamp(ctx context.Context, options ...rpc.Option) (time.Time, error)
-	// GetValidatorsAt returns the weights of the validator set of a provided allychain
+	// GetValidatorsAt returns the weights of the validator set of a provided subnet
 	// at the specified height.
-	GetValidatorsAt(ctx context.Context, allychainID ids.ID, height uint64, options ...rpc.Option) (map[string]uint64, error)
+	GetValidatorsAt(ctx context.Context, subnetID ids.ID, height uint64, options ...rpc.Option) (map[string]uint64, error)
 	// GetBlock returns the block with the given id.
 	GetBlock(ctx context.Context, blockID ids.ID, options ...rpc.Option) ([]byte, error)
 }
@@ -306,25 +306,25 @@ func (c *client) GetAtomicUTXOs(
 	return utxos, res.EndIndex, nil
 }
 
-func (c *client) GetAllychains(ctx context.Context, ids []ids.ID, options ...rpc.Option) ([]APIAllychain, error) {
-	res := &GetAllychainsResponse{}
-	err := c.requester.SendRequest(ctx, "getAllychains", &GetAllychainsArgs{
+func (c *client) GetSubnets(ctx context.Context, ids []ids.ID, options ...rpc.Option) ([]APISubnet, error) {
+	res := &GetSubnetsResponse{}
+	err := c.requester.SendRequest(ctx, "getSubnets", &GetSubnetsArgs{
 		IDs: ids,
 	}, res, options...)
-	return res.Allychains, err
+	return res.Subnets, err
 }
 
-func (c *client) GetStakingAssetID(ctx context.Context, allychainID ids.ID, options ...rpc.Option) (ids.ID, error) {
+func (c *client) GetStakingAssetID(ctx context.Context, subnetID ids.ID, options ...rpc.Option) (ids.ID, error) {
 	res := &GetStakingAssetIDResponse{}
 	err := c.requester.SendRequest(ctx, "getStakingAssetID", &GetStakingAssetIDArgs{
-		AllychainID: allychainID,
+		SubnetID: subnetID,
 	}, res, options...)
 	return res.AssetID, err
 }
 
 func (c *client) GetCurrentValidators(
 	ctx context.Context,
-	allychainID ids.ID,
+	subnetID ids.ID,
 	nodeIDs []ids.ShortID,
 	options ...rpc.Option,
 ) ([]interface{}, error) {
@@ -334,7 +334,7 @@ func (c *client) GetCurrentValidators(
 	}
 	res := &GetCurrentValidatorsReply{}
 	err := c.requester.SendRequest(ctx, "getCurrentValidators", &GetCurrentValidatorsArgs{
-		AllychainID: allychainID,
+		SubnetID: subnetID,
 		NodeIDs:  nodeIDsStr,
 	}, res, options...)
 	return res.Validators, err
@@ -342,7 +342,7 @@ func (c *client) GetCurrentValidators(
 
 func (c *client) GetPendingValidators(
 	ctx context.Context,
-	allychainID ids.ID,
+	subnetID ids.ID,
 	nodeIDs []ids.ShortID,
 	options ...rpc.Option,
 ) ([]interface{}, []interface{}, error) {
@@ -352,7 +352,7 @@ func (c *client) GetPendingValidators(
 	}
 	res := &GetPendingValidatorsReply{}
 	err := c.requester.SendRequest(ctx, "getPendingValidators", &GetPendingValidatorsArgs{
-		AllychainID: allychainID,
+		SubnetID: subnetID,
 		NodeIDs:  nodeIDsStr,
 	}, res, options...)
 	return res.Validators, res.Delegators, err
@@ -364,10 +364,10 @@ func (c *client) GetCurrentSupply(ctx context.Context, options ...rpc.Option) (u
 	return uint64(res.Supply), err
 }
 
-func (c *client) SampleValidators(ctx context.Context, allychainID ids.ID, sampleSize uint16, options ...rpc.Option) ([]string, error) {
+func (c *client) SampleValidators(ctx context.Context, subnetID ids.ID, sampleSize uint16, options ...rpc.Option) ([]string, error) {
 	res := &SampleValidatorsReply{}
 	err := c.requester.SendRequest(ctx, "sampleValidators", &SampleValidatorsArgs{
-		AllychainID: allychainID,
+		SubnetID: subnetID,
 		Size:     json.Uint16(sampleSize),
 	}, res, options...)
 	return res.Validators, err
@@ -435,12 +435,12 @@ func (c *client) AddDelegator(
 	return res.TxID, err
 }
 
-func (c *client) AddAllychainValidator(
+func (c *client) AddSubnetValidator(
 	ctx context.Context,
 	user api.UserPass,
 	from []string,
 	changeAddr string,
-	allychainID,
+	subnetID,
 	nodeID string,
 	stakeAmount,
 	startTime,
@@ -449,7 +449,7 @@ func (c *client) AddAllychainValidator(
 ) (ids.ID, error) {
 	res := &api.JSONTxID{}
 	jsonStakeAmount := json.Uint64(stakeAmount)
-	err := c.requester.SendRequest(ctx, "addAllychainValidator", &AddAllychainValidatorArgs{
+	err := c.requester.SendRequest(ctx, "addSubnetValidator", &AddSubnetValidatorArgs{
 		JSONSpendHeader: api.JSONSpendHeader{
 			UserPass:       user,
 			JSONFromAddrs:  api.JSONFromAddrs{From: from},
@@ -461,12 +461,12 @@ func (c *client) AddAllychainValidator(
 			StartTime:   json.Uint64(startTime),
 			EndTime:     json.Uint64(endTime),
 		},
-		AllychainID: allychainID,
+		SubnetID: subnetID,
 	}, res, options...)
 	return res.TxID, err
 }
 
-func (c *client) CreateAllychain(
+func (c *client) CreateSubnet(
 	ctx context.Context,
 	user api.UserPass,
 	from []string,
@@ -476,13 +476,13 @@ func (c *client) CreateAllychain(
 	options ...rpc.Option,
 ) (ids.ID, error) {
 	res := &api.JSONTxID{}
-	err := c.requester.SendRequest(ctx, "createAllychain", &CreateAllychainArgs{
+	err := c.requester.SendRequest(ctx, "createSubnet", &CreateSubnetArgs{
 		JSONSpendHeader: api.JSONSpendHeader{
 			UserPass:       user,
 			JSONFromAddrs:  api.JSONFromAddrs{From: from},
 			JSONChangeAddr: api.JSONChangeAddr{ChangeAddr: changeAddr},
 		},
-		APIAllychain: APIAllychain{
+		APISubnet: APISubnet{
 			ControlKeys: controlKeys,
 			Threshold:   json.Uint32(threshold),
 		},
@@ -490,7 +490,7 @@ func (c *client) CreateAllychain(
 	return res.TxID, err
 }
 
-func (c *client) ExportAXC(
+func (c *client) ExportAVAX(
 	ctx context.Context,
 	user api.UserPass,
 	from []string,
@@ -500,7 +500,7 @@ func (c *client) ExportAXC(
 	options ...rpc.Option,
 ) (ids.ID, error) {
 	res := &api.JSONTxID{}
-	err := c.requester.SendRequest(ctx, "exportAXC", &ExportAXCArgs{
+	err := c.requester.SendRequest(ctx, "exportAVAX", &ExportAVAXArgs{
 		JSONSpendHeader: api.JSONSpendHeader{
 			UserPass:       user,
 			JSONFromAddrs:  api.JSONFromAddrs{From: from},
@@ -512,7 +512,7 @@ func (c *client) ExportAXC(
 	return res.TxID, err
 }
 
-func (c *client) ImportAXC(
+func (c *client) ImportAVAX(
 	ctx context.Context,
 	user api.UserPass,
 	from []string,
@@ -522,7 +522,7 @@ func (c *client) ImportAXC(
 	options ...rpc.Option,
 ) (ids.ID, error) {
 	res := &api.JSONTxID{}
-	err := c.requester.SendRequest(ctx, "importAXC", &ImportAXCArgs{
+	err := c.requester.SendRequest(ctx, "importAVAX", &ImportAVAXArgs{
 		JSONSpendHeader: api.JSONSpendHeader{
 			UserPass:       user,
 			JSONFromAddrs:  api.JSONFromAddrs{From: from},
@@ -539,7 +539,7 @@ func (c *client) CreateBlockchain(
 	user api.UserPass,
 	from []string,
 	changeAddr string,
-	allychainID ids.ID,
+	subnetID ids.ID,
 	vmID string,
 	fxIDs []string,
 	name string,
@@ -558,7 +558,7 @@ func (c *client) CreateBlockchain(
 			JSONFromAddrs:  api.JSONFromAddrs{From: from},
 			JSONChangeAddr: api.JSONChangeAddr{ChangeAddr: changeAddr},
 		},
-		AllychainID:    allychainID,
+		SubnetID:    subnetID,
 		VMID:        vmID,
 		FxIDs:       fxIDs,
 		Name:        name,
@@ -581,13 +581,13 @@ func (c *client) ValidatedBy(ctx context.Context, blockchainID ids.ID, options .
 	err := c.requester.SendRequest(ctx, "validatedBy", &ValidatedByArgs{
 		BlockchainID: blockchainID,
 	}, res, options...)
-	return res.AllychainID, err
+	return res.SubnetID, err
 }
 
-func (c *client) Validates(ctx context.Context, allychainID ids.ID, options ...rpc.Option) ([]ids.ID, error) {
+func (c *client) Validates(ctx context.Context, subnetID ids.ID, options ...rpc.Option) ([]ids.ID, error) {
 	res := &ValidatesResponse{}
 	err := c.requester.SendRequest(ctx, "validates", &ValidatesArgs{
-		AllychainID: allychainID,
+		SubnetID: subnetID,
 	}, res, options...)
 	return res.BlockchainIDs, err
 }
@@ -674,10 +674,10 @@ func (c *client) GetTotalStake(ctx context.Context, options ...rpc.Option) (uint
 	return uint64(res.Stake), err
 }
 
-func (c *client) GetMaxStakeAmount(ctx context.Context, allychainID ids.ID, nodeID string, startTime, endTime uint64, options ...rpc.Option) (uint64, error) {
+func (c *client) GetMaxStakeAmount(ctx context.Context, subnetID ids.ID, nodeID string, startTime, endTime uint64, options ...rpc.Option) (uint64, error) {
 	res := new(GetMaxStakeAmountReply)
 	err := c.requester.SendRequest(ctx, "getMaxStakeAmount", &GetMaxStakeAmountArgs{
-		AllychainID:  allychainID,
+		SubnetID:  subnetID,
 		NodeID:    nodeID,
 		StartTime: json.Uint64(startTime),
 		EndTime:   json.Uint64(endTime),
@@ -708,10 +708,10 @@ func (c *client) GetTimestamp(ctx context.Context, options ...rpc.Option) (time.
 	return res.Timestamp, err
 }
 
-func (c *client) GetValidatorsAt(ctx context.Context, allychainID ids.ID, height uint64, options ...rpc.Option) (map[string]uint64, error) {
+func (c *client) GetValidatorsAt(ctx context.Context, subnetID ids.ID, height uint64, options ...rpc.Option) (map[string]uint64, error) {
 	res := &GetValidatorsAtReply{}
 	err := c.requester.SendRequest(ctx, "getValidatorsAt", &GetValidatorsAtArgs{
-		AllychainID: allychainID,
+		SubnetID: subnetID,
 		Height:   json.Uint64(height),
 	}, res, options...)
 	return res.Validators, err

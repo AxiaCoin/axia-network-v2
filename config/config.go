@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package config
@@ -28,7 +28,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/network/dialer"
 	"github.com/axiacoin/axia-network-v2/network/throttling"
 	"github.com/axiacoin/axia-network-v2/node"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/axia"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/avalanche"
 	"github.com/axiacoin/axia-network-v2/snow/consensus/snowball"
 	"github.com/axiacoin/axia-network-v2/snow/networking/benchlist"
 	"github.com/axiacoin/axia-network-v2/snow/networking/router"
@@ -49,7 +49,7 @@ const (
 	pluginsDirName       = "plugins"
 	chainConfigFileName  = "config"
 	chainUpgradeFileName = "upgrade"
-	allychainConfigFileExt  = ".json"
+	subnetConfigFileExt  = ".json"
 )
 
 var (
@@ -80,7 +80,7 @@ func GetRunnerConfig(v *viper.Viper) (runner.Config, error) {
 	// Build directory should have this structure:
 	//
 	// build
-	// ├── axia (the binary from compiling the app directory)
+	// ├── avalanchego (the binary from compiling the app directory)
 	// └── plugins
 	//     └── evm
 	validBuildDir := func(dir string) bool {
@@ -114,8 +114,8 @@ func GetRunnerConfig(v *viper.Viper) (runner.Config, error) {
 	return config, nil
 }
 
-func getConsensusConfig(v *viper.Viper) axia.Parameters {
-	return axia.Parameters{
+func getConsensusConfig(v *viper.Viper) avalanche.Parameters {
+	return avalanche.Parameters{
 		Parameters: snowball.Parameters{
 			K:                     v.GetInt(SnowSampleSizeKey),
 			Alpha:                 v.GetInt(SnowQuorumSizeKey),
@@ -126,8 +126,8 @@ func getConsensusConfig(v *viper.Viper) axia.Parameters {
 			MaxOutstandingItems:   v.GetInt(SnowMaxProcessingKey),
 			MaxItemProcessingTime: v.GetDuration(SnowMaxTimeProcessingKey),
 		},
-		BatchSize: v.GetInt(SnowAxiaBatchSizeKey),
-		Parents:   v.GetInt(SnowAxiaNumParentsKey),
+		BatchSize: v.GetInt(SnowAvalancheBatchSizeKey),
+		Parents:   v.GetInt(SnowAvalancheNumParentsKey),
 	}
 }
 
@@ -640,7 +640,7 @@ func getStakingConfig(v *viper.Viper, networkID uint32) (node.StakingConfig, err
 		return node.StakingConfig{}, errInvalidStakerWeights
 	}
 
-	if !config.EnableStaking && (networkID == constants.MainnetID || networkID == constants.TestID) {
+	if !config.EnableStaking && (networkID == constants.MainnetID || networkID == constants.FujiID) {
 		return node.StakingConfig{}, errStakingDisableOnPublicNetwork
 	}
 
@@ -649,7 +649,7 @@ func getStakingConfig(v *viper.Viper, networkID uint32) (node.StakingConfig, err
 	if err != nil {
 		return node.StakingConfig{}, err
 	}
-	if networkID != constants.MainnetID && networkID != constants.TestID {
+	if networkID != constants.MainnetID && networkID != constants.FujiID {
 		config.UptimeRequirement = v.GetFloat64(UptimeRequirementKey)
 		config.MinValidatorStake = v.GetUint64(MinValidatorStakeKey)
 		config.MaxValidatorStake = v.GetUint64(MaxValidatorStakeKey)
@@ -684,11 +684,11 @@ func getStakingConfig(v *viper.Viper, networkID uint32) (node.StakingConfig, err
 }
 
 func getTxFeeConfig(v *viper.Viper, networkID uint32) genesis.TxFeeConfig {
-	if networkID != constants.MainnetID && networkID != constants.TestID {
+	if networkID != constants.MainnetID && networkID != constants.FujiID {
 		return genesis.TxFeeConfig{
 			TxFee:                 v.GetUint64(TxFeeKey),
 			CreateAssetTxFee:      v.GetUint64(CreateAssetTxFeeKey),
-			CreateAllychainTxFee:     v.GetUint64(CreateAllychainTxFeeKey),
+			CreateSubnetTxFee:     v.GetUint64(CreateSubnetTxFeeKey),
 			CreateBlockchainTxFee: v.GetUint64(CreateBlockchainTxFeeKey),
 		}
 	}
@@ -713,22 +713,22 @@ func getGenesisData(v *viper.Viper, networkID uint32) ([]byte, ids.ID, error) {
 	return genesis.FromConfig(config)
 }
 
-func getWhitelistedAllychains(v *viper.Viper) (ids.Set, error) {
-	whitelistedAllychainIDs := ids.Set{}
-	for _, allychain := range strings.Split(v.GetString(WhitelistedAllychainsKey), ",") {
-		if allychain == "" {
+func getWhitelistedSubnets(v *viper.Viper) (ids.Set, error) {
+	whitelistedSubnetIDs := ids.Set{}
+	for _, subnet := range strings.Split(v.GetString(WhitelistedSubnetsKey), ",") {
+		if subnet == "" {
 			continue
 		}
-		allychainID, err := ids.FromString(allychain)
+		subnetID, err := ids.FromString(subnet)
 		if err != nil {
-			return nil, fmt.Errorf("couldn't parse allychainID %q: %w", allychain, err)
+			return nil, fmt.Errorf("couldn't parse subnetID %q: %w", subnet, err)
 		}
-		if allychainID == constants.PrimaryNetworkID {
+		if subnetID == constants.PrimaryNetworkID {
 			return nil, errCannotWhitelistPrimaryNetwork
 		}
-		whitelistedAllychainIDs.Add(allychainID)
+		whitelistedSubnetIDs.Add(subnetID)
 	}
-	return whitelistedAllychainIDs, nil
+	return whitelistedSubnetIDs, nil
 }
 
 func getDatabaseConfig(v *viper.Viper, networkID uint32) (node.DatabaseConfig, error) {
@@ -908,69 +908,69 @@ func readChainConfigPath(chainConfigPath string) (map[string]chains.ChainConfig,
 	return chainConfigMap, nil
 }
 
-func getAllychainConfigsFromFlags(v *viper.Viper, allychainIDs []ids.ID) (map[ids.ID]chains.AllychainConfig, error) {
-	allychainConfigContentB64 := v.GetString(AllychainConfigContentKey)
-	allychainConfigContent, err := base64.StdEncoding.DecodeString(allychainConfigContentB64)
+func getSubnetConfigsFromFlags(v *viper.Viper, subnetIDs []ids.ID) (map[ids.ID]chains.SubnetConfig, error) {
+	subnetConfigContentB64 := v.GetString(SubnetConfigContentKey)
+	subnetConfigContent, err := base64.StdEncoding.DecodeString(subnetConfigContentB64)
 	if err != nil {
 		return nil, fmt.Errorf("unable to decode base64 content: %w", err)
 	}
 
 	// partially parse configs to be filled by defaults later
-	allychainConfigs := make(map[ids.ID]json.RawMessage, len(allychainIDs))
-	if err := json.Unmarshal(allychainConfigContent, &allychainConfigs); err != nil {
+	subnetConfigs := make(map[ids.ID]json.RawMessage, len(subnetIDs))
+	if err := json.Unmarshal(subnetConfigContent, &subnetConfigs); err != nil {
 		return nil, fmt.Errorf("could not unmarshal JSON: %w", err)
 	}
 
-	res := make(map[ids.ID]chains.AllychainConfig)
-	for _, allychainID := range allychainIDs {
-		if rawAllychainConfigBytes, ok := allychainConfigs[allychainID]; ok {
-			allychainConfig := defaultAllychainConfig(v)
-			if err := json.Unmarshal(rawAllychainConfigBytes, &allychainConfig); err != nil {
+	res := make(map[ids.ID]chains.SubnetConfig)
+	for _, subnetID := range subnetIDs {
+		if rawSubnetConfigBytes, ok := subnetConfigs[subnetID]; ok {
+			subnetConfig := defaultSubnetConfig(v)
+			if err := json.Unmarshal(rawSubnetConfigBytes, &subnetConfig); err != nil {
 				return nil, err
 			}
-			if err := allychainConfig.ConsensusParameters.Valid(); err != nil {
+			if err := subnetConfig.ConsensusParameters.Valid(); err != nil {
 				return nil, err
 			}
-			res[allychainID] = allychainConfig
+			res[subnetID] = subnetConfig
 		}
 	}
 	return res, nil
 }
 
-// getAllychainConfigs reads AllychainConfigs to node config map
-func getAllychainConfigsFromDir(v *viper.Viper, allychainIDs []ids.ID) (map[ids.ID]chains.AllychainConfig, error) {
-	allychainConfigPath, err := getPathFromDirKey(v, AllychainConfigDirKey)
+// getSubnetConfigs reads SubnetConfigs to node config map
+func getSubnetConfigsFromDir(v *viper.Viper, subnetIDs []ids.ID) (map[ids.ID]chains.SubnetConfig, error) {
+	subnetConfigPath, err := getPathFromDirKey(v, SubnetConfigDirKey)
 	if err != nil {
 		return nil, err
 	}
-	if len(allychainConfigPath) == 0 {
-		// allychain config path does not exist but not explicitly specified, so ignore it
-		return make(map[ids.ID]chains.AllychainConfig), nil
+	if len(subnetConfigPath) == 0 {
+		// subnet config path does not exist but not explicitly specified, so ignore it
+		return make(map[ids.ID]chains.SubnetConfig), nil
 	}
 
-	allychainConfigs, err := readAllychainConfigs(allychainConfigPath, allychainIDs, defaultAllychainConfig(v))
+	subnetConfigs, err := readSubnetConfigs(subnetConfigPath, subnetIDs, defaultSubnetConfig(v))
 	if err != nil {
-		return nil, fmt.Errorf("couldn't read allychain configs: %w", err)
+		return nil, fmt.Errorf("couldn't read subnet configs: %w", err)
 	}
-	return allychainConfigs, nil
+	return subnetConfigs, nil
 }
 
-func getAllychainConfigs(v *viper.Viper, allychainIDs []ids.ID) (map[ids.ID]chains.AllychainConfig, error) {
-	if v.IsSet(AllychainConfigContentKey) {
-		return getAllychainConfigsFromFlags(v, allychainIDs)
+func getSubnetConfigs(v *viper.Viper, subnetIDs []ids.ID) (map[ids.ID]chains.SubnetConfig, error) {
+	if v.IsSet(SubnetConfigContentKey) {
+		return getSubnetConfigsFromFlags(v, subnetIDs)
 	}
-	return getAllychainConfigsFromDir(v, allychainIDs)
+	return getSubnetConfigsFromDir(v, subnetIDs)
 }
 
-// readAllychainConfigs reads allychain config files from a path and given allychainIDs and returns a map.
-func readAllychainConfigs(allychainConfigPath string, allychainIDs []ids.ID, defaultAllychainConfig chains.AllychainConfig) (map[ids.ID]chains.AllychainConfig, error) {
-	allychainConfigs := make(map[ids.ID]chains.AllychainConfig)
-	for _, allychainID := range allychainIDs {
-		filePath := filepath.Join(allychainConfigPath, allychainID.String()+allychainConfigFileExt)
+// readSubnetConfigs reads subnet config files from a path and given subnetIDs and returns a map.
+func readSubnetConfigs(subnetConfigPath string, subnetIDs []ids.ID, defaultSubnetConfig chains.SubnetConfig) (map[ids.ID]chains.SubnetConfig, error) {
+	subnetConfigs := make(map[ids.ID]chains.SubnetConfig)
+	for _, subnetID := range subnetIDs {
+		filePath := filepath.Join(subnetConfigPath, subnetID.String()+subnetConfigFileExt)
 		fileInfo, err := os.Stat(filePath)
 		switch {
 		case errors.Is(err, os.ErrNotExist):
-			// this allychain config does not exist, move to the next one
+			// this subnet config does not exist, move to the next one
 			continue
 		case err != nil:
 			return nil, err
@@ -978,27 +978,27 @@ func readAllychainConfigs(allychainConfigPath string, allychainIDs []ids.ID, def
 			return nil, fmt.Errorf("%q is a directory, expected a file", fileInfo.Name())
 		}
 
-		// allychainConfigDir/allychainID.json
+		// subnetConfigDir/subnetID.json
 		file, err := os.ReadFile(filePath)
 		if err != nil {
 			return nil, err
 		}
 
-		configData := defaultAllychainConfig
+		configData := defaultSubnetConfig
 		if err := json.Unmarshal(file, &configData); err != nil {
 			return nil, err
 		}
 		if err := configData.ConsensusParameters.Valid(); err != nil {
 			return nil, err
 		}
-		allychainConfigs[allychainID] = configData
+		subnetConfigs[subnetID] = configData
 	}
 
-	return allychainConfigs, nil
+	return subnetConfigs, nil
 }
 
-func defaultAllychainConfig(v *viper.Viper) chains.AllychainConfig {
-	return chains.AllychainConfig{
+func defaultSubnetConfig(v *viper.Viper) chains.SubnetConfig {
+	return chains.SubnetConfig{
 		ConsensusParameters: getConsensusConfig(v),
 		ValidatorOnly:       false,
 		GossipConfig:        getGossipConfig(v),
@@ -1058,8 +1058,8 @@ func GetNodeConfig(v *viper.Viper, buildDir string) (node.Config, error) {
 		return node.Config{}, err
 	}
 
-	// Whitelisted Allychains
-	nodeConfig.WhitelistedAllychains, err = getWhitelistedAllychains(v)
+	// Whitelisted Subnets
+	nodeConfig.WhitelistedSubnets, err = getWhitelistedSubnets(v)
 	if err != nil {
 		return node.Config{}, err
 	}
@@ -1118,7 +1118,7 @@ func GetNodeConfig(v *viper.Viper, buildDir string) (node.Config, error) {
 	nodeConfig.TxFeeConfig = getTxFeeConfig(v, nodeConfig.NetworkID)
 
 	// Genesis Data
-	nodeConfig.GenesisBytes, nodeConfig.AxcAssetID, err = getGenesisData(v, nodeConfig.NetworkID)
+	nodeConfig.GenesisBytes, nodeConfig.AvaxAssetID, err = getGenesisData(v, nodeConfig.NetworkID)
 	if err != nil {
 		return node.Config{}, fmt.Errorf("unable to load genesis file: %w", err)
 	}
@@ -1135,12 +1135,12 @@ func GetNodeConfig(v *viper.Viper, buildDir string) (node.Config, error) {
 		return node.Config{}, err
 	}
 
-	// Allychain Configs
-	allychainConfigs, err := getAllychainConfigs(v, nodeConfig.WhitelistedAllychains.List())
+	// Subnet Configs
+	subnetConfigs, err := getSubnetConfigs(v, nodeConfig.WhitelistedSubnets.List())
 	if err != nil {
 		return node.Config{}, err
 	}
-	nodeConfig.AllychainConfigs = allychainConfigs
+	nodeConfig.SubnetConfigs = subnetConfigs
 
 	// Chain Configs
 	nodeConfig.ChainConfigs, err = getChainConfigs(v)

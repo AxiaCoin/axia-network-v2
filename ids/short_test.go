@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package ids
@@ -11,10 +11,10 @@ import (
 func TestShortString(t *testing.T) {
 	id := ShortID{1}
 
-	xPrefixedID := id.PrefixedString("Swap-")
+	xPrefixedID := id.PrefixedString("X-")
 	pPrefixedID := id.PrefixedString("P-")
 
-	newID, err := ShortFromPrefixedString(xPrefixedID, "Swap-")
+	newID, err := ShortFromPrefixedString(xPrefixedID, "X-")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -22,7 +22,7 @@ func TestShortString(t *testing.T) {
 		t.Fatalf("ShortFromPrefixedString did not produce the identical ID")
 	}
 
-	_, err = ShortFromPrefixedString(pPrefixedID, "Swap-")
+	_, err = ShortFromPrefixedString(pPrefixedID, "X-")
 	if err == nil {
 		t.Fatal("Using the incorrect prefix did not cause an error")
 	}

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package common
@@ -12,7 +12,7 @@ import (
 // DefaultConfigTest returns a test configuration
 func DefaultConfigTest() Config {
 	isBootstrapped := false
-	allychain := &AllychainTest{
+	subnet := &SubnetTest{
 		IsBootstrappedF: func() bool { return isBootstrapped },
 		BootstrappedF:   func(ids.ID) { isBootstrapped = true },
 	}
@@ -23,7 +23,7 @@ func DefaultConfigTest() Config {
 		Beacons:                        validators.NewSet(),
 		Sender:                         &SenderTest{},
 		Bootstrapable:                  &BootstrapableTest{},
-		Allychain:                         allychain,
+		Subnet:                         subnet,
 		Timer:                          &TimerTest{},
 		AncestorsMaxContainersSent:     2000,
 		AncestorsMaxContainersReceived: 2000,

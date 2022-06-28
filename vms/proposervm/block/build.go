@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package block
@@ -17,14 +17,14 @@ import (
 func BuildUnsigned(
 	parentID ids.ID,
 	timestamp time.Time,
-	coreChainHeight uint64,
+	pChainHeight uint64,
 	blockBytes []byte,
 ) (SignedBlock, error) {
 	var block SignedBlock = &statelessBlock{
 		StatelessBlock: statelessUnsignedBlock{
 			ParentID:     parentID,
 			Timestamp:    timestamp.Unix(),
-			CoreChainHeight: coreChainHeight,
+			PChainHeight: pChainHeight,
 			Certificate:  nil,
 			Block:        blockBytes,
 		},
@@ -41,7 +41,7 @@ func BuildUnsigned(
 func Build(
 	parentID ids.ID,
 	timestamp time.Time,
-	coreChainHeight uint64,
+	pChainHeight uint64,
 	cert *x509.Certificate,
 	blockBytes []byte,
 	chainID ids.ID,
@@ -51,7 +51,7 @@ func Build(
 		StatelessBlock: statelessUnsignedBlock{
 			ParentID:     parentID,
 			Timestamp:    timestamp.Unix(),
-			CoreChainHeight: coreChainHeight,
+			PChainHeight: pChainHeight,
 			Certificate:  cert.Raw,
 			Block:        blockBytes,
 		},

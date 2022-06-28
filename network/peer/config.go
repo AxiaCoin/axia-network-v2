@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package peer
@@ -31,7 +31,7 @@ type Config struct {
 	Router               router.InboundHandler
 	VersionCompatibility version.Compatibility
 	VersionParser        version.ApplicationParser
-	MyAllychains            ids.Set
+	MySubnets            ids.Set
 	Beacons              validators.Set
 	NetworkID            uint32
 	PingFrequency        time.Duration

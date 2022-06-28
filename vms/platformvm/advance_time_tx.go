@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package platformvm
@@ -9,7 +9,7 @@ import (
 
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow"
-	"github.com/axiacoin/axia-network-v2/vms/components/axc"
+	"github.com/axiacoin/axia-network-v2/vms/components/avax"
 
 	safemath "github.com/axiacoin/axia-network-v2/utils/math"
 )
@@ -23,7 +23,7 @@ var _ UnsignedProposalTx = &UnsignedAdvanceTimeTx{}
 //   * proposed timestamp > [current chain time]
 //   * proposed timestamp <= [time for next staker set change]
 type UnsignedAdvanceTimeTx struct {
-	axc.Metadata
+	avax.Metadata
 
 	// Unix time this block proposes increasing the timestamp to
 	Time uint64 `serialize:"true" json:"time"`
@@ -155,7 +155,7 @@ pendingStakerLoop:
 				potentialReward: r,
 			})
 			numToRemoveFromPending++
-		case *UnsignedAddAllychainValidatorTx:
+		case *UnsignedAddSubnetValidatorTx:
 			if staker.StartTime().After(txTimestamp) {
 				break pendingStakerLoop
 			}
@@ -175,12 +175,12 @@ pendingStakerLoop:
 	currentStakers := parentState.CurrentStakerChainState()
 	numToRemoveFromCurrent := 0
 
-	// Remove from the staker set any allychain validators whose endTime is at or
+	// Remove from the staker set any subnet validators whose endTime is at or
 	// before the new timestamp
 currentStakerLoop:
 	for _, tx := range currentStakers.Stakers() {
 		switch staker := tx.UnsignedTx.(type) {
-		case *UnsignedAddAllychainValidatorTx:
+		case *UnsignedAddSubnetValidatorTx:
 			if staker.EndTime().After(txTimestamp) {
 				break currentStakerLoop
 			}

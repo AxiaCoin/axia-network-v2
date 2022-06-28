@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package info
@@ -49,7 +49,7 @@ type Parameters struct {
 	NetworkID             uint32
 	TxFee                 uint64
 	CreateAssetTxFee      uint64
-	CreateAllychainTxFee     uint64
+	CreateSubnetTxFee     uint64
 	CreateBlockchainTxFee uint64
 	VMManager             vms.Manager
 }
@@ -293,16 +293,16 @@ type GetTxFeeResponse struct {
 	// TODO: remove [CreationTxFee] after enough time for dependencies to update
 	CreationTxFee         json.Uint64 `json:"creationTxFee"`
 	CreateAssetTxFee      json.Uint64 `json:"createAssetTxFee"`
-	CreateAllychainTxFee     json.Uint64 `json:"createAllychainTxFee"`
+	CreateSubnetTxFee     json.Uint64 `json:"createSubnetTxFee"`
 	CreateBlockchainTxFee json.Uint64 `json:"createBlockchainTxFee"`
 }
 
-// GetTxFee returns the transaction fee in nAXC.
+// GetTxFee returns the transaction fee in nAVAX.
 func (service *Info) GetTxFee(_ *http.Request, args *struct{}, reply *GetTxFeeResponse) error {
 	reply.TxFee = json.Uint64(service.TxFee)
 	reply.CreationTxFee = json.Uint64(service.CreateAssetTxFee)
 	reply.CreateAssetTxFee = json.Uint64(service.CreateAssetTxFee)
-	reply.CreateAllychainTxFee = json.Uint64(service.CreateAllychainTxFee)
+	reply.CreateSubnetTxFee = json.Uint64(service.CreateSubnetTxFee)
 	reply.CreateBlockchainTxFee = json.Uint64(service.CreateBlockchainTxFee)
 	return nil
 }

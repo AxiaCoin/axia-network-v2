@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package platformvm
@@ -14,13 +14,13 @@ import (
 	"github.com/axiacoin/axia-network-v2/utils/constants"
 	"github.com/axiacoin/axia-network-v2/utils/formatting"
 	"github.com/axiacoin/axia-network-v2/utils/json"
-	"github.com/axiacoin/axia-network-v2/vms/components/axc"
+	"github.com/axiacoin/axia-network-v2/vms/components/avax"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 
 	safemath "github.com/axiacoin/axia-network-v2/utils/math"
 )
 
-// Note that since an Axia network has exactly one Platform Chain,
+// Note that since an Avalanche network has exactly one Platform Chain,
 // and the Platform Chain defines the genesis state of the network
 // (who is staking, which chains exist, etc.), defining the genesis
 // state of the Platform Chain is the same as defining the genesis
@@ -104,13 +104,13 @@ func (v *APIStaker) weight() uint64 {
 // [VMID] is the ID of the VM this chain runs.
 // [FxIDs] are the IDs of the Fxs the chain supports.
 // [Name] is a human-readable, non-unique name for the chain.
-// [AllychainID] is the ID of the allychain that validates the chain
+// [SubnetID] is the ID of the subnet that validates the chain
 type APIChain struct {
 	GenesisData string   `json:"genesisData"`
 	VMID        ids.ID   `json:"vmID"`
 	FxIDs       []ids.ID `json:"fxIDs"`
 	Name        string   `json:"name"`
-	AllychainID    ids.ID   `json:"allychainID"`
+	SubnetID    ids.ID   `json:"subnetID"`
 }
 
 // BuildGenesisArgs are the arguments used to create
@@ -121,7 +121,7 @@ type APIChain struct {
 // [Chains] are the chains that exist at genesis.
 // [Time] is the Platform Chain's time at network genesis.
 type BuildGenesisArgs struct {
-	AxcAssetID   ids.ID                `json:"axcAssetID"`
+	AvaxAssetID   ids.ID                `json:"avaxAssetID"`
 	NetworkID     json.Uint32           `json:"networkID"`
 	UTXOs         []APIUTXO             `json:"utxos"`
 	Validators    []APIPrimaryValidator `json:"validators"`
@@ -140,7 +140,7 @@ type BuildGenesisReply struct {
 
 // GenesisUTXO adds messages to UTXOs
 type GenesisUTXO struct {
-	axc.UTXO `serialize:"true"`
+	avax.UTXO `serialize:"true"`
 	Message   []byte `serialize:"true" json:"message"`
 }
 
@@ -177,7 +177,7 @@ func bech32ToID(address string) (ids.ShortID, error) {
 	return ids.ToShortID(addr)
 }
 
-// BuildGenesis build the genesis state of the Platform Chain (and thereby the Axia network.)
+// BuildGenesis build the genesis state of the Platform Chain (and thereby the Avalanche network.)
 func (ss *StaticService) BuildGenesis(_ *http.Request, args *BuildGenesisArgs, reply *BuildGenesisReply) error {
 	// Specify the UTXOs on the Platform chain that exist at genesis.
 	utxos := make([]*GenesisUTXO, 0, len(args.UTXOs))
@@ -190,12 +190,12 @@ func (ss *StaticService) BuildGenesis(_ *http.Request, args *BuildGenesisArgs, r
 			return err
 		}
 
-		utxo := axc.UTXO{
-			UTXOID: axc.UTXOID{
+		utxo := avax.UTXO{
+			UTXOID: avax.UTXOID{
 				TxID:        ids.Empty,
 				OutputIndex: uint32(i),
 			},
-			Asset: axc.Asset{ID: args.AxcAssetID},
+			Asset: avax.Asset{ID: args.AvaxAssetID},
 			Out: &secp256k1fx.TransferOutput{
 				Amt: uint64(apiUTXO.Amount),
 				OutputOwners: secp256k1fx.OutputOwners{
@@ -208,7 +208,7 @@ func (ss *StaticService) BuildGenesis(_ *http.Request, args *BuildGenesisArgs, r
 		if apiUTXO.Locktime > args.Time {
 			utxo.Out = &StakeableLockOut{
 				Locktime:        uint64(apiUTXO.Locktime),
-				TransferableOut: utxo.Out.(axc.TransferableOut),
+				TransferableOut: utxo.Out.(avax.TransferableOut),
 			}
 		}
 		messageBytes, err := formatting.Decode(args.Encoding, apiUTXO.Message)
@@ -225,7 +225,7 @@ func (ss *StaticService) BuildGenesis(_ *http.Request, args *BuildGenesisArgs, r
 	validators := newTxHeapByEndTime()
 	for _, validator := range args.Validators {
 		weight := uint64(0)
-		stake := make([]*axc.TransferableOutput, len(validator.Staked))
+		stake := make([]*avax.TransferableOutput, len(validator.Staked))
 		sortAPIUTXOs(validator.Staked)
 		for i, apiUTXO := range validator.Staked {
 			addrID, err := bech32ToID(apiUTXO.Address)
@@ -233,8 +233,8 @@ func (ss *StaticService) BuildGenesis(_ *http.Request, args *BuildGenesisArgs, r
 				return err
 			}
 
-			utxo := &axc.TransferableOutput{
-				Asset: axc.Asset{ID: args.AxcAssetID},
+			utxo := &avax.TransferableOutput{
+				Asset: avax.Asset{ID: args.AvaxAssetID},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: uint64(apiUTXO.Amount),
 					OutputOwners: secp256k1fx.OutputOwners{
@@ -289,7 +289,7 @@ func (ss *StaticService) BuildGenesis(_ *http.Request, args *BuildGenesisArgs, r
 		}
 
 		tx := &Tx{UnsignedTx: &UnsignedAddValidatorTx{
-			BaseTx: BaseTx{BaseTx: axc.BaseTx{
+			BaseTx: BaseTx{BaseTx: avax.BaseTx{
 				NetworkID:    uint32(args.NetworkID),
 				BlockchainID: ids.Empty,
 			}},
@@ -318,16 +318,16 @@ func (ss *StaticService) BuildGenesis(_ *http.Request, args *BuildGenesisArgs, r
 			return fmt.Errorf("problem decoding chain genesis data: %w", err)
 		}
 		tx := &Tx{UnsignedTx: &UnsignedCreateChainTx{
-			BaseTx: BaseTx{BaseTx: axc.BaseTx{
+			BaseTx: BaseTx{BaseTx: avax.BaseTx{
 				NetworkID:    uint32(args.NetworkID),
 				BlockchainID: ids.Empty,
 			}},
-			AllychainID:    chain.AllychainID,
+			SubnetID:    chain.SubnetID,
 			ChainName:   chain.Name,
 			VMID:        chain.VMID,
 			FxIDs:       chain.FxIDs,
 			GenesisData: genesisBytes,
-			AllychainAuth:  &secp256k1fx.Input{},
+			SubnetAuth:  &secp256k1fx.Input{},
 		}}
 		if err := tx.Sign(GenesisCodec, nil); err != nil {
 			return err

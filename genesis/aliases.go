@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package genesis
@@ -16,14 +16,14 @@ import (
 func Aliases(genesisBytes []byte) (map[string][]string, map[ids.ID][]string, error) {
 	apiAliases := map[string][]string{
 		constants.ChainAliasPrefix + constants.PlatformChainID.String(): {
-			"Core",
+			"P",
 			"platform",
-			constants.ChainAliasPrefix + "Core",
+			constants.ChainAliasPrefix + "P",
 			constants.ChainAliasPrefix + "platform",
 		},
 	}
 	chainAliases := map[ids.ID][]string{
-		constants.PlatformChainID: {"Core", "platform"},
+		constants.PlatformChainID: {"P", "platform"},
 	}
 	genesis := &platformvm.Genesis{} // TODO let's not re-create genesis to do aliasing
 	if _, err := platformvm.GenesisCodec.Unmarshal(genesisBytes, genesis); err != nil {
@@ -37,22 +37,22 @@ func Aliases(genesisBytes []byte) (map[string][]string, map[ids.ID][]string, err
 		uChain := chain.UnsignedTx.(*platformvm.UnsignedCreateChainTx)
 		switch uChain.VMID {
 		case constants.AVMID:
-			apiAliases[constants.ChainAliasPrefix+chain.ID().String()] = []string{"Swap", "avm", constants.ChainAliasPrefix + "Swap", constants.ChainAliasPrefix + "avm"}
-			chainAliases[chain.ID()] = GetSwapChainAliases()
+			apiAliases[constants.ChainAliasPrefix+chain.ID().String()] = []string{"X", "avm", constants.ChainAliasPrefix + "X", constants.ChainAliasPrefix + "avm"}
+			chainAliases[chain.ID()] = GetXChainAliases()
 		case constants.EVMID:
-			apiAliases[constants.ChainAliasPrefix+chain.ID().String()] = []string{"AXC", "evm", constants.ChainAliasPrefix + "AXC", constants.ChainAliasPrefix + "evm"}
-			chainAliases[chain.ID()] = GetAXCChainAliases()
+			apiAliases[constants.ChainAliasPrefix+chain.ID().String()] = []string{"C", "evm", constants.ChainAliasPrefix + "C", constants.ChainAliasPrefix + "evm"}
+			chainAliases[chain.ID()] = GetCChainAliases()
 		}
 	}
 	return apiAliases, chainAliases, nil
 }
 
-func GetAXCChainAliases() []string {
-	return []string{"AXC", "evm"}
+func GetCChainAliases() []string {
+	return []string{"C", "evm"}
 }
 
-func GetSwapChainAliases() []string {
-	return []string{"Swap", "avm"}
+func GetXChainAliases() []string {
+	return []string{"X", "avm"}
 }
 
 func GetVMAliases() map[ids.ID][]string {

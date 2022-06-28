@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 // Implements transfer tests.
@@ -18,16 +18,16 @@ import (
 	"github.com/axiacoin/axia-network-v2/tests/e2e"
 	"github.com/axiacoin/axia-network-v2/utils/crypto"
 	"github.com/axiacoin/axia-network-v2/vms/avm"
-	"github.com/axiacoin/axia-network-v2/vms/components/axc"
+	"github.com/axiacoin/axia-network-v2/vms/components/avax"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
-	"github.com/axiacoin/axia-network-v2/wallet/allychain/primary"
-	"github.com/axiacoin/axia-network-v2/wallet/allychain/primary/common"
+	"github.com/axiacoin/axia-network-v2/wallet/subnet/primary"
+	"github.com/axiacoin/axia-network-v2/wallet/subnet/primary/common"
 )
 
 var keyFactory crypto.FactorySECP256K1R
 
-var _ = e2e.DescribeSwapChain("[Virtuous Transfer Tx AXC]", func() {
-	ginkgo.It("can issue a virtuous transfer tx for AXC asset", func() {
+var _ = e2e.DescribeXChain("[Virtuous Transfer Tx AVAX]", func() {
+	ginkgo.It("can issue a virtuous transfer tx for AVAX asset", func() {
 		if e2e.GetEnableWhitelistTxTests() {
 			ginkgo.Skip("whitelist vtx tests are enabled; skipping")
 		}
@@ -60,14 +60,14 @@ var _ = e2e.DescribeSwapChain("[Virtuous Transfer Tx AXC]", func() {
 		})
 
 		allMetrics := []string{
-			"axia_X_vtx_processing",
-			"axia_X_vtx_accepted_count",
-			"axia_X_vtx_rejected_count",
+			"avalanche_X_vtx_processing",
+			"avalanche_X_vtx_accepted_count",
+			"avalanche_X_vtx_rejected_count",
 		}
 
 		// URI -> "metric name" -> "metric value"
 		curMetrics := make(map[string]map[string]float64)
-		ginkgo.By("collect swap-chain metrics", func() {
+		ginkgo.By("collect x-chain metrics", func() {
 			for _, u := range uris {
 				ep := u + "/ext/metrics"
 
@@ -75,7 +75,7 @@ var _ = e2e.DescribeSwapChain("[Virtuous Transfer Tx AXC]", func() {
 				gomega.Expect(err).Should(gomega.BeNil())
 				tests.Outf("{{green}}metrics at %q:{{/}} %v\n", ep, mm)
 
-				if mm["axia_X_vtx_processing"] > 0 {
+				if mm["avalanche_X_vtx_processing"] > 0 {
 					tests.Outf("{{red}}{{bold}}%q already has processing vtx!!!{{/}}\n", u)
 					ginkgo.Skip("the cluster has already ongoing vtx txs thus skipping to prevent conflicts...")
 				}
@@ -97,18 +97,18 @@ var _ = e2e.DescribeSwapChain("[Virtuous Transfer Tx AXC]", func() {
 			}),
 		)
 		var txID ids.ID
-		ginkgo.By("issue regular, virtuous Swap-Chain tx should succeed", func() {
+		ginkgo.By("issue regular, virtuous X-Chain tx should succeed", func() {
 			balances, err := ewoqWallet.X().Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
 
-			axcAssetID := baseWallet.X().AXCAssetID()
-			ewoqPrevBalX := balances[axcAssetID]
+			avaxAssetID := baseWallet.X().AVAXAssetID()
+			ewoqPrevBalX := balances[avaxAssetID]
 			tests.Outf("{{green}}ewoq wallet balance:{{/}} %d\n", ewoqPrevBalX)
 
 			balances, err = randWallet.X().Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
 
-			randPrevBalX := balances[axcAssetID]
+			randPrevBalX := balances[avaxAssetID]
 			tests.Outf("{{green}}rand wallet balance:{{/}} %d\n", randPrevBalX)
 
 			amount := ewoqPrevBalX / 10
@@ -121,9 +121,9 @@ var _ = e2e.DescribeSwapChain("[Virtuous Transfer Tx AXC]", func() {
 			tests.Outf("{{blue}}transferring %d from 'ewoq' to 'random' at %q{{/}}\n", amount, uris[0])
 			ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
 			txID, err = ewoqWallet.X().IssueBaseTx(
-				[]*axc.TransferableOutput{{
-					Asset: axc.Asset{
-						ID: axcAssetID,
+				[]*avax.TransferableOutput{{
+					Asset: avax.Asset{
+						ID: avaxAssetID,
 					},
 					Out: &secp256k1fx.TransferOutput{
 						Amt: amount,
@@ -140,23 +140,23 @@ var _ = e2e.DescribeSwapChain("[Virtuous Transfer Tx AXC]", func() {
 
 			balances, err = ewoqWallet.X().Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
-			ewoqCurBalX := balances[axcAssetID]
+			ewoqCurBalX := balances[avaxAssetID]
 			tests.Outf("{{green}}ewoq wallet balance:{{/}} %d\n", ewoqCurBalX)
 
 			balances, err = randWallet.X().Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
-			randCurBalX := balances[axcAssetID]
+			randCurBalX := balances[avaxAssetID]
 			tests.Outf("{{green}}ewoq wallet balance:{{/}} %d\n", randCurBalX)
 
 			gomega.Expect(ewoqCurBalX).Should(gomega.Equal(ewoqPrevBalX - amount - baseWallet.X().BaseTxFee()))
 			gomega.Expect(randCurBalX).Should(gomega.Equal(randPrevBalX + amount))
 		})
 
-		ginkgo.By("accept swap-chain tx in all nodes", func() {
+		ginkgo.By("accept x-chain tx in all nodes", func() {
 			tests.Outf("{{blue}}waiting before querying metrics{{/}}\n")
 
 			for _, u := range uris {
-				xc := avm.NewClient(u, "Swap")
+				xc := avm.NewClient(u, "X")
 				ctx, cancel := context.WithTimeout(context.Background(), e2e.DefaultConfirmTxTimeout)
 				status, err := xc.ConfirmTx(ctx, txID, 2*time.Second)
 				cancel()
@@ -169,14 +169,14 @@ var _ = e2e.DescribeSwapChain("[Virtuous Transfer Tx AXC]", func() {
 
 				prev := curMetrics[u]
 
-				// +0 since swap-chain tx must have been processed and accepted by now
-				gomega.Expect(mm["axia_X_vtx_processing"]).Should(gomega.Equal(prev["axia_X_vtx_processing"]))
+				// +0 since x-chain tx must have been processed and accepted by now
+				gomega.Expect(mm["avalanche_X_vtx_processing"]).Should(gomega.Equal(prev["avalanche_X_vtx_processing"]))
 
-				// +1 since swap-chain tx must have been accepted by now
-				gomega.Expect(mm["axia_X_vtx_accepted_count"]).Should(gomega.Equal(prev["axia_X_vtx_accepted_count"] + 1))
+				// +1 since x-chain tx must have been accepted by now
+				gomega.Expect(mm["avalanche_X_vtx_accepted_count"]).Should(gomega.Equal(prev["avalanche_X_vtx_accepted_count"] + 1))
 
-				// +0 since virtuous swap-chain tx must not be rejected
-				gomega.Expect(mm["axia_X_vtx_rejected_count"]).Should(gomega.Equal(prev["axia_X_vtx_rejected_count"]))
+				// +0 since virtuous x-chain tx must not be rejected
+				gomega.Expect(mm["avalanche_X_vtx_rejected_count"]).Should(gomega.Equal(prev["avalanche_X_vtx_rejected_count"]))
 
 				curMetrics[u] = mm
 			}

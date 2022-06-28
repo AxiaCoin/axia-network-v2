@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package chains
@@ -24,8 +24,8 @@ import (
 	"github.com/axiacoin/axia-network-v2/network"
 	"github.com/axiacoin/axia-network-v2/snow"
 	"github.com/axiacoin/axia-network-v2/snow/consensus/snowball"
-	"github.com/axiacoin/axia-network-v2/snow/engine/axia/state"
-	"github.com/axiacoin/axia-network-v2/snow/engine/axia/vertex"
+	"github.com/axiacoin/axia-network-v2/snow/engine/avalanche/state"
+	"github.com/axiacoin/axia-network-v2/snow/engine/avalanche/vertex"
 	"github.com/axiacoin/axia-network-v2/snow/engine/common"
 	"github.com/axiacoin/axia-network-v2/snow/engine/common/queue"
 	"github.com/axiacoin/axia-network-v2/snow/engine/common/tracker"
@@ -45,10 +45,10 @@ import (
 
 	dbManager "github.com/axiacoin/axia-network-v2/database/manager"
 
-	avcon "github.com/axiacoin/axia-network-v2/snow/consensus/axia"
-	aveng "github.com/axiacoin/axia-network-v2/snow/engine/axia"
-	avbootstrap "github.com/axiacoin/axia-network-v2/snow/engine/axia/bootstrap"
-	avagetter "github.com/axiacoin/axia-network-v2/snow/engine/axia/getter"
+	avcon "github.com/axiacoin/axia-network-v2/snow/consensus/avalanche"
+	aveng "github.com/axiacoin/axia-network-v2/snow/engine/avalanche"
+	avbootstrap "github.com/axiacoin/axia-network-v2/snow/engine/avalanche/bootstrap"
+	avagetter "github.com/axiacoin/axia-network-v2/snow/engine/avalanche/getter"
 
 	smcon "github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
 	smeng "github.com/axiacoin/axia-network-v2/snow/engine/snowman"
@@ -60,7 +60,7 @@ const defaultChannelSize = 1
 
 var (
 	errUnknownChainID   = errors.New("unknown chain ID")
-	errUnknownVMType    = errors.New("the vm should have type axia.DAGVM or snowman.ChainVM")
+	errUnknownVMType    = errors.New("the vm should have type avalanche.DAGVM or snowman.ChainVM")
 	errCreatePlatformVM = errors.New("attempted to create a chain running the PlatformVM")
 	errNotBootstrapped  = errors.New("chains not bootstrapped")
 
@@ -95,8 +95,8 @@ type Manager interface {
 	// Given an alias, return the ID of the VM associated with that alias
 	LookupVM(string) (ids.ID, error)
 
-	// Returns the ID of the allychain that is validating the provided chain
-	AllychainID(chainID ids.ID) (ids.ID, error)
+	// Returns the ID of the subnet that is validating the provided chain
+	SubnetID(chainID ids.ID) (ids.ID, error)
 
 	// Returns true iff the chain with the given ID exists and is finished bootstrapping
 	IsBootstrapped(ids.ID) bool
@@ -107,7 +107,7 @@ type Manager interface {
 // ChainParameters defines the chain being created
 type ChainParameters struct {
 	ID          ids.ID   // The ID of the chain being created
-	AllychainID    ids.ID   // ID of the allychain that validates this chain
+	SubnetID    ids.ID   // ID of the subnet that validates this chain
 	GenesisData []byte   // The genesis data of this chain's ledger
 	VMAlias     string   // The ID of the vm this chain is running
 	FxAliases   []string // The IDs of the feature extensions this chain is running
@@ -149,15 +149,15 @@ type ManagerConfig struct {
 	Server                      server.Server      // Handles HTTP API calls
 	Keystore                    keystore.Keystore
 	AtomicMemory                *atomic.Memory
-	AXCAssetID                 ids.ID
-	SwapChainID                    ids.ID
+	AVAXAssetID                 ids.ID
+	XChainID                    ids.ID
 	CriticalChains              ids.Set         // Chains that can't exit gracefully
-	WhitelistedAllychains          ids.Set         // Allychains to validate
+	WhitelistedSubnets          ids.Set         // Subnets to validate
 	TimeoutManager              timeout.Manager // Manages request timeouts when sending messages to other validators
 	Health                      health.Registerer
 	RetryBootstrap              bool                    // Should Bootstrap be retried
 	RetryBootstrapWarnFrequency int                     // Max number of times to retry bootstrap before warning the node operator
-	AllychainConfigs               map[ids.ID]AllychainConfig // ID -> AllychainConfig
+	SubnetConfigs               map[ids.ID]SubnetConfig // ID -> SubnetConfig
 	ChainConfigs                map[string]ChainConfig  // alias -> ChainConfig
 	// ShutdownNodeFunc allows the chain manager to issue a request to shutdown the node
 	ShutdownNodeFunc func(exitCode int)
@@ -178,7 +178,7 @@ type ManagerConfig struct {
 	BootstrapAncestorsMaxContainersReceived int
 
 	ApricotPhase4Time            time.Time
-	ApricotPhase4MinCoreChainHeight uint64
+	ApricotPhase4MinPChainHeight uint64
 
 	ResetProposerVMHeightIndex bool
 }
@@ -195,9 +195,9 @@ type manager struct {
 	unblocked     bool
 	blockedChains []ChainParameters
 
-	// Key: Allychain's ID
-	// Value: Allychain description
-	allychains map[ids.ID]Allychain
+	// Key: Subnet's ID
+	// Value: Subnet description
+	subnets map[ids.ID]Subnet
 
 	chainsLock sync.Mutex
 	// Key: Chain's ID
@@ -213,7 +213,7 @@ func New(config *ManagerConfig) Manager {
 	return &manager{
 		Aliaser:       ids.NewAliaser(),
 		ManagerConfig: *config,
-		allychains:       make(map[ids.ID]Allychain),
+		subnets:       make(map[ids.ID]Subnet),
 		chains:        make(map[ids.ID]handler.Handler),
 	}
 }
@@ -230,10 +230,10 @@ func (m *manager) CreateChain(chain ChainParameters) {
 	}
 }
 
-// Create a chain, this is only called from the Core-chain thread, except for
-// creating the Core-chain.
+// Create a chain, this is only called from the P-chain thread, except for
+// creating the P-chain.
 func (m *manager) ForceCreateChain(chainParams ChainParameters) {
-	if m.StakingEnabled && chainParams.AllychainID != constants.PrimaryNetworkID && !m.WhitelistedAllychains.Contains(chainParams.AllychainID) {
+	if m.StakingEnabled && chainParams.SubnetID != constants.PrimaryNetworkID && !m.WhitelistedSubnets.Contains(chainParams.SubnetID) {
 		m.Log.Debug("Skipped creating non-whitelisted chain:\n"+
 			"    ID: %s\n"+
 			"    VMID:%s",
@@ -257,10 +257,10 @@ func (m *manager) ForceCreateChain(chainParams ChainParameters) {
 		chainParams.VMAlias,
 	)
 
-	sb, exists := m.allychains[chainParams.AllychainID]
+	sb, exists := m.subnets[chainParams.SubnetID]
 	if !exists {
-		sb = newAllychain()
-		m.allychains[chainParams.AllychainID] = sb
+		sb = newSubnet()
+		m.subnets[chainParams.SubnetID] = sb
 	}
 
 	sb.addChain(chainParams.ID)
@@ -323,7 +323,7 @@ func (m *manager) ForceCreateChain(chainParams ChainParameters) {
 }
 
 // Create a chain
-func (m *manager) buildChain(chainParams ChainParameters, sb Allychain) (*chain, error) {
+func (m *manager) buildChain(chainParams ChainParameters, sb Subnet) (*chain, error) {
 	vmID, err := m.VMManager.Lookup(chainParams.VMAlias)
 	if err != nil {
 		return nil, fmt.Errorf("error while looking up VM: %w", err)
@@ -355,12 +355,12 @@ func (m *manager) buildChain(chainParams ChainParameters, sb Allychain) (*chain,
 	ctx := &snow.ConsensusContext{
 		Context: &snow.Context{
 			NetworkID: m.NetworkID,
-			AllychainID:  chainParams.AllychainID,
+			SubnetID:  chainParams.SubnetID,
 			ChainID:   chainParams.ID,
 			NodeID:    m.NodeID,
 
-			SwapChainID:    m.SwapChainID,
-			AXCAssetID: m.AXCAssetID,
+			XChainID:    m.XChainID,
+			AVAXAssetID: m.AVAXAssetID,
 
 			Log:          chainLog,
 			Keystore:     m.Keystore.NewBlockchainKeyStore(chainParams.ID),
@@ -382,7 +382,7 @@ func (m *manager) buildChain(chainParams ChainParameters, sb Allychain) (*chain,
 	// cause a panic.
 	ctx.SetState(snow.Bootstrapping)
 
-	if sbConfigs, ok := m.AllychainConfigs[chainParams.AllychainID]; ok {
+	if sbConfigs, ok := m.SubnetConfigs[chainParams.SubnetID]; ok {
 		if sbConfigs.ValidatorOnly {
 			ctx.SetValidatorOnly()
 		}
@@ -427,7 +427,7 @@ func (m *manager) buildChain(chainParams ChainParameters, sb Allychain) (*chain,
 	}
 
 	consensusParams := m.ConsensusParams
-	if sbConfigs, ok := m.AllychainConfigs[chainParams.AllychainID]; ok && chainParams.AllychainID != constants.PrimaryNetworkID {
+	if sbConfigs, ok := m.SubnetConfigs[chainParams.SubnetID]; ok && chainParams.SubnetID != constants.PrimaryNetworkID {
 		consensusParams = sbConfigs.ConsensusParameters
 	}
 
@@ -435,12 +435,12 @@ func (m *manager) buildChain(chainParams ChainParameters, sb Allychain) (*chain,
 	var vdrs validators.Set // Validators validating this blockchain
 	var ok bool
 	if m.StakingEnabled {
-		vdrs, ok = m.Validators.GetValidators(chainParams.AllychainID)
-	} else { // Staking is disabled. Every peer validates every allychain.
+		vdrs, ok = m.Validators.GetValidators(chainParams.SubnetID)
+	} else { // Staking is disabled. Every peer validates every subnet.
 		vdrs, ok = m.Validators.GetValidators(constants.PrimaryNetworkID)
 	}
 	if !ok {
-		return nil, fmt.Errorf("couldn't get validator set of allychain with ID %s. The allychain may not exist", chainParams.AllychainID)
+		return nil, fmt.Errorf("couldn't get validator set of subnet with ID %s. The subnet may not exist", chainParams.SubnetID)
 	}
 
 	beacons := vdrs
@@ -453,7 +453,7 @@ func (m *manager) buildChain(chainParams ChainParameters, sb Allychain) (*chain,
 	var chain *chain
 	switch vm := vm.(type) {
 	case vertex.DAGVM:
-		chain, err = m.createAxiaChain(
+		chain, err = m.createAvalancheChain(
 			ctx,
 			chainParams.GenesisData,
 			vdrs,
@@ -465,7 +465,7 @@ func (m *manager) buildChain(chainParams ChainParameters, sb Allychain) (*chain,
 			sb,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("error while creating new axia vm %w", err)
+			return nil, fmt.Errorf("error while creating new avalanche vm %w", err)
 		}
 	case block.ChainVM:
 		chain, err = m.createSnowmanChain(
@@ -505,8 +505,8 @@ func (m *manager) unblockChains() {
 	}
 }
 
-// Create a DAG-based blockchain that uses Axia
-func (m *manager) createAxiaChain(
+// Create a DAG-based blockchain that uses Avalanche
+func (m *manager) createAvalancheChain(
 	ctx *snow.ConsensusContext,
 	genesisData []byte,
 	vdrs,
@@ -515,7 +515,7 @@ func (m *manager) createAxiaChain(
 	fxs []*common.Fx,
 	consensusParams avcon.Parameters,
 	bootstrapWeight uint64,
-	sb Allychain,
+	sb Subnet,
 ) (*chain, error) {
 	ctx.Lock.Lock()
 	defer ctx.Lock.Unlock()
@@ -546,7 +546,7 @@ func (m *manager) createAxiaChain(
 	msgChan := make(chan common.Message, defaultChannelSize)
 
 	gossipConfig := m.GossipConfig
-	if sbConfigs, ok := m.AllychainConfigs[ctx.AllychainID]; ok && ctx.AllychainID != constants.PrimaryNetworkID {
+	if sbConfigs, ok := m.SubnetConfigs[ctx.SubnetID]; ok && ctx.SubnetID != constants.PrimaryNetworkID {
 		gossipConfig = sbConfigs.GossipConfig
 	}
 
@@ -584,7 +584,7 @@ func (m *manager) createAxiaChain(
 			VM:                  vm,
 			DB:                  vertexDB,
 			Log:                 ctx.Log,
-			SwapChainMigrationTime: version.GetSwapChainMigrationTime(ctx.NetworkID),
+			XChainMigrationTime: version.GetXChainMigrationTime(ctx.NetworkID),
 		},
 	)
 	if err := vm.Initialize(
@@ -626,7 +626,7 @@ func (m *manager) createAxiaChain(
 		StartupAlpha:                   (3*bootstrapWeight + 3) / 4,
 		Alpha:                          bootstrapWeight/2 + 1, // must be > 50%
 		Sender:                         sender,
-		Allychain:                         sb,
+		Subnet:                         sb,
 		Timer:                          handler,
 		RetryBootstrap:                 m.RetryBootstrap,
 		RetryBootstrapWarnFrequency:    m.RetryBootstrapWarnFrequency,
@@ -639,7 +639,7 @@ func (m *manager) createAxiaChain(
 	weightTracker := tracker.NewWeightTracker(beacons, commonCfg.StartupAlpha)
 	avaGetHandler, err := avagetter.New(vtxManager, commonCfg)
 	if err != nil {
-		return nil, fmt.Errorf("couldn't initialize axia base message handler: %w", err)
+		return nil, fmt.Errorf("couldn't initialize avalanche base message handler: %w", err)
 	}
 
 	// create bootstrap gear
@@ -659,7 +659,7 @@ func (m *manager) createAxiaChain(
 		},
 	)
 	if err != nil {
-		return nil, fmt.Errorf("error initializing axia bootstrapper: %w", err)
+		return nil, fmt.Errorf("error initializing avalanche bootstrapper: %w", err)
 	}
 	handler.SetBootstrapper(bootstrapper)
 
@@ -676,7 +676,7 @@ func (m *manager) createAxiaChain(
 	}
 	engine, err := aveng.New(engineConfig)
 	if err != nil {
-		return nil, fmt.Errorf("error initializing axia engine: %w", err)
+		return nil, fmt.Errorf("error initializing avalanche engine: %w", err)
 	}
 	handler.SetConsensus(engine)
 
@@ -717,7 +717,7 @@ func (m *manager) createSnowmanChain(
 	fxs []*common.Fx,
 	consensusParams snowball.Parameters,
 	bootstrapWeight uint64,
-	sb Allychain,
+	sb Subnet,
 ) (*chain, error) {
 	ctx.Lock.Lock()
 	defer ctx.Lock.Unlock()
@@ -742,7 +742,7 @@ func (m *manager) createSnowmanChain(
 	msgChan := make(chan common.Message, defaultChannelSize)
 
 	gossipConfig := m.GossipConfig
-	if sbConfigs, ok := m.AllychainConfigs[ctx.AllychainID]; ok && ctx.AllychainID != constants.PrimaryNetworkID {
+	if sbConfigs, ok := m.SubnetConfigs[ctx.SubnetID]; ok && ctx.SubnetID != constants.PrimaryNetworkID {
 		gossipConfig = sbConfigs.GossipConfig
 	}
 
@@ -763,7 +763,7 @@ func (m *manager) createSnowmanChain(
 		return nil, fmt.Errorf("problem initializing event dispatcher: %w", err)
 	}
 
-	// first vm to be init is Core-Chain once, which provides validator interface to all ProposerVMs
+	// first vm to be init is P-Chain once, which provides validator interface to all ProposerVMs
 	if m.validatorState == nil {
 		if m.ManagerConfig.StakingEnabled {
 			valState, ok := vm.(validators.State)
@@ -776,7 +776,7 @@ func (m *manager) createSnowmanChain(
 
 			// Notice that this context is left unlocked. This is because the
 			// lock will already be held when accessing these values on the
-			// Core-chain.
+			// P-chain.
 			ctx.ValidatorState = valState
 		} else {
 			m.validatorState = validators.NewNoState()
@@ -791,7 +791,7 @@ func (m *manager) createSnowmanChain(
 	}
 
 	// enable ProposerVM on this VM
-	vm = proposervm.New(vm, m.ApricotPhase4Time, m.ApricotPhase4MinCoreChainHeight, m.ResetProposerVMHeightIndex)
+	vm = proposervm.New(vm, m.ApricotPhase4Time, m.ApricotPhase4MinPChainHeight, m.ResetProposerVMHeightIndex)
 
 	if m.MeterVMEnabled {
 		vm = metervm.NewBlockVM(vm)
@@ -835,7 +835,7 @@ func (m *manager) createSnowmanChain(
 		StartupAlpha:                   (3*bootstrapWeight + 3) / 4,
 		Alpha:                          bootstrapWeight/2 + 1, // must be > 50%
 		Sender:                         sender,
-		Allychain:                         sb,
+		Subnet:                         sb,
 		Timer:                          handler,
 		RetryBootstrap:                 m.RetryBootstrap,
 		RetryBootstrapWarnFrequency:    m.RetryBootstrapWarnFrequency,
@@ -913,7 +913,7 @@ func (m *manager) createSnowmanChain(
 	}, nil
 }
 
-func (m *manager) AllychainID(chainID ids.ID) (ids.ID, error) {
+func (m *manager) SubnetID(chainID ids.ID) (ids.ID, error) {
 	m.chainsLock.Lock()
 	defer m.chainsLock.Unlock()
 
@@ -921,7 +921,7 @@ func (m *manager) AllychainID(chainID ids.ID) (ids.ID, error) {
 	if !exists {
 		return ids.ID{}, errUnknownChainID
 	}
-	return chain.Context().AllychainID, nil
+	return chain.Context().SubnetID, nil
 }
 
 func (m *manager) IsBootstrapped(id ids.ID) bool {

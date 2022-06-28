@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package proposervm
@@ -82,13 +82,13 @@ func (b *postForkOption) verifyPreForkChild(child *preForkBlock) error {
 
 func (b *postForkOption) verifyPostForkChild(child *postForkBlock) error {
 	parentTimestamp := b.Timestamp()
-	parentCoreChainHeight, err := b.coreChainHeight()
+	parentPChainHeight, err := b.pChainHeight()
 	if err != nil {
 		return err
 	}
 	return b.postForkCommonComponents.Verify(
 		parentTimestamp,
-		parentCoreChainHeight,
+		parentPChainHeight,
 		child,
 	)
 }
@@ -99,24 +99,24 @@ func (b *postForkOption) verifyPostForkOption(child *postForkOption) error {
 }
 
 func (b *postForkOption) buildChild() (Block, error) {
-	parentCoreChainHeight, err := b.coreChainHeight()
+	parentPChainHeight, err := b.pChainHeight()
 	if err != nil {
 		return nil, err
 	}
 	return b.postForkCommonComponents.buildChild(
 		b.ID(),
 		b.Timestamp(),
-		parentCoreChainHeight,
+		parentPChainHeight,
 	)
 }
 
-// This block's Core-Chain height is its parent's Core-Chain height
-func (b *postForkOption) coreChainHeight() (uint64, error) {
+// This block's P-Chain height is its parent's P-Chain height
+func (b *postForkOption) pChainHeight() (uint64, error) {
 	parent, err := b.vm.getBlock(b.ParentID())
 	if err != nil {
 		return 0, err
 	}
-	return parent.coreChainHeight()
+	return parent.pChainHeight()
 }
 
 func (b *postForkOption) setStatus(status choices.Status) {

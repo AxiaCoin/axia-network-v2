@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package platformvm
@@ -19,7 +19,7 @@ var errUnknownBlockType = errors.New("unknown block type")
 
 type metrics struct {
 	percentConnected       prometheus.Gauge
-	allychainPercentConnected *prometheus.GaugeVec
+	subnetPercentConnected *prometheus.GaugeVec
 	localStake             prometheus.Gauge
 	totalStake             prometheus.Gauge
 
@@ -32,11 +32,11 @@ type metrics struct {
 	numVotesWon, numVotesLost prometheus.Counter
 
 	numAddDelegatorTxs,
-	numAddAllychainValidatorTxs,
+	numAddSubnetValidatorTxs,
 	numAddValidatorTxs,
 	numAdvanceTimeTxs,
 	numCreateChainTxs,
-	numCreateAllychainTxs,
+	numCreateSubnetTxs,
 	numExportTxs,
 	numImportTxs,
 	numRewardValidatorTxs prometheus.Counter
@@ -69,30 +69,30 @@ func newTxMetrics(namespace string, name string) prometheus.Counter {
 func (m *metrics) Initialize(
 	namespace string,
 	registerer prometheus.Registerer,
-	whitelistedAllychains ids.Set,
+	whitelistedSubnets ids.Set,
 ) error {
 	m.percentConnected = prometheus.NewGauge(prometheus.GaugeOpts{
 		Namespace: namespace,
 		Name:      "percent_connected",
 		Help:      "Percent of connected stake",
 	})
-	m.allychainPercentConnected = prometheus.NewGaugeVec(
+	m.subnetPercentConnected = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Namespace: namespace,
-			Name:      "percent_connected_allychain",
-			Help:      "Percent of connected allychain weight",
+			Name:      "percent_connected_subnet",
+			Help:      "Percent of connected subnet weight",
 		},
-		[]string{"allychainID"},
+		[]string{"subnetID"},
 	)
 	m.localStake = prometheus.NewGauge(prometheus.GaugeOpts{
 		Namespace: namespace,
 		Name:      "local_staked",
-		Help:      "Total amount of AXC on this node staked",
+		Help:      "Total amount of AVAX on this node staked",
 	})
 	m.totalStake = prometheus.NewGauge(prometheus.GaugeOpts{
 		Namespace: namespace,
 		Name:      "total_staked",
-		Help:      "Total amount of AXC staked",
+		Help:      "Total amount of AVAX staked",
 	})
 
 	m.numAbortBlocks = newBlockMetrics(namespace, "abort")
@@ -113,11 +113,11 @@ func (m *metrics) Initialize(
 	})
 
 	m.numAddDelegatorTxs = newTxMetrics(namespace, "add_delegator")
-	m.numAddAllychainValidatorTxs = newTxMetrics(namespace, "add_allychain_validator")
+	m.numAddSubnetValidatorTxs = newTxMetrics(namespace, "add_subnet_validator")
 	m.numAddValidatorTxs = newTxMetrics(namespace, "add_validator")
 	m.numAdvanceTimeTxs = newTxMetrics(namespace, "advance_time")
 	m.numCreateChainTxs = newTxMetrics(namespace, "create_chain")
-	m.numCreateAllychainTxs = newTxMetrics(namespace, "create_allychain")
+	m.numCreateSubnetTxs = newTxMetrics(namespace, "create_subnet")
 	m.numExportTxs = newTxMetrics(namespace, "export")
 	m.numImportTxs = newTxMetrics(namespace, "import")
 	m.numRewardValidatorTxs = newTxMetrics(namespace, "reward_validator")
@@ -150,7 +150,7 @@ func (m *metrics) Initialize(
 		err,
 
 		registerer.Register(m.percentConnected),
-		registerer.Register(m.allychainPercentConnected),
+		registerer.Register(m.subnetPercentConnected),
 		registerer.Register(m.localStake),
 		registerer.Register(m.totalStake),
 
@@ -164,11 +164,11 @@ func (m *metrics) Initialize(
 		registerer.Register(m.numVotesLost),
 
 		registerer.Register(m.numAddDelegatorTxs),
-		registerer.Register(m.numAddAllychainValidatorTxs),
+		registerer.Register(m.numAddSubnetValidatorTxs),
 		registerer.Register(m.numAddValidatorTxs),
 		registerer.Register(m.numAdvanceTimeTxs),
 		registerer.Register(m.numCreateChainTxs),
-		registerer.Register(m.numCreateAllychainTxs),
+		registerer.Register(m.numCreateSubnetTxs),
 		registerer.Register(m.numExportTxs),
 		registerer.Register(m.numImportTxs),
 		registerer.Register(m.numRewardValidatorTxs),
@@ -179,10 +179,10 @@ func (m *metrics) Initialize(
 		registerer.Register(m.validatorSetsDuration),
 	)
 
-	// init allychain tracker metrics with whitelisted allychains
-	for allychainID := range whitelistedAllychains {
+	// init subnet tracker metrics with whitelisted subnets
+	for subnetID := range whitelistedSubnets {
 		// initialize to 0
-		m.allychainPercentConnected.WithLabelValues(allychainID.String()).Set(0)
+		m.subnetPercentConnected.WithLabelValues(subnetID.String()).Set(0)
 	}
 	return errs.Err
 }
@@ -216,16 +216,16 @@ func (m *metrics) AcceptTx(tx *Tx) error {
 	switch tx.UnsignedTx.(type) {
 	case *UnsignedAddDelegatorTx:
 		m.numAddDelegatorTxs.Inc()
-	case *UnsignedAddAllychainValidatorTx:
-		m.numAddAllychainValidatorTxs.Inc()
+	case *UnsignedAddSubnetValidatorTx:
+		m.numAddSubnetValidatorTxs.Inc()
 	case *UnsignedAddValidatorTx:
 		m.numAddValidatorTxs.Inc()
 	case *UnsignedAdvanceTimeTx:
 		m.numAdvanceTimeTxs.Inc()
 	case *UnsignedCreateChainTx:
 		m.numCreateChainTxs.Inc()
-	case *UnsignedCreateAllychainTx:
-		m.numCreateAllychainTxs.Inc()
+	case *UnsignedCreateSubnetTx:
+		m.numCreateSubnetTxs.Inc()
 	case *UnsignedImportTx:
 		m.numImportTxs.Inc()
 	case *UnsignedExportTx:

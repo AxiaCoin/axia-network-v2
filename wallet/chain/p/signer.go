@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package p
@@ -14,7 +14,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/utils/constants"
 	"github.com/axiacoin/axia-network-v2/utils/crypto"
 	"github.com/axiacoin/axia-network-v2/utils/hashing"
-	"github.com/axiacoin/axia-network-v2/vms/components/axc"
+	"github.com/axiacoin/axia-network-v2/vms/components/avax"
 	"github.com/axiacoin/axia-network-v2/vms/components/verify"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
@@ -25,7 +25,7 @@ var (
 	errUnknownInputType      = errors.New("unknown input type")
 	errUnknownCredentialType = errors.New("unknown credential type")
 	errUnknownOutputType     = errors.New("unknown output type")
-	errUnknownAllychainAuthType = errors.New("unknown allychain auth type")
+	errUnknownSubnetAuthType = errors.New("unknown subnet auth type")
 	errInvalidUTXOSigIndex   = errors.New("invalid UTXO signature index")
 
 	emptySig [crypto.SECP256K1RSigLen]byte
@@ -39,7 +39,7 @@ type Signer interface {
 }
 
 type SignerBackend interface {
-	GetUTXO(ctx stdcontext.Context, chainID, utxoID ids.ID) (*axc.UTXO, error)
+	GetUTXO(ctx stdcontext.Context, chainID, utxoID ids.ID) (*avax.UTXO, error)
 	GetTx(ctx stdcontext.Context, txID ids.ID) (*platformvm.Tx, error)
 }
 
@@ -66,14 +66,14 @@ func (s *signer) Sign(ctx stdcontext.Context, tx *platformvm.Tx) error {
 	switch utx := tx.UnsignedTx.(type) {
 	case *platformvm.UnsignedAddValidatorTx:
 		return s.signAddValidatorTx(ctx, tx, utx)
-	case *platformvm.UnsignedAddAllychainValidatorTx:
-		return s.signAddAllychainValidatorTx(ctx, tx, utx)
+	case *platformvm.UnsignedAddSubnetValidatorTx:
+		return s.signAddSubnetValidatorTx(ctx, tx, utx)
 	case *platformvm.UnsignedAddDelegatorTx:
 		return s.signAddDelegatorTx(ctx, tx, utx)
 	case *platformvm.UnsignedCreateChainTx:
 		return s.signCreateChainTx(ctx, tx, utx)
-	case *platformvm.UnsignedCreateAllychainTx:
-		return s.signCreateAllychainTx(ctx, tx, utx)
+	case *platformvm.UnsignedCreateSubnetTx:
+		return s.signCreateSubnetTx(ctx, tx, utx)
 	case *platformvm.UnsignedImportTx:
 		return s.signImportTx(ctx, tx, utx)
 	case *platformvm.UnsignedExportTx:
@@ -91,16 +91,16 @@ func (s *signer) signAddValidatorTx(ctx stdcontext.Context, tx *platformvm.Tx, u
 	return s.sign(tx, txSigners)
 }
 
-func (s *signer) signAddAllychainValidatorTx(ctx stdcontext.Context, tx *platformvm.Tx, utx *platformvm.UnsignedAddAllychainValidatorTx) error {
+func (s *signer) signAddSubnetValidatorTx(ctx stdcontext.Context, tx *platformvm.Tx, utx *platformvm.UnsignedAddSubnetValidatorTx) error {
 	txSigners, err := s.getSigners(ctx, constants.PlatformChainID, utx.Ins)
 	if err != nil {
 		return err
 	}
-	allychainAuthSigners, err := s.getAllychainSigners(ctx, utx.Validator.Allychain, utx.AllychainAuth)
+	subnetAuthSigners, err := s.getSubnetSigners(ctx, utx.Validator.Subnet, utx.SubnetAuth)
 	if err != nil {
 		return err
 	}
-	txSigners = append(txSigners, allychainAuthSigners)
+	txSigners = append(txSigners, subnetAuthSigners)
 	return s.sign(tx, txSigners)
 }
 
@@ -117,15 +117,15 @@ func (s *signer) signCreateChainTx(ctx stdcontext.Context, tx *platformvm.Tx, ut
 	if err != nil {
 		return err
 	}
-	allychainAuthSigners, err := s.getAllychainSigners(ctx, utx.AllychainID, utx.AllychainAuth)
+	subnetAuthSigners, err := s.getSubnetSigners(ctx, utx.SubnetID, utx.SubnetAuth)
 	if err != nil {
 		return err
 	}
-	txSigners = append(txSigners, allychainAuthSigners)
+	txSigners = append(txSigners, subnetAuthSigners)
 	return s.sign(tx, txSigners)
 }
 
-func (s *signer) signCreateAllychainTx(ctx stdcontext.Context, tx *platformvm.Tx, utx *platformvm.UnsignedCreateAllychainTx) error {
+func (s *signer) signCreateSubnetTx(ctx stdcontext.Context, tx *platformvm.Tx, utx *platformvm.UnsignedCreateSubnetTx) error {
 	txSigners, err := s.getSigners(ctx, constants.PlatformChainID, utx.Ins)
 	if err != nil {
 		return err
@@ -154,7 +154,7 @@ func (s *signer) signExportTx(ctx stdcontext.Context, tx *platformvm.Tx, utx *pl
 	return s.sign(tx, txSigners)
 }
 
-func (s *signer) getSigners(ctx stdcontext.Context, sourceChainID ids.ID, ins []*axc.TransferableInput) ([][]*crypto.PrivateKeySECP256K1R, error) {
+func (s *signer) getSigners(ctx stdcontext.Context, sourceChainID ids.ID, ins []*avax.TransferableInput) ([][]*crypto.PrivateKeySECP256K1R, error) {
 	txSigners := make([][]*crypto.PrivateKeySECP256K1R, len(ins))
 	for credIndex, transferInput := range ins {
 		input, ok := transferInput.In.(*secp256k1fx.TransferInput)
@@ -204,32 +204,32 @@ func (s *signer) getSigners(ctx stdcontext.Context, sourceChainID ids.ID, ins []
 	return txSigners, nil
 }
 
-func (s *signer) getAllychainSigners(ctx stdcontext.Context, allychainID ids.ID, allychainAuth verify.Verifiable) ([]*crypto.PrivateKeySECP256K1R, error) {
-	allychainInput, ok := allychainAuth.(*secp256k1fx.Input)
+func (s *signer) getSubnetSigners(ctx stdcontext.Context, subnetID ids.ID, subnetAuth verify.Verifiable) ([]*crypto.PrivateKeySECP256K1R, error) {
+	subnetInput, ok := subnetAuth.(*secp256k1fx.Input)
 	if !ok {
-		return nil, errUnknownAllychainAuthType
+		return nil, errUnknownSubnetAuthType
 	}
 
-	allychainTx, err := s.backend.GetTx(ctx, allychainID)
+	subnetTx, err := s.backend.GetTx(ctx, subnetID)
 	if err != nil {
 		return nil, fmt.Errorf(
-			"failed to fetch allychain %q: %w",
-			allychainID,
+			"failed to fetch subnet %q: %w",
+			subnetID,
 			err,
 		)
 	}
-	allychain, ok := allychainTx.UnsignedTx.(*platformvm.UnsignedCreateAllychainTx)
+	subnet, ok := subnetTx.UnsignedTx.(*platformvm.UnsignedCreateSubnetTx)
 	if !ok {
 		return nil, errWrongTxType
 	}
 
-	owner, ok := allychain.Owner.(*secp256k1fx.OutputOwners)
+	owner, ok := subnet.Owner.(*secp256k1fx.OutputOwners)
 	if !ok {
 		return nil, errUnknownOwnerType
 	}
 
-	authSigners := make([]*crypto.PrivateKeySECP256K1R, len(allychainInput.SigIndices))
-	for sigIndex, addrIndex := range allychainInput.SigIndices {
+	authSigners := make([]*crypto.PrivateKeySECP256K1R, len(subnetInput.SigIndices))
+	for sigIndex, addrIndex := range subnetInput.SigIndices {
 		if addrIndex >= uint32(len(owner.Addrs)) {
 			return nil, errInvalidUTXOSigIndex
 		}

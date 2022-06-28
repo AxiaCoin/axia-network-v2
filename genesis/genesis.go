@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package genesis
@@ -28,7 +28,7 @@ import (
 const (
 	defaultEncoding    = formatting.Hex
 	codecVersion       = 0
-	configChainIDAlias = "Swap"
+	configChainIDAlias = "X"
 )
 
 var (
@@ -36,7 +36,7 @@ var (
 	errNoSupply               = errors.New("initial supply must be > 0")
 	errNoStakeDuration        = errors.New("initial stake duration must be > 0")
 	errNoStakers              = errors.New("initial stakers must be > 0")
-	errNoAXCChainGenesis        = errors.New("AXC-Chain genesis cannot be empty")
+	errNoCChainGenesis        = errors.New("C-Chain genesis cannot be empty")
 	errNoTxs                  = errors.New("genesis creates no transactions")
 )
 
@@ -55,13 +55,13 @@ func validateInitialStakedFunds(config *Config) error {
 	initialStakedFundsSet := ids.ShortSet{}
 	for _, allocation := range config.Allocations {
 		// It is ok to have duplicates as different
-		// ethAddrs could claim to the same axcAddr.
-		allocationSet.Add(allocation.AXCAddr)
+		// ethAddrs could claim to the same avaxAddr.
+		allocationSet.Add(allocation.AVAXAddr)
 	}
 
 	for _, staker := range config.InitialStakedFunds {
 		if initialStakedFundsSet.Contains(staker) {
-			axcAddr, err := formatting.FormatAddress(
+			avaxAddr, err := formatting.FormatAddress(
 				configChainIDAlias,
 				constants.GetHRP(config.NetworkID),
 				staker.Bytes(),
@@ -75,13 +75,13 @@ func validateInitialStakedFunds(config *Config) error {
 
 			return fmt.Errorf(
 				"address %s is duplicated in initial staked funds",
-				axcAddr,
+				avaxAddr,
 			)
 		}
 		initialStakedFundsSet.Add(staker)
 
 		if !allocationSet.Contains(staker) {
-			axcAddr, err := formatting.FormatAddress(
+			avaxAddr, err := formatting.FormatAddress(
 				configChainIDAlias,
 				constants.GetHRP(config.NetworkID),
 				staker.Bytes(),
@@ -95,7 +95,7 @@ func validateInitialStakedFunds(config *Config) error {
 
 			return fmt.Errorf(
 				"address %s does not have an allocation to stake",
-				axcAddr,
+				avaxAddr,
 			)
 		}
 	}
@@ -156,8 +156,8 @@ func validateConfig(networkID uint32, config *Config) error {
 		return fmt.Errorf("initial staked funds validation failed: %w", err)
 	}
 
-	if len(config.AXCChainGenesis) == 0 {
-		return errNoAXCChainGenesis
+	if len(config.CChainGenesis) == 0 {
+		return errNoCChainGenesis
 	}
 
 	return nil
@@ -165,7 +165,7 @@ func validateConfig(networkID uint32, config *Config) error {
 
 // FromFile returns the genesis data of the Platform Chain.
 //
-// Since an Axia network has exactly one Platform Chain, and the Platform
+// Since an Avalanche network has exactly one Platform Chain, and the Platform
 // Chain defines the genesis state of the network (who is staking, which chains
 // exist, etc.), defining the genesis state of the Platform Chain is the same as
 // defining the genesis state of the network.
@@ -181,7 +181,7 @@ func validateConfig(networkID uint32, config *Config) error {
 // FromFile returns:
 // 1) The byte representation of the genesis state of the platform chain
 //    (ie the genesis state of the network)
-// 2) The asset ID of AXC
+// 2) The asset ID of AVAX
 func FromFile(networkID uint32, filepath string) ([]byte, ids.ID, error) {
 	switch networkID {
 	case constants.MainnetID, constants.TestnetID, constants.LocalID:
@@ -206,7 +206,7 @@ func FromFile(networkID uint32, filepath string) ([]byte, ids.ID, error) {
 
 // FromFlag returns the genesis data of the Platform Chain.
 //
-// Since an Axia network has exactly one Platform Chain, and the Platform
+// Since an Avalanche network has exactly one Platform Chain, and the Platform
 // Chain defines the genesis state of the network (who is staking, which chains
 // exist, etc.), defining the genesis state of the Platform Chain is the same as
 // defining the genesis state of the network.
@@ -222,7 +222,7 @@ func FromFile(networkID uint32, filepath string) ([]byte, ids.ID, error) {
 // FromFlag returns:
 // 1) The byte representation of the genesis state of the platform chain
 //    (ie the genesis state of the network)
-// 2) The asset ID of AXC
+// 2) The asset ID of AVAX
 func FromFlag(networkID uint32, genesisContent string) ([]byte, ids.ID, error) {
 	switch networkID {
 	case constants.MainnetID, constants.TestnetID, constants.LocalID:
@@ -248,7 +248,7 @@ func FromFlag(networkID uint32, genesisContent string) ([]byte, ids.ID, error) {
 // FromConfig returns:
 // 1) The byte representation of the genesis state of the platform chain
 //    (ie the genesis state of the network)
-// 2) The asset ID of AXC
+// 2) The asset ID of AVAX
 func FromConfig(config *Config) ([]byte, ids.ID, error) {
 	hrp := constants.GetHRP(config.NetworkID)
 
@@ -260,9 +260,9 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 		Encoding:  defaultEncoding,
 	}
 	{
-		axc := avm.AssetDefinition{
-			Name:         "Axia",
-			Symbol:       "AXC",
+		avax := avm.AssetDefinition{
+			Name:         "Avalanche",
+			Symbol:       "AVAX",
 			Denomination: 9,
 			InitialState: map[string][]interface{}{},
 		}
@@ -276,12 +276,12 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 		sortXAllocation(xAllocations)
 
 		for _, allocation := range xAllocations {
-			addr, err := formatting.FormatBech32(hrp, allocation.AXCAddr.Bytes())
+			addr, err := formatting.FormatBech32(hrp, allocation.AVAXAddr.Bytes())
 			if err != nil {
 				return nil, ids.ID{}, err
 			}
 
-			axc.InitialState["fixedCap"] = append(axc.InitialState["fixedCap"], avm.Holder{
+			avax.InitialState["fixedCap"] = append(avax.InitialState["fixedCap"], avm.Holder{
 				Amount:  json.Uint64(allocation.InitialAmount),
 				Address: addr,
 			})
@@ -290,12 +290,12 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 		}
 
 		var err error
-		axc.Memo, err = formatting.EncodeWithChecksum(defaultEncoding, memoBytes)
+		avax.Memo, err = formatting.EncodeWithChecksum(defaultEncoding, memoBytes)
 		if err != nil {
 			return nil, ids.Empty, fmt.Errorf("couldn't parse memo bytes to string: %w", err)
 		}
 		avmArgs.GenesisData = map[string]avm.AssetDefinition{
-			"AXC": axc, // The AVM starts out with one asset: AXC
+			"AVAX": avax, // The AVM starts out with one asset: AVAX
 		}
 	}
 	avmReply := avm.BuildGenesisReply{}
@@ -310,9 +310,9 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 	if err != nil {
 		return nil, ids.ID{}, fmt.Errorf("couldn't parse avm genesis reply: %w", err)
 	}
-	axcAssetID, err := AXCAssetID(bytes)
+	avaxAssetID, err := AVAXAssetID(bytes)
 	if err != nil {
-		return nil, ids.ID{}, fmt.Errorf("couldn't generate AXC asset ID: %w", err)
+		return nil, ids.ID{}, fmt.Errorf("couldn't generate AVAX asset ID: %w", err)
 	}
 
 	genesisTime := time.Unix(int64(config.StartTime), 0)
@@ -327,7 +327,7 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 
 	// Specify the initial state of the Platform Chain
 	platformvmArgs := platformvm.BuildGenesisArgs{
-		AxcAssetID:   axcAssetID,
+		AvaxAssetID:   avaxAssetID,
 		NetworkID:     json.Uint32(config.NetworkID),
 		Time:          json.Uint64(config.StartTime),
 		InitialSupply: json.Uint64(initialSupply),
@@ -335,11 +335,11 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 		Encoding:      defaultEncoding,
 	}
 	for _, allocation := range config.Allocations {
-		if initiallyStaked.Contains(allocation.AXCAddr) {
+		if initiallyStaked.Contains(allocation.AVAXAddr) {
 			skippedAllocations = append(skippedAllocations, allocation)
 			continue
 		}
-		addr, err := formatting.FormatBech32(hrp, allocation.AXCAddr.Bytes())
+		addr, err := formatting.FormatBech32(hrp, allocation.AVAXAddr.Bytes())
 		if err != nil {
 			return nil, ids.ID{}, err
 		}
@@ -377,7 +377,7 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 
 		utxos := []platformvm.APIUTXO(nil)
 		for _, allocation := range nodeAllocations {
-			addr, err := formatting.FormatBech32(hrp, allocation.AXCAddr.Bytes())
+			addr, err := formatting.FormatBech32(hrp, allocation.AVAXAddr.Bytes())
 			if err != nil {
 				return nil, ids.ID{}, err
 			}
@@ -416,27 +416,27 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 	}
 
 	// Specify the chains that exist upon this network's creation
-	genesisStr, err := formatting.EncodeWithChecksum(defaultEncoding, []byte(config.AXCChainGenesis))
+	genesisStr, err := formatting.EncodeWithChecksum(defaultEncoding, []byte(config.CChainGenesis))
 	if err != nil {
 		return nil, ids.Empty, fmt.Errorf("couldn't encode message: %w", err)
 	}
 	platformvmArgs.Chains = []platformvm.APIChain{
 		{
 			GenesisData: avmReply.Bytes,
-			AllychainID:    constants.PrimaryNetworkID,
+			SubnetID:    constants.PrimaryNetworkID,
 			VMID:        constants.AVMID,
 			FxIDs: []ids.ID{
 				secp256k1fx.ID,
 				nftfx.ID,
 				propertyfx.ID,
 			},
-			Name: "Swap-Chain",
+			Name: "X-Chain",
 		},
 		{
 			GenesisData: genesisStr,
-			AllychainID:    constants.PrimaryNetworkID,
+			SubnetID:    constants.PrimaryNetworkID,
 			VMID:        constants.EVMID,
-			Name:        "AXC-Chain",
+			Name:        "C-Chain",
 		},
 	}
 
@@ -451,7 +451,7 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 		return nil, ids.ID{}, fmt.Errorf("problem parsing platformvm genesis bytes: %w", err)
 	}
 
-	return genesisBytes, axcAssetID, nil
+	return genesisBytes, avaxAssetID, nil
 }
 
 func splitAllocations(allocations []Allocation, numSplits int) [][]Allocation {
@@ -469,7 +469,7 @@ func splitAllocations(allocations []Allocation, numSplits int) [][]Allocation {
 	currentNodeAmount := uint64(0)
 	for _, allocation := range allocations {
 		currentAllocation := allocation
-		// Already added to the Swap-chain
+		// Already added to the X-chain
 		currentAllocation.InitialAmount = 0
 		// Going to be added until the correct amount is reached
 		currentAllocation.UnlockSchedule = nil
@@ -492,7 +492,7 @@ func splitAllocations(allocations []Allocation, numSplits int) [][]Allocation {
 				currentNodeAmount = 0
 
 				currentAllocation = allocation
-				// Already added to the Swap-chain
+				// Already added to the X-chain
 				currentAllocation.InitialAmount = 0
 				// Going to be added until the correct amount is reached
 				currentAllocation.UnlockSchedule = nil
@@ -534,7 +534,7 @@ func VMGenesis(genesisBytes []byte, vmID ids.ID) (*platformvm.Tx, error) {
 	return nil, fmt.Errorf("couldn't find blockchain with VM ID %s", vmID)
 }
 
-func AXCAssetID(avmGenesisBytes []byte) (ids.ID, error) {
+func AVAXAssetID(avmGenesisBytes []byte) (ids.ID, error) {
 	c := linearcodec.NewCustomMaxLength(1 << 20)
 	m := codec.NewManager(math.MaxInt32)
 	errs := wrappers.Errs{}
@@ -584,7 +584,7 @@ type innerSortXAllocation []Allocation
 func (xa innerSortXAllocation) Less(i, j int) bool {
 	return xa[i].InitialAmount < xa[j].InitialAmount ||
 		(xa[i].InitialAmount == xa[j].InitialAmount &&
-			bytes.Compare(xa[i].AXCAddr.Bytes(), xa[j].AXCAddr.Bytes()) == -1)
+			bytes.Compare(xa[i].AVAXAddr.Bytes(), xa[j].AVAXAddr.Bytes()) == -1)
 }
 
 func (xa innerSortXAllocation) Len() int      { return len(xa) }

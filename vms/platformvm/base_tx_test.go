@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package platformvm
@@ -10,7 +10,7 @@ import (
 
 	"github.com/axiacoin/axia-network-v2/ids"
 
-	"github.com/axiacoin/axia-network-v2/vms/components/axc"
+	"github.com/axiacoin/axia-network-v2/vms/components/avax"
 )
 
 func TestBaseTxMarshalJSON(t *testing.T) {
@@ -27,22 +27,22 @@ func TestBaseTxMarshalJSON(t *testing.T) {
 	utxoTxID := ids.ID{2}
 	assetID := ids.ID{3}
 	fxID := ids.ID{4}
-	tx := &BaseTx{BaseTx: axc.BaseTx{
+	tx := &BaseTx{BaseTx: avax.BaseTx{
 		BlockchainID: blockchainID,
 		NetworkID:    4,
-		Ins: []*axc.TransferableInput{
+		Ins: []*avax.TransferableInput{
 			{
 				FxID:   fxID,
-				UTXOID: axc.UTXOID{TxID: utxoTxID, OutputIndex: 5},
-				Asset:  axc.Asset{ID: assetID},
-				In:     &axc.TestTransferable{Val: 100},
+				UTXOID: avax.UTXOID{TxID: utxoTxID, OutputIndex: 5},
+				Asset:  avax.Asset{ID: assetID},
+				In:     &avax.TestTransferable{Val: 100},
 			},
 		},
-		Outs: []*axc.TransferableOutput{
+		Outs: []*avax.TransferableOutput{
 			{
 				FxID:  fxID,
-				Asset: axc.Asset{ID: assetID},
-				Out:   &axc.TestTransferable{Val: 100},
+				Asset: avax.Asset{ID: assetID},
+				Out:   &avax.TestTransferable{Val: 100},
 			},
 		},
 		Memo: []byte{1, 2, 3},

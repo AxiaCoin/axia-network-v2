@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package proposer
@@ -18,17 +18,17 @@ import (
 func TestWindowerNoValidators(t *testing.T) {
 	assert := assert.New(t)
 
-	allychainID := ids.GenerateTestID()
+	subnetID := ids.GenerateTestID()
 	chainID := ids.GenerateTestID()
 	nodeID := ids.GenerateTestShortID()
 	vdrState := &validators.TestState{
 		T: t,
-		GetValidatorSetF: func(height uint64, allychainID ids.ID) (map[ids.ShortID]uint64, error) {
+		GetValidatorSetF: func(height uint64, subnetID ids.ID) (map[ids.ShortID]uint64, error) {
 			return nil, nil
 		},
 	}
 
-	w := New(vdrState, allychainID, chainID)
+	w := New(vdrState, subnetID, chainID)
 
 	delay, err := w.Delay(1, 0, nodeID)
 	assert.NoError(err)
@@ -38,20 +38,20 @@ func TestWindowerNoValidators(t *testing.T) {
 func TestWindowerRepeatedValidator(t *testing.T) {
 	assert := assert.New(t)
 
-	allychainID := ids.GenerateTestID()
+	subnetID := ids.GenerateTestID()
 	chainID := ids.GenerateTestID()
 	validatorID := ids.GenerateTestShortID()
 	nonValidatorID := ids.GenerateTestShortID()
 	vdrState := &validators.TestState{
 		T: t,
-		GetValidatorSetF: func(height uint64, allychainID ids.ID) (map[ids.ShortID]uint64, error) {
+		GetValidatorSetF: func(height uint64, subnetID ids.ID) (map[ids.ShortID]uint64, error) {
 			return map[ids.ShortID]uint64{
 				validatorID: 10,
 			}, nil
 		},
 	}
 
-	w := New(vdrState, allychainID, chainID)
+	w := New(vdrState, subnetID, chainID)
 
 	validatorDelay, err := w.Delay(1, 0, validatorID)
 	assert.NoError(err)
@@ -65,7 +65,7 @@ func TestWindowerRepeatedValidator(t *testing.T) {
 func TestWindowerChangeByHeight(t *testing.T) {
 	assert := assert.New(t)
 
-	allychainID := ids.ID{0, 1}
+	subnetID := ids.ID{0, 1}
 	chainID := ids.ID{0, 2}
 	validatorIDs := make([]ids.ShortID, MaxWindows)
 	for i := range validatorIDs {
@@ -73,7 +73,7 @@ func TestWindowerChangeByHeight(t *testing.T) {
 	}
 	vdrState := &validators.TestState{
 		T: t,
-		GetValidatorSetF: func(height uint64, allychainID ids.ID) (map[ids.ShortID]uint64, error) {
+		GetValidatorSetF: func(height uint64, subnetID ids.ID) (map[ids.ShortID]uint64, error) {
 			validators := make(map[ids.ShortID]uint64, MaxWindows)
 			for _, id := range validatorIDs {
 				validators[id] = 1
@@ -82,7 +82,7 @@ func TestWindowerChangeByHeight(t *testing.T) {
 		},
 	}
 
-	w := New(vdrState, allychainID, chainID)
+	w := New(vdrState, subnetID, chainID)
 
 	expectedDelays1 := []time.Duration{
 		2 * WindowDuration,
@@ -119,7 +119,7 @@ func TestWindowerChangeByHeight(t *testing.T) {
 func TestWindowerChangeByChain(t *testing.T) {
 	assert := assert.New(t)
 
-	allychainID := ids.ID{0, 1}
+	subnetID := ids.ID{0, 1}
 
 	rand.Seed(0)
 	chainID0 := ids.ID{}
@@ -133,7 +133,7 @@ func TestWindowerChangeByChain(t *testing.T) {
 	}
 	vdrState := &validators.TestState{
 		T: t,
-		GetValidatorSetF: func(height uint64, allychainID ids.ID) (map[ids.ShortID]uint64, error) {
+		GetValidatorSetF: func(height uint64, subnetID ids.ID) (map[ids.ShortID]uint64, error) {
 			validators := make(map[ids.ShortID]uint64, MaxWindows)
 			for _, id := range validatorIDs {
 				validators[id] = 1
@@ -142,8 +142,8 @@ func TestWindowerChangeByChain(t *testing.T) {
 		},
 	}
 
-	w0 := New(vdrState, allychainID, chainID0)
-	w1 := New(vdrState, allychainID, chainID1)
+	w0 := New(vdrState, subnetID, chainID0)
+	w1 := New(vdrState, subnetID, chainID1)
 
 	expectedDelays0 := []time.Duration{
 		5 * WindowDuration,

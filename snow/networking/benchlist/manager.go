@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package benchlist
@@ -120,7 +120,7 @@ func (m *manager) RegisterChain(ctx *snow.ConsensusContext) error {
 		ok   bool
 	)
 	if m.config.StakingEnabled {
-		vdrs, ok = m.config.Validators.GetValidators(ctx.AllychainID)
+		vdrs, ok = m.config.Validators.GetValidators(ctx.SubnetID)
 	} else {
 		// If staking is disabled, everyone validates every chain
 		vdrs, ok = m.config.Validators.GetValidators(constants.PrimaryNetworkID)

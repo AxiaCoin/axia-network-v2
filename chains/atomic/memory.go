@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package atomic
@@ -25,7 +25,7 @@ type rcLock struct {
 	count int
 }
 
-// Memory is the interface for shared memory inside a allychain
+// Memory is the interface for shared memory inside a subnet
 type Memory struct {
 	lock  sync.Mutex
 	log   logging.Logger

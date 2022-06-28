@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package platformvm
@@ -94,17 +94,17 @@ func TestPrimaryValidatorSet(t *testing.T) {
 	}
 }
 
-func TestAllychainValidatorSet(t *testing.T) {
-	allychainID := ids.GenerateTestID()
+func TestSubnetValidatorSet(t *testing.T) {
+	subnetID := ids.GenerateTestID()
 
 	// Initialize the chain state
 	nodeID0 := ids.GenerateTestShortID()
 	node0Weight := uint64(1)
 	vdr0 := &currentValidatorImpl{
 		validatorImpl: validatorImpl{
-			allychains: map[ids.ID]*UnsignedAddAllychainValidatorTx{
-				allychainID: {
-					Validator: AllychainValidator{
+			subnets: map[ids.ID]*UnsignedAddSubnetValidatorTx{
+				subnetID: {
+					Validator: SubnetValidator{
 						Validator: Validator{
 							Wght: node0Weight,
 						},
@@ -118,9 +118,9 @@ func TestAllychainValidatorSet(t *testing.T) {
 	node1Weight := uint64(2)
 	vdr1 := &currentValidatorImpl{
 		validatorImpl: validatorImpl{
-			allychains: map[ids.ID]*UnsignedAddAllychainValidatorTx{
-				allychainID: {
-					Validator: AllychainValidator{
+			subnets: map[ids.ID]*UnsignedAddSubnetValidatorTx{
+				subnetID: {
+					Validator: SubnetValidator{
 						Validator: Validator{
 							Wght: node1Weight,
 						},
@@ -134,9 +134,9 @@ func TestAllychainValidatorSet(t *testing.T) {
 	node2Weight := uint64(2)
 	vdr2 := &currentValidatorImpl{
 		validatorImpl: validatorImpl{
-			allychains: map[ids.ID]*UnsignedAddAllychainValidatorTx{
-				allychainID: {
-					Validator: AllychainValidator{
+			subnets: map[ids.ID]*UnsignedAddSubnetValidatorTx{
+				subnetID: {
+					Validator: SubnetValidator{
 						Validator: Validator{
 							Wght: node2Weight,
 						},
@@ -158,7 +158,7 @@ func TestAllychainValidatorSet(t *testing.T) {
 
 	{
 		// Apply the on-chain validator set to [vdrs]
-		vdrs, err := cs.ValidatorSet(allychainID)
+		vdrs, err := cs.ValidatorSet(subnetID)
 		assert.NoError(t, err)
 
 		// Validate that the state was applied and the old state was cleared
@@ -179,7 +179,7 @@ func TestAllychainValidatorSet(t *testing.T) {
 
 	{
 		// Apply the on-chain validator set again
-		vdrs, err := cs.ValidatorSet(allychainID)
+		vdrs, err := cs.ValidatorSet(subnetID)
 		assert.NoError(t, err)
 
 		// The state should be the same

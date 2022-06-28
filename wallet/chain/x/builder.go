@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package x
@@ -12,12 +12,12 @@ import (
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/utils/math"
 	"github.com/axiacoin/axia-network-v2/vms/avm"
-	"github.com/axiacoin/axia-network-v2/vms/components/axc"
+	"github.com/axiacoin/axia-network-v2/vms/components/avax"
 	"github.com/axiacoin/axia-network-v2/vms/components/verify"
 	"github.com/axiacoin/axia-network-v2/vms/nftfx"
 	"github.com/axiacoin/axia-network-v2/vms/propertyfx"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
-	"github.com/axiacoin/axia-network-v2/wallet/allychain/primary/common"
+	"github.com/axiacoin/axia-network-v2/wallet/subnet/primary/common"
 )
 
 var (
@@ -27,7 +27,7 @@ var (
 	_ Builder = &builder{}
 )
 
-// Builder provides a convenient interface for building unsigned Swap-chain
+// Builder provides a convenient interface for building unsigned X-chain
 // transactions.
 type Builder interface {
 	// GetFTBalance calculates the amount of each fungible asset that this
@@ -50,7 +50,7 @@ type Builder interface {
 	// - [outputs] specifies all the recipients and amounts that should be sent
 	//   from this transaction.
 	NewBaseTx(
-		outputs []*axc.TransferableOutput,
+		outputs []*avax.TransferableOutput,
 		options ...common.Option,
 	) (*avm.BaseTx, error)
 
@@ -141,17 +141,17 @@ type Builder interface {
 	// - [outputs] specifies the outputs to send to the [chainID].
 	NewExportTx(
 		chainID ids.ID,
-		outputs []*axc.TransferableOutput,
+		outputs []*avax.TransferableOutput,
 		options ...common.Option,
 	) (*avm.ExportTx, error)
 }
 
 // BuilderBackend specifies the required information needed to build unsigned
-// Swap-chain transactions.
+// X-chain transactions.
 type BuilderBackend interface {
 	Context
 
-	UTXOs(ctx stdcontext.Context, sourceChainID ids.ID) ([]*axc.UTXO, error)
+	UTXOs(ctx stdcontext.Context, sourceChainID ids.ID) ([]*avax.UTXO, error)
 }
 
 type builder struct {
@@ -188,11 +188,11 @@ func (b *builder) GetImportableBalance(
 }
 
 func (b *builder) NewBaseTx(
-	outputs []*axc.TransferableOutput,
+	outputs []*avax.TransferableOutput,
 	options ...common.Option,
 ) (*avm.BaseTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.backend.AXCAssetID(): b.backend.BaseTxFee(),
+		b.backend.AVAXAssetID(): b.backend.BaseTxFee(),
 	}
 	for _, out := range outputs {
 		assetID := out.AssetID()
@@ -209,9 +209,9 @@ func (b *builder) NewBaseTx(
 		return nil, err
 	}
 	outputs = append(outputs, changeOutputs...)
-	axc.SortTransferableOutputs(outputs, Codec) // sort the outputs
+	avax.SortTransferableOutputs(outputs, Codec) // sort the outputs
 
-	return &avm.BaseTx{BaseTx: axc.BaseTx{
+	return &avm.BaseTx{BaseTx: avax.BaseTx{
 		NetworkID:    b.backend.NetworkID(),
 		BlockchainID: b.backend.BlockchainID(),
 		Ins:          inputs,
@@ -228,7 +228,7 @@ func (b *builder) NewCreateAssetTx(
 	options ...common.Option,
 ) (*avm.CreateAssetTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.backend.AXCAssetID(): b.backend.CreateAssetTxFee(),
+		b.backend.AVAXAssetID(): b.backend.CreateAssetTxFee(),
 	}
 	ops := common.NewOptions(options)
 	inputs, outputs, err := b.spend(toBurn, ops)
@@ -247,7 +247,7 @@ func (b *builder) NewCreateAssetTx(
 	}
 
 	tx := &avm.CreateAssetTx{
-		BaseTx: avm.BaseTx{BaseTx: axc.BaseTx{
+		BaseTx: avm.BaseTx{BaseTx: avax.BaseTx{
 			NetworkID:    b.backend.NetworkID(),
 			BlockchainID: b.backend.BlockchainID(),
 			Ins:          inputs,
@@ -268,7 +268,7 @@ func (b *builder) NewOperationTx(
 	options ...common.Option,
 ) (*avm.OperationTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.backend.AXCAssetID(): b.backend.CreateAssetTxFee(),
+		b.backend.AVAXAssetID(): b.backend.CreateAssetTxFee(),
 	}
 	ops := common.NewOptions(options)
 	inputs, outputs, err := b.spend(toBurn, ops)
@@ -278,7 +278,7 @@ func (b *builder) NewOperationTx(
 
 	avm.SortOperations(operations, Codec)
 	return &avm.OperationTx{
-		BaseTx: avm.BaseTx{BaseTx: axc.BaseTx{
+		BaseTx: avm.BaseTx{BaseTx: avax.BaseTx{
 			NetworkID:    b.backend.NetworkID(),
 			BlockchainID: b.backend.BlockchainID(),
 			Ins:          inputs,
@@ -354,10 +354,10 @@ func (b *builder) NewImportTx(
 	var (
 		addrs           = ops.Addresses(b.addrs)
 		minIssuanceTime = ops.MinIssuanceTime()
-		axcAssetID     = b.backend.AXCAssetID()
+		avaxAssetID     = b.backend.AVAXAssetID()
 		txFee           = b.backend.BaseTxFee()
 
-		importedInputs  = make([]*axc.TransferableInput, 0, len(utxos))
+		importedInputs  = make([]*avax.TransferableInput, 0, len(utxos))
 		importedAmounts = make(map[ids.ID]uint64)
 	)
 	// Iterate over the unlocked UTXOs
@@ -374,7 +374,7 @@ func (b *builder) NewImportTx(
 			continue
 		}
 
-		importedInputs = append(importedInputs, &axc.TransferableInput{
+		importedInputs = append(importedInputs, &avax.TransferableInput{
 			UTXOID: utxo.UTXOID,
 			Asset:  utxo.Asset,
 			In: &secp256k1fx.TransferInput{
@@ -392,7 +392,7 @@ func (b *builder) NewImportTx(
 		}
 		importedAmounts[assetID] = newImportedAmount
 	}
-	axc.SortTransferableInputs(importedInputs) // sort imported inputs
+	avax.SortTransferableInputs(importedInputs) // sort imported inputs
 
 	if len(importedAmounts) == 0 {
 		return nil, fmt.Errorf(
@@ -402,16 +402,16 @@ func (b *builder) NewImportTx(
 	}
 
 	var (
-		inputs       []*axc.TransferableInput
-		outputs      = make([]*axc.TransferableOutput, 0, len(importedAmounts))
-		importedAXC = importedAmounts[axcAssetID]
+		inputs       []*avax.TransferableInput
+		outputs      = make([]*avax.TransferableOutput, 0, len(importedAmounts))
+		importedAVAX = importedAmounts[avaxAssetID]
 	)
-	if importedAXC > txFee {
-		importedAmounts[axcAssetID] -= txFee
+	if importedAVAX > txFee {
+		importedAmounts[avaxAssetID] -= txFee
 	} else {
-		if importedAXC < txFee { // imported amount goes toward paying tx fee
+		if importedAVAX < txFee { // imported amount goes toward paying tx fee
 			toBurn := map[ids.ID]uint64{
-				axcAssetID: txFee - importedAXC,
+				avaxAssetID: txFee - importedAVAX,
 			}
 			var err error
 			inputs, outputs, err = b.spend(toBurn, ops)
@@ -419,12 +419,12 @@ func (b *builder) NewImportTx(
 				return nil, fmt.Errorf("couldn't generate tx inputs/outputs: %w", err)
 			}
 		}
-		delete(importedAmounts, axcAssetID)
+		delete(importedAmounts, avaxAssetID)
 	}
 
 	for assetID, amount := range importedAmounts {
-		outputs = append(outputs, &axc.TransferableOutput{
-			Asset: axc.Asset{ID: assetID},
+		outputs = append(outputs, &avax.TransferableOutput{
+			Asset: avax.Asset{ID: assetID},
 			Out: &secp256k1fx.TransferOutput{
 				Amt:          amount,
 				OutputOwners: *to,
@@ -432,9 +432,9 @@ func (b *builder) NewImportTx(
 		})
 	}
 
-	axc.SortTransferableOutputs(outputs, Codec)
+	avax.SortTransferableOutputs(outputs, Codec)
 	return &avm.ImportTx{
-		BaseTx: avm.BaseTx{BaseTx: axc.BaseTx{
+		BaseTx: avm.BaseTx{BaseTx: avax.BaseTx{
 			NetworkID:    b.backend.NetworkID(),
 			BlockchainID: b.backend.BlockchainID(),
 			Ins:          inputs,
@@ -448,11 +448,11 @@ func (b *builder) NewImportTx(
 
 func (b *builder) NewExportTx(
 	chainID ids.ID,
-	outputs []*axc.TransferableOutput,
+	outputs []*avax.TransferableOutput,
 	options ...common.Option,
 ) (*avm.ExportTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.backend.AXCAssetID(): b.backend.BaseTxFee(),
+		b.backend.AVAXAssetID(): b.backend.BaseTxFee(),
 	}
 	for _, out := range outputs {
 		assetID := out.AssetID()
@@ -469,9 +469,9 @@ func (b *builder) NewExportTx(
 		return nil, err
 	}
 
-	axc.SortTransferableOutputs(outputs, Codec)
+	avax.SortTransferableOutputs(outputs, Codec)
 	return &avm.ExportTx{
-		BaseTx: avm.BaseTx{BaseTx: axc.BaseTx{
+		BaseTx: avm.BaseTx{BaseTx: avax.BaseTx{
 			NetworkID:    b.backend.NetworkID(),
 			BlockchainID: b.backend.BlockchainID(),
 			Ins:          inputs,
@@ -527,8 +527,8 @@ func (b *builder) spend(
 	amountsToBurn map[ids.ID]uint64,
 	options *common.Options,
 ) (
-	inputs []*axc.TransferableInput,
-	outputs []*axc.TransferableOutput,
+	inputs []*avax.TransferableInput,
+	outputs []*avax.TransferableOutput,
 	err error,
 ) {
 	utxos, err := b.backend.UTXOs(options.Context(), b.backend.BlockchainID())
@@ -572,7 +572,7 @@ func (b *builder) spend(
 			continue
 		}
 
-		inputs = append(inputs, &axc.TransferableInput{
+		inputs = append(inputs, &avax.TransferableInput{
 			UTXOID: utxo.UTXOID,
 			Asset:  utxo.Asset,
 			In: &secp256k1fx.TransferInput{
@@ -591,7 +591,7 @@ func (b *builder) spend(
 		amountsToBurn[assetID] -= amountToBurn
 		if remainingAmount := out.Amt - amountToBurn; remainingAmount > 0 {
 			// This input had extra value, so some of it must be returned
-			outputs = append(outputs, &axc.TransferableOutput{
+			outputs = append(outputs, &avax.TransferableOutput{
 				Asset: utxo.Asset,
 				Out: &secp256k1fx.TransferOutput{
 					Amt:          remainingAmount,
@@ -612,8 +612,8 @@ func (b *builder) spend(
 		}
 	}
 
-	axc.SortTransferableInputs(inputs)          // sort inputs
-	axc.SortTransferableOutputs(outputs, Codec) // sort the change outputs
+	avax.SortTransferableInputs(inputs)          // sort inputs
+	avax.SortTransferableOutputs(outputs, Codec) // sort the change outputs
 	return inputs, outputs, nil
 }
 
@@ -652,7 +652,7 @@ func (b *builder) mintFTs(
 		// add the operation to the array
 		operations = append(operations, &avm.Operation{
 			Asset:   utxo.Asset,
-			UTXOIDs: []*axc.UTXOID{&utxo.UTXOID},
+			UTXOIDs: []*avax.UTXOID{&utxo.UTXOID},
 			Op: &secp256k1fx.MintOperation{
 				MintInput: secp256k1fx.Input{
 					SigIndices: inputSigIndices,
@@ -712,8 +712,8 @@ func (b *builder) mintNFTs(
 
 		// add the operation to the array
 		operations = append(operations, &avm.Operation{
-			Asset: axc.Asset{ID: assetID},
-			UTXOIDs: []*axc.UTXOID{
+			Asset: avax.Asset{ID: assetID},
+			UTXOIDs: []*avax.UTXOID{
 				&utxo.UTXOID,
 			},
 			Op: &nftfx.MintOperation{
@@ -768,8 +768,8 @@ func (b *builder) mintProperty(
 
 		// add the operation to the array
 		operations = append(operations, &avm.Operation{
-			Asset: axc.Asset{ID: assetID},
-			UTXOIDs: []*axc.UTXOID{
+			Asset: avax.Asset{ID: assetID},
+			UTXOIDs: []*avax.UTXOID{
 				&utxo.UTXOID,
 			},
 			Op: &propertyfx.MintOperation{
@@ -824,8 +824,8 @@ func (b *builder) burnProperty(
 
 		// add the operation to the array
 		operations = append(operations, &avm.Operation{
-			Asset: axc.Asset{ID: assetID},
-			UTXOIDs: []*axc.UTXOID{
+			Asset: avax.Asset{ID: assetID},
+			UTXOIDs: []*avax.UTXOID{
 				&utxo.UTXOID,
 			},
 			Op: &propertyfx.BurnOperation{

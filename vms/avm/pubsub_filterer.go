@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package avm
@@ -6,7 +6,7 @@ package avm
 import (
 	"github.com/axiacoin/axia-network-v2/api"
 	"github.com/axiacoin/axia-network-v2/pubsub"
-	"github.com/axiacoin/axia-network-v2/vms/components/axc"
+	"github.com/axiacoin/axia-network-v2/vms/components/avax"
 )
 
 var _ pubsub.Filterer = &filterer{}
@@ -23,7 +23,7 @@ func NewPubSubFilterer(tx *Tx) pubsub.Filterer {
 func (f *filterer) Filter(filters []pubsub.Filter) ([]bool, interface{}) {
 	resp := make([]bool, len(filters))
 	for _, utxo := range f.tx.UTXOs() {
-		addressable, ok := utxo.Out.(axc.Addressable)
+		addressable, ok := utxo.Out.(avax.Addressable)
 		if !ok {
 			continue
 		}

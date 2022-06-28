@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package p
@@ -17,38 +17,38 @@ var _ Context = &context{}
 type Context interface {
 	NetworkID() uint32
 	HRP() string
-	AXCAssetID() ids.ID
+	AVAXAssetID() ids.ID
 	BaseTxFee() uint64
-	CreateAllychainTxFee() uint64
+	CreateSubnetTxFee() uint64
 	CreateBlockchainTxFee() uint64
 }
 
 type context struct {
 	networkID             uint32
 	hrp                   string
-	axcAssetID           ids.ID
+	avaxAssetID           ids.ID
 	baseTxFee             uint64
-	createAllychainTxFee     uint64
+	createSubnetTxFee     uint64
 	createBlockchainTxFee uint64
 }
 
 func NewContextFromURI(ctx stdcontext.Context, uri string) (Context, error) {
 	infoClient := info.NewClient(uri)
-	swapChainClient := avm.NewClient(uri, "Swap")
-	return NewContextFromClients(ctx, infoClient, swapChainClient)
+	xChainClient := avm.NewClient(uri, "X")
+	return NewContextFromClients(ctx, infoClient, xChainClient)
 }
 
 func NewContextFromClients(
 	ctx stdcontext.Context,
 	infoClient info.Client,
-	swapChainClient avm.Client,
+	xChainClient avm.Client,
 ) (Context, error) {
 	networkID, err := infoClient.GetNetworkID(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	asset, err := swapChainClient.GetAssetDescription(ctx, "AXC")
+	asset, err := xChainClient.GetAssetDescription(ctx, "AVAX")
 	if err != nil {
 		return nil, err
 	}
@@ -62,31 +62,31 @@ func NewContextFromClients(
 		networkID,
 		asset.AssetID,
 		uint64(txFees.TxFee),
-		uint64(txFees.CreateAllychainTxFee),
+		uint64(txFees.CreateSubnetTxFee),
 		uint64(txFees.CreateBlockchainTxFee),
 	), nil
 }
 
 func NewContext(
 	networkID uint32,
-	axcAssetID ids.ID,
+	avaxAssetID ids.ID,
 	baseTxFee uint64,
-	createAllychainTxFee uint64,
+	createSubnetTxFee uint64,
 	createBlockchainTxFee uint64,
 ) Context {
 	return &context{
 		networkID:             networkID,
 		hrp:                   constants.GetHRP(networkID),
-		axcAssetID:           axcAssetID,
+		avaxAssetID:           avaxAssetID,
 		baseTxFee:             baseTxFee,
-		createAllychainTxFee:     createAllychainTxFee,
+		createSubnetTxFee:     createSubnetTxFee,
 		createBlockchainTxFee: createBlockchainTxFee,
 	}
 }
 
 func (c *context) NetworkID() uint32             { return c.networkID }
 func (c *context) HRP() string                   { return c.hrp }
-func (c *context) AXCAssetID() ids.ID           { return c.axcAssetID }
+func (c *context) AVAXAssetID() ids.ID           { return c.avaxAssetID }
 func (c *context) BaseTxFee() uint64             { return c.baseTxFee }
-func (c *context) CreateAllychainTxFee() uint64     { return c.createAllychainTxFee }
+func (c *context) CreateSubnetTxFee() uint64     { return c.createSubnetTxFee }
 func (c *context) CreateBlockchainTxFee() uint64 { return c.createBlockchainTxFee }

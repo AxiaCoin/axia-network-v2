@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package block
@@ -19,7 +19,7 @@ func TestParse(t *testing.T) {
 
 	parentID := ids.ID{1}
 	timestamp := time.Unix(123, 0)
-	coreChainHeight := uint64(2)
+	pChainHeight := uint64(2)
 	innerBlockBytes := []byte{3}
 	chainID := ids.ID{4}
 
@@ -32,7 +32,7 @@ func TestParse(t *testing.T) {
 	builtBlock, err := Build(
 		parentID,
 		timestamp,
-		coreChainHeight,
+		pChainHeight,
 		cert,
 		innerBlockBytes,
 		chainID,
@@ -95,10 +95,10 @@ func TestParseUnsigned(t *testing.T) {
 
 	parentID := ids.ID{1}
 	timestamp := time.Unix(123, 0)
-	coreChainHeight := uint64(2)
+	pChainHeight := uint64(2)
 	innerBlockBytes := []byte{3}
 
-	builtBlock, err := BuildUnsigned(parentID, timestamp, coreChainHeight, innerBlockBytes)
+	builtBlock, err := BuildUnsigned(parentID, timestamp, pChainHeight, innerBlockBytes)
 	assert.NoError(err)
 
 	builtBlockBytes := builtBlock.Bytes()

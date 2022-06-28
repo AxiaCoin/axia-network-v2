@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package avm
@@ -18,14 +18,14 @@ import (
 // 2) the VM
 // 3) The wallet service that wraps the VM
 // 4) atomic memory to use in tests
-func setupWS(t *testing.T, isAXCAsset bool) ([]byte, *VM, *WalletService, *atomic.Memory, *Tx) {
+func setupWS(t *testing.T, isAVAXAsset bool) ([]byte, *VM, *WalletService, *atomic.Memory, *Tx) {
 	var genesisBytes []byte
 	var vm *VM
 	var m *atomic.Memory
 	var genesisTx *Tx
-	if isAXCAsset {
+	if isAVAXAsset {
 		genesisBytes, _, vm, m = GenesisVM(t)
-		genesisTx = GetAXCTxFromGenesisTest(genesisBytes, t)
+		genesisTx = GetAVAXTxFromGenesisTest(genesisBytes, t)
 	} else {
 		genesisBytes, _, vm, m = setupTxFeeAssets(t)
 		genesisTx = GetCreateTxFromGenesisTest(t, genesisBytes, feeAssetName)
@@ -40,8 +40,8 @@ func setupWS(t *testing.T, isAXCAsset bool) ([]byte, *VM, *WalletService, *atomi
 // 2) the VM
 // 3) The wallet service that wraps the VM
 // 4) atomic memory to use in tests
-func setupWSWithKeys(t *testing.T, isAXCAsset bool) ([]byte, *VM, *WalletService, *atomic.Memory, *Tx) {
-	genesisBytes, vm, ws, m, tx := setupWS(t, isAXCAsset)
+func setupWSWithKeys(t *testing.T, isAVAXAsset bool) ([]byte, *VM, *WalletService, *atomic.Memory, *Tx) {
+	genesisBytes, vm, ws, m, tx := setupWS(t, isAVAXAsset)
 
 	// Import the initially funded private keys
 	user, err := keystore.NewUserFromKeystore(ws.vm.ctx.Keystore, username, password)
@@ -62,7 +62,7 @@ func setupWSWithKeys(t *testing.T, isAXCAsset bool) ([]byte, *VM, *WalletService
 func TestWalletService_SendMultiple(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			_, vm, ws, _, genesisTx := setupWSWithKeys(t, tc.axcAsset)
+			_, vm, ws, _, genesisTx := setupWSWithKeys(t, tc.avaxAsset)
 			defer func() {
 				if err := vm.Shutdown(); err != nil {
 					t.Fatal(err)

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package sender
@@ -22,8 +22,8 @@ type ExternalSenderTest struct {
 
 	CantSend, CantGossip bool
 
-	SendF   func(msg message.OutboundMessage, nodeIDs ids.ShortSet, allychainID ids.ID, validatorOnly bool) ids.ShortSet
-	GossipF func(msg message.OutboundMessage, allychainID ids.ID, validatorOnly bool, numValidatorsToSend, numNonValidatorsToSend, numPeersToSend int) ids.ShortSet
+	SendF   func(msg message.OutboundMessage, nodeIDs ids.ShortSet, subnetID ids.ID, validatorOnly bool) ids.ShortSet
+	GossipF func(msg message.OutboundMessage, subnetID ids.ID, validatorOnly bool, numValidatorsToSend, numNonValidatorsToSend, numPeersToSend int) ids.ShortSet
 }
 
 // Default set the default callable value to [cant]
@@ -35,11 +35,11 @@ func (s *ExternalSenderTest) Default(cant bool) {
 func (s *ExternalSenderTest) Send(
 	msg message.OutboundMessage,
 	nodeIDs ids.ShortSet,
-	allychainID ids.ID,
+	subnetID ids.ID,
 	validatorOnly bool,
 ) ids.ShortSet {
 	if s.SendF != nil {
-		return s.SendF(msg, nodeIDs, allychainID, validatorOnly)
+		return s.SendF(msg, nodeIDs, subnetID, validatorOnly)
 	}
 	if s.CantSend {
 		if s.TB != nil {
@@ -55,14 +55,14 @@ func (s *ExternalSenderTest) Send(
 // initialized, then testing will fail.
 func (s *ExternalSenderTest) Gossip(
 	msg message.OutboundMessage,
-	allychainID ids.ID,
+	subnetID ids.ID,
 	validatorOnly bool,
 	numValidatorsToSend int,
 	numNonValidatorsToSend int,
 	numPeersToSend int,
 ) ids.ShortSet {
 	if s.GossipF != nil {
-		return s.GossipF(msg, allychainID, validatorOnly, numValidatorsToSend, numNonValidatorsToSend, numPeersToSend)
+		return s.GossipF(msg, subnetID, validatorOnly, numValidatorsToSend, numNonValidatorsToSend, numPeersToSend)
 	}
 	if s.CantGossip {
 		if s.TB != nil {

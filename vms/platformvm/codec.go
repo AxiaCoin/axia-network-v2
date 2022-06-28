@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package platformvm
@@ -50,11 +50,11 @@ func init() {
 			c.RegisterType(&secp256k1fx.OutputOwners{}),
 
 			c.RegisterType(&UnsignedAddValidatorTx{}),
-			c.RegisterType(&UnsignedAddAllychainValidatorTx{}),
+			c.RegisterType(&UnsignedAddSubnetValidatorTx{}),
 			c.RegisterType(&UnsignedAddDelegatorTx{}),
 
 			c.RegisterType(&UnsignedCreateChainTx{}),
-			c.RegisterType(&UnsignedCreateAllychainTx{}),
+			c.RegisterType(&UnsignedCreateSubnetTx{}),
 
 			c.RegisterType(&UnsignedImportTx{}),
 			c.RegisterType(&UnsignedExportTx{}),

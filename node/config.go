@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package node
@@ -12,7 +12,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/nat"
 	"github.com/axiacoin/axia-network-v2/network"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/axia"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/avalanche"
 	"github.com/axiacoin/axia-network-v2/snow/networking/benchlist"
 	"github.com/axiacoin/axia-network-v2/snow/networking/router"
 	"github.com/axiacoin/axia-network-v2/snow/networking/sender"
@@ -125,7 +125,7 @@ type DatabaseConfig struct {
 	Config []byte `json:"-"`
 }
 
-// Config contains all of the configurations of an Axia node.
+// Config contains all of the configurations of an Avalanche node.
 type Config struct {
 	HTTPConfig          `json:"httpConfig"`
 	IPConfig            `json:"ipConfig"`
@@ -136,7 +136,7 @@ type Config struct {
 
 	// Genesis information
 	GenesisBytes []byte `json:"-"`
-	AxcAssetID  ids.ID `json:"axcAssetID"`
+	AvaxAssetID  ids.ID `json:"avaxAssetID"`
 
 	// ID of the network this node should connect to
 	NetworkID uint32 `json:"networkID"`
@@ -173,7 +173,7 @@ type Config struct {
 	FdLimit uint64 `json:"fdLimit"`
 
 	// Consensus configuration
-	ConsensusParams axia.Parameters `json:"consensusParams"`
+	ConsensusParams avalanche.Parameters `json:"consensusParams"`
 
 	// Metrics
 	MeterVMEnabled bool `json:"meterVMEnabled"`
@@ -185,11 +185,11 @@ type Config struct {
 	// Gossip a container in the accepted frontier every [ConsensusGossipFrequency]
 	ConsensusGossipFrequency time.Duration `json:"consensusGossipFreq"`
 
-	// Allychain Whitelist
-	WhitelistedAllychains ids.Set `json:"whitelistedAllychains"`
+	// Subnet Whitelist
+	WhitelistedSubnets ids.Set `json:"whitelistedSubnets"`
 
-	// AllychainConfigs
-	AllychainConfigs map[ids.ID]chains.AllychainConfig `json:"allychainConfigs"`
+	// SubnetConfigs
+	SubnetConfigs map[ids.ID]chains.SubnetConfig `json:"subnetConfigs"`
 
 	// ChainConfigs
 	ChainConfigs map[string]chains.ChainConfig `json:"-"`

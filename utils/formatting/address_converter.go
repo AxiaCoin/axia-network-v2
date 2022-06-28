@@ -1,10 +1,10 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package formatting
 
 // ConvertAddresses converts a list of addresses with arbitrary chains and HRPs
-// (e.g. Swap-local1....) to a list of addresses with the provided format
+// (e.g. X-local1....) to a list of addresses with the provided format
 // (e.g. P-custom1...).
 func ConvertAddresses(destChain string, toHRP string, addresses []string) ([]string, error) {
 	convertedAddrs := make([]string, len(addresses))

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package avm
@@ -18,7 +18,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/utils/crypto"
 	"github.com/axiacoin/axia-network-v2/utils/logging"
 	"github.com/axiacoin/axia-network-v2/version"
-	"github.com/axiacoin/axia-network-v2/vms/components/axc"
+	"github.com/axiacoin/axia-network-v2/vms/components/avax"
 	"github.com/axiacoin/axia-network-v2/vms/components/verify"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 )
@@ -28,11 +28,11 @@ func TestImportTxSyntacticVerify(t *testing.T) {
 	_, c := setupCodec()
 
 	tx := &ImportTx{
-		BaseTx: BaseTx{BaseTx: axc.BaseTx{
+		BaseTx: BaseTx{BaseTx: avax.BaseTx{
 			NetworkID:    networkID,
 			BlockchainID: chainID,
-			Outs: []*axc.TransferableOutput{{
-				Asset: axc.Asset{ID: assetID},
+			Outs: []*avax.TransferableOutput{{
+				Asset: avax.Asset{ID: assetID},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: 12345,
 					OutputOwners: secp256k1fx.OutputOwners{
@@ -43,8 +43,8 @@ func TestImportTxSyntacticVerify(t *testing.T) {
 			}},
 		}},
 		SourceChain: platformChainID,
-		ImportedIns: []*axc.TransferableInput{{
-			UTXOID: axc.UTXOID{
+		ImportedIns: []*avax.TransferableInput{{
+			UTXOID: avax.UTXOID{
 				TxID: ids.ID{
 					0xff, 0xfe, 0xfd, 0xfc, 0xfb, 0xfa, 0xf9, 0xf8,
 					0xf7, 0xf6, 0xf5, 0xf4, 0xf3, 0xf2, 0xf1, 0xf0,
@@ -53,7 +53,7 @@ func TestImportTxSyntacticVerify(t *testing.T) {
 				},
 				OutputIndex: 0,
 			},
-			Asset: axc.Asset{ID: assetID},
+			Asset: avax.Asset{ID: assetID},
 			In: &secp256k1fx.TransferInput{
 				Amt: 54321,
 				Input: secp256k1fx.Input{
@@ -74,11 +74,11 @@ func TestImportTxSyntacticVerifyInvalidMemo(t *testing.T) {
 	_, c := setupCodec()
 
 	tx := &ImportTx{
-		BaseTx: BaseTx{BaseTx: axc.BaseTx{
+		BaseTx: BaseTx{BaseTx: avax.BaseTx{
 			NetworkID:    networkID,
 			BlockchainID: chainID,
-			Outs: []*axc.TransferableOutput{{
-				Asset: axc.Asset{ID: assetID},
+			Outs: []*avax.TransferableOutput{{
+				Asset: avax.Asset{ID: assetID},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: 12345,
 					OutputOwners: secp256k1fx.OutputOwners{
@@ -87,11 +87,11 @@ func TestImportTxSyntacticVerifyInvalidMemo(t *testing.T) {
 					},
 				},
 			}},
-			Memo: make([]byte, axc.MaxMemoSize+1),
+			Memo: make([]byte, avax.MaxMemoSize+1),
 		}},
 		SourceChain: platformChainID,
-		ImportedIns: []*axc.TransferableInput{{
-			UTXOID: axc.UTXOID{
+		ImportedIns: []*avax.TransferableInput{{
+			UTXOID: avax.UTXOID{
 				TxID: ids.ID{
 					0xff, 0xfe, 0xfd, 0xfc, 0xfb, 0xfa, 0xf9, 0xf8,
 					0xf7, 0xf6, 0xf5, 0xf4, 0xf3, 0xf2, 0xf1, 0xf0,
@@ -100,7 +100,7 @@ func TestImportTxSyntacticVerifyInvalidMemo(t *testing.T) {
 				},
 				OutputIndex: 0,
 			},
-			Asset: axc.Asset{ID: assetID},
+			Asset: avax.Asset{ID: assetID},
 			In: &secp256k1fx.TransferInput{
 				Amt: 54321,
 				Input: secp256k1fx.Input{
@@ -170,7 +170,7 @@ func TestImportTxSerialization(t *testing.T) {
 	}
 
 	tx := &Tx{UnsignedTx: &ImportTx{
-		BaseTx: BaseTx{BaseTx: axc.BaseTx{
+		BaseTx: BaseTx{BaseTx: avax.BaseTx{
 			NetworkID: 2,
 			BlockchainID: ids.ID{
 				0xff, 0xff, 0xff, 0xff, 0xee, 0xee, 0xee, 0xee,
@@ -186,14 +186,14 @@ func TestImportTxSerialization(t *testing.T) {
 			0x3b, 0x6b, 0xbb, 0xeb, 0x3a, 0x6a, 0xba, 0xea,
 			0x49, 0x59, 0xc9, 0xd9, 0x48, 0x58, 0xc8, 0xd8,
 		},
-		ImportedIns: []*axc.TransferableInput{{
-			UTXOID: axc.UTXOID{TxID: ids.ID{
+		ImportedIns: []*avax.TransferableInput{{
+			UTXOID: avax.UTXOID{TxID: ids.ID{
 				0x0f, 0x2f, 0x4f, 0x6f, 0x8e, 0xae, 0xce, 0xee,
 				0x0d, 0x2d, 0x4d, 0x6d, 0x8c, 0xac, 0xcc, 0xec,
 				0x0b, 0x2b, 0x4b, 0x6b, 0x8a, 0xaa, 0xca, 0xea,
 				0x09, 0x29, 0x49, 0x69, 0x88, 0xa8, 0xc8, 0xe8,
 			}},
-			Asset: axc.Asset{ID: ids.ID{
+			Asset: avax.Asset{ID: ids.ID{
 				0x1f, 0x3f, 0x5f, 0x7f, 0x9e, 0xbe, 0xde, 0xfe,
 				0x1d, 0x3d, 0x5d, 0x7d, 0x9c, 0xbc, 0xdc, 0xfc,
 				0x1b, 0x3b, 0x5b, 0x7b, 0x9a, 0xba, 0xda, 0xfa,
@@ -296,9 +296,9 @@ func TestIssueImportTx(t *testing.T) {
 	ctx.SharedMemory = m.NewSharedMemory(chainID)
 	peerSharedMemory := m.NewSharedMemory(platformChainID)
 
-	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
+	genesisTx := GetAVAXTxFromGenesisTest(genesisBytes, t)
 
-	axcID := genesisTx.ID()
+	avaxID := genesisTx.ID()
 	platformID := ids.Empty.Prefix(0)
 
 	ctx.Lock.Lock()
@@ -339,7 +339,7 @@ func TestIssueImportTx(t *testing.T) {
 
 	key := keys[0]
 
-	utxoID := axc.UTXOID{
+	utxoID := avax.UTXOID{
 		TxID: ids.ID{
 			0x0f, 0x2f, 0x4f, 0x6f, 0x8e, 0xae, 0xce, 0xee,
 			0x0d, 0x2d, 0x4d, 0x6d, 0x8c, 0xac, 0xcc, 0xec,
@@ -348,12 +348,12 @@ func TestIssueImportTx(t *testing.T) {
 		},
 	}
 
-	txAssetID := axc.Asset{ID: axcID}
+	txAssetID := avax.Asset{ID: avaxID}
 	tx := &Tx{UnsignedTx: &ImportTx{
-		BaseTx: BaseTx{BaseTx: axc.BaseTx{
+		BaseTx: BaseTx{BaseTx: avax.BaseTx{
 			NetworkID:    networkID,
 			BlockchainID: chainID,
-			Outs: []*axc.TransferableOutput{{
+			Outs: []*avax.TransferableOutput{{
 				Asset: txAssetID,
 				Out: &secp256k1fx.TransferOutput{
 					Amt: 1000,
@@ -365,7 +365,7 @@ func TestIssueImportTx(t *testing.T) {
 			}},
 		}},
 		SourceChain: platformChainID,
-		ImportedIns: []*axc.TransferableInput{{
+		ImportedIns: []*avax.TransferableInput{{
 			UTXOID: utxoID,
 			Asset:  txAssetID,
 			In: &secp256k1fx.TransferInput{
@@ -386,7 +386,7 @@ func TestIssueImportTx(t *testing.T) {
 
 	// Provide the platform UTXO:
 
-	utxo := &axc.UTXO{
+	utxo := &avax.UTXO{
 		UTXOID: utxoID,
 		Asset:  txAssetID,
 		Out: &secp256k1fx.TransferOutput{
@@ -448,7 +448,7 @@ func TestIssueImportTx(t *testing.T) {
 	}
 
 	assertIndexedTX(t, vm.db, 0, key.PublicKey().Address(), txAssetID.AssetID(), parsedTx.ID())
-	assertLatestIdx(t, vm.db, key.PublicKey().Address(), axcID, 1)
+	assertLatestIdx(t, vm.db, key.PublicKey().Address(), avaxID, 1)
 
 	id := utxoID.InputID()
 	if _, err := vm.ctx.SharedMemory.Get(platformID, [][]byte{id[:]}); err == nil {
@@ -511,9 +511,9 @@ func TestForceAcceptImportTx(t *testing.T) {
 
 	key := keys[0]
 
-	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
+	genesisTx := GetAVAXTxFromGenesisTest(genesisBytes, t)
 
-	utxoID := axc.UTXOID{
+	utxoID := avax.UTXOID{
 		TxID: ids.ID{
 			0x0f, 0x2f, 0x4f, 0x6f, 0x8e, 0xae, 0xce, 0xee,
 			0x0d, 0x2d, 0x4d, 0x6d, 0x8c, 0xac, 0xcc, 0xec,
@@ -523,14 +523,14 @@ func TestForceAcceptImportTx(t *testing.T) {
 	}
 
 	tx := &Tx{UnsignedTx: &ImportTx{
-		BaseTx: BaseTx{BaseTx: axc.BaseTx{
+		BaseTx: BaseTx{BaseTx: avax.BaseTx{
 			NetworkID:    networkID,
 			BlockchainID: chainID,
 		}},
 		SourceChain: platformChainID,
-		ImportedIns: []*axc.TransferableInput{{
+		ImportedIns: []*avax.TransferableInput{{
 			UTXOID: utxoID,
-			Asset:  axc.Asset{ID: genesisTx.ID()},
+			Asset:  avax.Asset{ID: genesisTx.ID()},
 			In: &secp256k1fx.TransferInput{
 				Amt:   1000,
 				Input: secp256k1fx.Input{SigIndices: []uint32{0}},

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package platformvm
@@ -19,7 +19,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/utils/json"
 	"github.com/axiacoin/axia-network-v2/utils/math"
 	"github.com/axiacoin/axia-network-v2/utils/wrappers"
-	"github.com/axiacoin/axia-network-v2/vms/components/axc"
+	"github.com/axiacoin/axia-network-v2/vms/components/avax"
 	"github.com/axiacoin/axia-network-v2/vms/components/keystore"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/reward"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/status"
@@ -44,13 +44,13 @@ const (
 var (
 	errMissingDecisionBlock       = errors.New("should have a decision block within the past two blocks")
 	errNoFunds                    = errors.New("no spendable funds were found")
-	errNoAllychainID                 = errors.New("argument 'allychainID' not provided")
+	errNoSubnetID                 = errors.New("argument 'subnetID' not provided")
 	errNoRewardAddress            = errors.New("argument 'rewardAddress' not provided")
 	errInvalidDelegationRate      = errors.New("argument 'delegationFeeRate' must be between 0 and 100, inclusive")
 	errNoAddresses                = errors.New("no addresses provided")
 	errNoKeys                     = errors.New("user has no keys or funds")
-	errNoPrimaryValidators        = errors.New("no default allychain validators")
-	errNoValidators               = errors.New("no allychain validators")
+	errNoPrimaryValidators        = errors.New("no default subnet validators")
+	errNoValidators               = errors.New("no subnet validators")
 	errCorruptedReason            = errors.New("tx validity corrupted")
 	errStartTimeTooSoon           = fmt.Errorf("start time must be at least %s in the future", minAddStakerDelay)
 	errStartTimeTooLate           = errors.New("start time is too far in the future")
@@ -60,7 +60,7 @@ var (
 	errNotStakeableOverflow       = errors.New("overflow while calculating locked not stakeable balance")
 	errLockedNotStakeableOverflow = errors.New("overflow while calculating locked not stakeable balance")
 	errUnlockedStakeableOverflow  = errors.New("overflow while calculating unlocked stakeable balance")
-	errNamedAllychainCantBePrimary   = errors.New("allychain validator attempts to validate primary network")
+	errNamedSubnetCantBePrimary   = errors.New("subnet validator attempts to validate primary network")
 	errNoAmount                   = errors.New("argument 'amount' must be > 0")
 	errMissingName                = errors.New("argument 'name' not given")
 	errMissingVMID                = errors.New("argument 'vmID' not given")
@@ -185,12 +185,12 @@ type GetBalanceRequest struct {
 }
 
 type GetBalanceResponse struct {
-	// Balance, in nAXC, of the address
+	// Balance, in nAVAX, of the address
 	Balance            json.Uint64    `json:"balance"`
 	Unlocked           json.Uint64    `json:"unlocked"`
 	LockedStakeable    json.Uint64    `json:"lockedStakeable"`
 	LockedNotStakeable json.Uint64    `json:"lockedNotStakeable"`
-	UTXOIDs            []*axc.UTXOID `json:"utxoIDs"`
+	UTXOIDs            []*avax.UTXOID `json:"utxoIDs"`
 }
 
 // GetBalance gets the balance of an address
@@ -211,7 +211,7 @@ func (service *Service) GetBalance(_ *http.Request, args *GetBalanceRequest, res
 		addrs.Add(addr)
 	}
 
-	utxos, err := axc.GetAllUTXOs(service.vm.internalState, addrs)
+	utxos, err := avax.GetAllUTXOs(service.vm.internalState, addrs)
 	if err != nil {
 		return fmt.Errorf("couldn't get UTXO set of %v: %w", args.Addresses, err)
 	}
@@ -423,7 +423,7 @@ func (service *Service) GetUTXOs(_ *http.Request, args *GetUTXOsArgs, response *
 	}
 
 	var (
-		utxos     []*axc.UTXO
+		utxos     []*avax.UTXO
 		endAddr   ids.ShortID
 		endUTXOID ids.ID
 		err       error
@@ -433,7 +433,7 @@ func (service *Service) GetUTXOs(_ *http.Request, args *GetUTXOsArgs, response *
 		limit = maxPageSize
 	}
 	if sourceChain == service.vm.ctx.ChainID {
-		utxos, endAddr, endUTXOID, err = axc.GetPaginatedUTXOs(
+		utxos, endAddr, endUTXOID, err = avax.GetPaginatedUTXOs(
 			service.vm.internalState,
 			addrSet,
 			startAddr,
@@ -479,51 +479,51 @@ func (service *Service) GetUTXOs(_ *http.Request, args *GetUTXOsArgs, response *
 
 /*
  ******************************************************
- ******************* Get Allychains **********************
+ ******************* Get Subnets **********************
  ******************************************************
  */
 
-// APIAllychain is a representation of a allychain used in API calls
-type APIAllychain struct {
-	// ID of the allychain
+// APISubnet is a representation of a subnet used in API calls
+type APISubnet struct {
+	// ID of the subnet
 	ID ids.ID `json:"id"`
 
 	// Each element of [ControlKeys] the address of a public key.
-	// A transaction to add a validator to this allychain requires
+	// A transaction to add a validator to this subnet requires
 	// signatures from [Threshold] of these keys to be valid.
 	ControlKeys []string    `json:"controlKeys"`
 	Threshold   json.Uint32 `json:"threshold"`
 }
 
-// GetAllychainsArgs are the arguments to GetAllychain
-type GetAllychainsArgs struct {
-	// IDs of the allychains to retrieve information about
-	// If omitted, gets all allychains
+// GetSubnetsArgs are the arguments to GetSubnet
+type GetSubnetsArgs struct {
+	// IDs of the subnets to retrieve information about
+	// If omitted, gets all subnets
 	IDs []ids.ID `json:"ids"`
 }
 
-// GetAllychainsResponse is the response from calling GetAllychains
-type GetAllychainsResponse struct {
-	// Each element is a allychain that exists
-	// Null if there are no allychains other than the primary network
-	Allychains []APIAllychain `json:"allychains"`
+// GetSubnetsResponse is the response from calling GetSubnets
+type GetSubnetsResponse struct {
+	// Each element is a subnet that exists
+	// Null if there are no subnets other than the primary network
+	Subnets []APISubnet `json:"subnets"`
 }
 
-// GetAllychains returns the allychains whose ID are in [args.IDs]
+// GetSubnets returns the subnets whose ID are in [args.IDs]
 // The response will include the primary network
-func (service *Service) GetAllychains(_ *http.Request, args *GetAllychainsArgs, response *GetAllychainsResponse) error {
-	service.vm.ctx.Log.Debug("Platform: GetAllychains called")
+func (service *Service) GetSubnets(_ *http.Request, args *GetSubnetsArgs, response *GetSubnetsResponse) error {
+	service.vm.ctx.Log.Debug("Platform: GetSubnets called")
 
 	getAll := len(args.IDs) == 0
 	if getAll {
-		allychains, err := service.vm.internalState.GetAllychains() // all allychains
+		subnets, err := service.vm.internalState.GetSubnets() // all subnets
 		if err != nil {
-			return fmt.Errorf("error getting allychains from database: %w", err)
+			return fmt.Errorf("error getting subnets from database: %w", err)
 		}
 
-		response.Allychains = make([]APIAllychain, len(allychains)+1)
-		for i, allychain := range allychains {
-			unsignedTx := allychain.UnsignedTx.(*UnsignedCreateAllychainTx)
+		response.Subnets = make([]APISubnet, len(subnets)+1)
+		for i, subnet := range subnets {
+			unsignedTx := subnet.UnsignedTx.(*UnsignedCreateSubnetTx)
 			owner := unsignedTx.Owner.(*secp256k1fx.OutputOwners)
 			controlAddrs := []string{}
 			for _, controlKeyID := range owner.Addrs {
@@ -533,14 +533,14 @@ func (service *Service) GetAllychains(_ *http.Request, args *GetAllychainsArgs, 
 				}
 				controlAddrs = append(controlAddrs, addr)
 			}
-			response.Allychains[i] = APIAllychain{
-				ID:          allychain.ID(),
+			response.Subnets[i] = APISubnet{
+				ID:          subnet.ID(),
 				ControlKeys: controlAddrs,
 				Threshold:   json.Uint32(owner.Threshold),
 			}
 		}
 		// Include primary network
-		response.Allychains[len(allychains)] = APIAllychain{
+		response.Subnets[len(subnets)] = APISubnet{
 			ID:          constants.PrimaryNetworkID,
 			ControlKeys: []string{},
 			Threshold:   json.Uint32(0),
@@ -548,16 +548,16 @@ func (service *Service) GetAllychains(_ *http.Request, args *GetAllychainsArgs, 
 		return nil
 	}
 
-	allychainSet := ids.NewSet(len(args.IDs))
-	for _, allychainID := range args.IDs {
-		if allychainSet.Contains(allychainID) {
+	subnetSet := ids.NewSet(len(args.IDs))
+	for _, subnetID := range args.IDs {
+		if subnetSet.Contains(subnetID) {
 			continue
 		}
-		allychainSet.Add(allychainID)
+		subnetSet.Add(subnetID)
 
-		if allychainID == constants.PrimaryNetworkID {
-			response.Allychains = append(response.Allychains,
-				APIAllychain{
+		if subnetID == constants.PrimaryNetworkID {
+			response.Subnets = append(response.Subnets,
+				APISubnet{
 					ID:          constants.PrimaryNetworkID,
 					ControlKeys: []string{},
 					Threshold:   json.Uint32(0),
@@ -566,7 +566,7 @@ func (service *Service) GetAllychains(_ *http.Request, args *GetAllychainsArgs, 
 			continue
 		}
 
-		allychainTx, _, err := service.vm.internalState.GetTx(allychainID)
+		subnetTx, _, err := service.vm.internalState.GetTx(subnetID)
 		if err == database.ErrNotFound {
 			continue
 		}
@@ -574,11 +574,11 @@ func (service *Service) GetAllychains(_ *http.Request, args *GetAllychainsArgs, 
 			return err
 		}
 
-		allychain, ok := allychainTx.UnsignedTx.(*UnsignedCreateAllychainTx)
+		subnet, ok := subnetTx.UnsignedTx.(*UnsignedCreateSubnetTx)
 		if !ok {
 			return errWrongTxType
 		}
-		owner, ok := allychain.Owner.(*secp256k1fx.OutputOwners)
+		owner, ok := subnet.Owner.(*secp256k1fx.OutputOwners)
 		if !ok {
 			return errUnknownOwners
 		}
@@ -592,9 +592,9 @@ func (service *Service) GetAllychains(_ *http.Request, args *GetAllychainsArgs, 
 			controlAddrs[i] = addr
 		}
 
-		response.Allychains = append(response.Allychains,
-			APIAllychain{
-				ID:          allychain.ID(),
+		response.Subnets = append(response.Subnets,
+			APISubnet{
+				ID:          subnet.ID(),
 				ControlKeys: controlAddrs,
 				Threshold:   json.Uint32(owner.Threshold),
 			},
@@ -605,7 +605,7 @@ func (service *Service) GetAllychains(_ *http.Request, args *GetAllychainsArgs, 
 
 // GetStakingAssetIDArgs are the arguments to GetStakingAssetID
 type GetStakingAssetIDArgs struct {
-	AllychainID ids.ID `json:"allychainID"`
+	SubnetID ids.ID `json:"subnetID"`
 }
 
 // GetStakingAssetIDResponse is the response from calling GetStakingAssetID
@@ -614,16 +614,16 @@ type GetStakingAssetIDResponse struct {
 }
 
 // GetStakingAssetID returns the assetID of the token used to stake on the
-// provided allychain
+// provided subnet
 func (service *Service) GetStakingAssetID(_ *http.Request, args *GetStakingAssetIDArgs, response *GetStakingAssetIDResponse) error {
 	service.vm.ctx.Log.Debug("Platform: GetStakingAssetID called")
 
-	if args.AllychainID != constants.PrimaryNetworkID {
-		return fmt.Errorf("Allychain %s doesn't have a valid staking token",
-			args.AllychainID)
+	if args.SubnetID != constants.PrimaryNetworkID {
+		return fmt.Errorf("Subnet %s doesn't have a valid staking token",
+			args.SubnetID)
 	}
 
-	response.AssetID = service.vm.ctx.AXCAssetID
+	response.AssetID = service.vm.ctx.AVAXAssetID
 	return nil
 }
 
@@ -635,9 +635,9 @@ func (service *Service) GetStakingAssetID(_ *http.Request, args *GetStakingAsset
 
 // GetCurrentValidatorsArgs are the arguments for calling GetCurrentValidators
 type GetCurrentValidatorsArgs struct {
-	// Allychain we're listing the validators of
+	// Subnet we're listing the validators of
 	// If omitted, defaults to primary network
-	AllychainID ids.ID `json:"allychainID"`
+	SubnetID ids.ID `json:"subnetID"`
 	// NodeIDs of validators to request. If [NodeIDs]
 	// is empty, it fetches all current validators. If
 	// some nodeIDs are not currently validators, they
@@ -680,7 +680,7 @@ func (service *Service) GetCurrentValidators(_ *http.Request, args *GetCurrentVa
 		}
 		switch staker := tx.UnsignedTx.(type) {
 		case *UnsignedAddDelegatorTx:
-			if args.AllychainID != constants.PrimaryNetworkID {
+			if args.SubnetID != constants.PrimaryNetworkID {
 				continue
 			}
 			if !includeAllNodes && !nodeIDs.Contains(staker.Validator.ID()) {
@@ -719,7 +719,7 @@ func (service *Service) GetCurrentValidators(_ *http.Request, args *GetCurrentVa
 			}
 			vdrToDelegators[delegator.NodeID] = append(vdrToDelegators[delegator.NodeID], delegator)
 		case *UnsignedAddValidatorTx:
-			if args.AllychainID != constants.PrimaryNetworkID {
+			if args.SubnetID != constants.PrimaryNetworkID {
 				continue
 			}
 			if !includeAllNodes && !nodeIDs.Contains(staker.Validator.ID()) {
@@ -769,8 +769,8 @@ func (service *Service) GetCurrentValidators(_ *http.Request, args *GetCurrentVa
 				RewardOwner:     rewardOwner,
 				DelegationFee:   delegationFee,
 			})
-		case *UnsignedAddAllychainValidatorTx:
-			if args.AllychainID != staker.Validator.Allychain {
+		case *UnsignedAddSubnetValidatorTx:
+			if args.SubnetID != staker.Validator.Subnet {
 				continue
 			}
 			if !includeAllNodes && !nodeIDs.Contains(staker.Validator.ID()) {
@@ -806,9 +806,9 @@ func (service *Service) GetCurrentValidators(_ *http.Request, args *GetCurrentVa
 
 // GetPendingValidatorsArgs are the arguments for calling GetPendingValidators
 type GetPendingValidatorsArgs struct {
-	// Allychain we're getting the pending validators of
+	// Subnet we're getting the pending validators of
 	// If omitted, defaults to primary network
-	AllychainID ids.ID `json:"allychainID"`
+	SubnetID ids.ID `json:"subnetID"`
 	// NodeIDs of validators to request. If [NodeIDs]
 	// is empty, it fetches all pending validators. If
 	// some requested nodeIDs are not pending validators,
@@ -846,7 +846,7 @@ func (service *Service) GetPendingValidators(_ *http.Request, args *GetPendingVa
 	for _, tx := range pendingValidators.Stakers() { // Iterates in order of increasing start time
 		switch staker := tx.UnsignedTx.(type) {
 		case *UnsignedAddDelegatorTx:
-			if args.AllychainID != constants.PrimaryNetworkID {
+			if args.SubnetID != constants.PrimaryNetworkID {
 				continue
 			}
 			if !includeAllNodes && !nodeIDs.Contains(staker.Validator.ID()) {
@@ -862,7 +862,7 @@ func (service *Service) GetPendingValidators(_ *http.Request, args *GetPendingVa
 				StakeAmount: &weight,
 			})
 		case *UnsignedAddValidatorTx:
-			if args.AllychainID != constants.PrimaryNetworkID {
+			if args.SubnetID != constants.PrimaryNetworkID {
 				continue
 			}
 			if !includeAllNodes && !nodeIDs.Contains(staker.Validator.ID()) {
@@ -885,8 +885,8 @@ func (service *Service) GetPendingValidators(_ *http.Request, args *GetPendingVa
 				DelegationFee: delegationFee,
 				Connected:     &connected,
 			})
-		case *UnsignedAddAllychainValidatorTx:
-			if args.AllychainID != staker.Validator.Allychain {
+		case *UnsignedAddSubnetValidatorTx:
+			if args.SubnetID != staker.Validator.Subnet {
 				continue
 			}
 			if !includeAllNodes && !nodeIDs.Contains(staker.Validator.ID()) {
@@ -913,7 +913,7 @@ type GetCurrentSupplyReply struct {
 	Supply json.Uint64 `json:"supply"`
 }
 
-// GetCurrentSupply returns an upper bound on the supply of AXC in the system
+// GetCurrentSupply returns an upper bound on the supply of AVAX in the system
 func (service *Service) GetCurrentSupply(_ *http.Request, _ *struct{}, reply *GetCurrentSupplyReply) error {
 	service.vm.ctx.Log.Debug("Platform: GetCurrentSupply called")
 
@@ -926,9 +926,9 @@ type SampleValidatorsArgs struct {
 	// Number of validators in the sample
 	Size json.Uint16 `json:"size"`
 
-	// ID of allychain to sample validators from
+	// ID of subnet to sample validators from
 	// If omitted, defaults to the primary network
-	AllychainID ids.ID `json:"allychainID"`
+	SubnetID ids.ID `json:"subnetID"`
 }
 
 // SampleValidatorsReply are the results from calling Sample
@@ -940,11 +940,11 @@ type SampleValidatorsReply struct {
 func (service *Service) SampleValidators(_ *http.Request, args *SampleValidatorsArgs, reply *SampleValidatorsReply) error {
 	service.vm.ctx.Log.Debug("Platform: SampleValidators called with Size = %d", args.Size)
 
-	validators, ok := service.vm.Validators.GetValidators(args.AllychainID)
+	validators, ok := service.vm.Validators.GetValidators(args.SubnetID)
 	if !ok {
 		return fmt.Errorf(
-			"couldn't get validators of allychain %q. Is it being validated?",
-			args.AllychainID,
+			"couldn't get validators of subnet %q. Is it being validated?",
+			args.SubnetID,
 		)
 	}
 
@@ -968,7 +968,7 @@ func (service *Service) SampleValidators(_ *http.Request, args *SampleValidators
 
 /*
  ******************************************************
- ************ Add Validators to Allychains ***************
+ ************ Add Validators to Subnets ***************
  ******************************************************
  */
 
@@ -1021,7 +1021,7 @@ func (service *Service) AddValidator(_ *http.Request, args *AddValidatorArgs, re
 	}
 
 	// Parse the from addresses
-	fromAddrs, err := axc.ParseLocalAddresses(service.vm, args.From)
+	fromAddrs, err := avax.ParseLocalAddresses(service.vm, args.From)
 	if err != nil {
 		return err
 	}
@@ -1134,7 +1134,7 @@ func (service *Service) AddDelegator(_ *http.Request, args *AddDelegatorArgs, re
 	}
 
 	// Parse the from addresses
-	fromAddrs, err := axc.ParseLocalAddresses(service.vm, args.From)
+	fromAddrs, err := avax.ParseLocalAddresses(service.vm, args.From)
 	if err != nil {
 		return err
 	}
@@ -1189,19 +1189,19 @@ func (service *Service) AddDelegator(_ *http.Request, args *AddDelegatorArgs, re
 	return errs.Err
 }
 
-// AddAllychainValidatorArgs are the arguments to AddAllychainValidator
-type AddAllychainValidatorArgs struct {
+// AddSubnetValidatorArgs are the arguments to AddSubnetValidator
+type AddSubnetValidatorArgs struct {
 	// User, password, from addrs, change addr
 	api.JSONSpendHeader
 	APIStaker
-	// ID of allychain to validate
-	AllychainID string `json:"allychainID"`
+	// ID of subnet to validate
+	SubnetID string `json:"subnetID"`
 }
 
-// AddAllychainValidator creates and signs and issues a transaction to add a
-// validator to a allychain other than the primary network
-func (service *Service) AddAllychainValidator(_ *http.Request, args *AddAllychainValidatorArgs, response *api.JSONTxIDChangeAddr) error {
-	service.vm.ctx.Log.Debug("Platform: AddAllychainValidator called")
+// AddSubnetValidator creates and signs and issues a transaction to add a
+// validator to a subnet other than the primary network
+func (service *Service) AddSubnetValidator(_ *http.Request, args *AddSubnetValidatorArgs, response *api.JSONTxIDChangeAddr) error {
+	service.vm.ctx.Log.Debug("Platform: AddSubnetValidator called")
 
 	now := service.vm.clock.Time()
 	minAddStakerTime := now.Add(minAddStakerDelay)
@@ -1214,8 +1214,8 @@ func (service *Service) AddAllychainValidator(_ *http.Request, args *AddAllychai
 	}
 
 	switch {
-	case args.AllychainID == "":
-		return errNoAllychainID
+	case args.SubnetID == "":
+		return errNoSubnetID
 	case args.StartTime < minAddStakerUnix:
 		return errStartTimeTooSoon
 	case args.StartTime > maxAddStakerUnix:
@@ -1228,17 +1228,17 @@ func (service *Service) AddAllychainValidator(_ *http.Request, args *AddAllychai
 		return fmt.Errorf("error parsing nodeID: %q: %w", args.NodeID, err)
 	}
 
-	// Parse the allychain ID
-	allychainID, err := ids.FromString(args.AllychainID)
+	// Parse the subnet ID
+	subnetID, err := ids.FromString(args.SubnetID)
 	if err != nil {
-		return fmt.Errorf("problem parsing allychainID %q: %w", args.AllychainID, err)
+		return fmt.Errorf("problem parsing subnetID %q: %w", args.SubnetID, err)
 	}
-	if allychainID == constants.PrimaryNetworkID {
-		return errNamedAllychainCantBePrimary
+	if subnetID == constants.PrimaryNetworkID {
+		return errNamedSubnetCantBePrimary
 	}
 
 	// Parse the from addresses
-	fromAddrs, err := axc.ParseLocalAddresses(service.vm, args.From)
+	fromAddrs, err := avax.ParseLocalAddresses(service.vm, args.From)
 	if err != nil {
 		return err
 	}
@@ -1267,12 +1267,12 @@ func (service *Service) AddAllychainValidator(_ *http.Request, args *AddAllychai
 	}
 
 	// Create the transaction
-	tx, err := service.vm.newAddAllychainValidatorTx(
+	tx, err := service.vm.newAddSubnetValidatorTx(
 		args.weight(),          // Stake amount
 		uint64(args.StartTime), // Start time
 		uint64(args.EndTime),   // End time
 		nodeID,                 // Node ID
-		allychainID,               // Allychain ID
+		subnetID,               // Subnet ID
 		keys.Keys,              // Keys
 		changeAddr,             // Change address
 	)
@@ -1292,27 +1292,27 @@ func (service *Service) AddAllychainValidator(_ *http.Request, args *AddAllychai
 	return errs.Err
 }
 
-// CreateAllychainArgs are the arguments to CreateAllychain
-type CreateAllychainArgs struct {
+// CreateSubnetArgs are the arguments to CreateSubnet
+type CreateSubnetArgs struct {
 	// User, password, from addrs, change addr
 	api.JSONSpendHeader
-	// The ID member of APIAllychain is ignored
-	APIAllychain
+	// The ID member of APISubnet is ignored
+	APISubnet
 }
 
-// CreateAllychain creates and signs and issues a transaction to create a new
-// allychain
-func (service *Service) CreateAllychain(_ *http.Request, args *CreateAllychainArgs, response *api.JSONTxIDChangeAddr) error {
-	service.vm.ctx.Log.Debug("Platform: CreateAllychain called")
+// CreateSubnet creates and signs and issues a transaction to create a new
+// subnet
+func (service *Service) CreateSubnet(_ *http.Request, args *CreateSubnetArgs, response *api.JSONTxIDChangeAddr) error {
+	service.vm.ctx.Log.Debug("Platform: CreateSubnet called")
 
 	// Parse the control keys
-	controlKeys, err := axc.ParseLocalAddresses(service.vm, args.ControlKeys)
+	controlKeys, err := avax.ParseLocalAddresses(service.vm, args.ControlKeys)
 	if err != nil {
 		return err
 	}
 
 	// Parse the from addresses
-	fromAddrs, err := axc.ParseLocalAddresses(service.vm, args.From)
+	fromAddrs, err := avax.ParseLocalAddresses(service.vm, args.From)
 	if err != nil {
 		return err
 	}
@@ -1342,7 +1342,7 @@ func (service *Service) CreateAllychain(_ *http.Request, args *CreateAllychainAr
 	}
 
 	// Create the transaction
-	tx, err := service.vm.newCreateAllychainTx(
+	tx, err := service.vm.newCreateSubnetTx(
 		uint32(args.Threshold), // Threshold
 		controlKeys.List(),     // Control Addresses
 		privKeys.Keys,          // Private keys
@@ -1364,23 +1364,23 @@ func (service *Service) CreateAllychain(_ *http.Request, args *CreateAllychainAr
 	return errs.Err
 }
 
-// ExportAXCArgs are the arguments to ExportAXC
-type ExportAXCArgs struct {
+// ExportAVAXArgs are the arguments to ExportAVAX
+type ExportAVAXArgs struct {
 	// User, password, from addrs, change addr
 	api.JSONSpendHeader
 
-	// Amount of AXC to send
+	// Amount of AVAX to send
 	Amount json.Uint64 `json:"amount"`
 
-	// ID of the address that will receive the AXC. This address includes the
+	// ID of the address that will receive the AVAX. This address includes the
 	// chainID, which is used to determine what the destination chain is.
 	To string `json:"to"`
 }
 
-// ExportAXC exports AXC from the Core-Chain to the Swap-Chain
-// It must be imported on the Swap-Chain to complete the transfer
-func (service *Service) ExportAXC(_ *http.Request, args *ExportAXCArgs, response *api.JSONTxIDChangeAddr) error {
-	service.vm.ctx.Log.Debug("Platform: ExportAXC called")
+// ExportAVAX exports AVAX from the P-Chain to the X-Chain
+// It must be imported on the X-Chain to complete the transfer
+func (service *Service) ExportAVAX(_ *http.Request, args *ExportAVAXArgs, response *api.JSONTxIDChangeAddr) error {
+	service.vm.ctx.Log.Debug("Platform: ExportAVAX called")
 
 	if args.Amount == 0 {
 		return errNoAmount
@@ -1393,7 +1393,7 @@ func (service *Service) ExportAXC(_ *http.Request, args *ExportAXCArgs, response
 	}
 
 	// Parse the from addresses
-	fromAddrs, err := axc.ParseLocalAddresses(service.vm, args.From)
+	fromAddrs, err := avax.ParseLocalAddresses(service.vm, args.From)
 	if err != nil {
 		return err
 	}
@@ -1446,8 +1446,8 @@ func (service *Service) ExportAXC(_ *http.Request, args *ExportAXCArgs, response
 	return errs.Err
 }
 
-// ImportAXCArgs are the arguments to ImportAXC
-type ImportAXCArgs struct {
+// ImportAVAXArgs are the arguments to ImportAVAX
+type ImportAVAXArgs struct {
 	// User, password, from addrs, change addr
 	api.JSONSpendHeader
 
@@ -1458,10 +1458,10 @@ type ImportAXCArgs struct {
 	To string `json:"to"`
 }
 
-// ImportAXC issues a transaction to import AXC from the Swap-chain. The AXC
-// must have already been exported from the Swap-Chain.
-func (service *Service) ImportAXC(_ *http.Request, args *ImportAXCArgs, response *api.JSONTxIDChangeAddr) error {
-	service.vm.ctx.Log.Debug("Platform: ImportAXC called")
+// ImportAVAX issues a transaction to import AVAX from the X-chain. The AVAX
+// must have already been exported from the X-Chain.
+func (service *Service) ImportAVAX(_ *http.Request, args *ImportAVAXArgs, response *api.JSONTxIDChangeAddr) error {
+	service.vm.ctx.Log.Debug("Platform: ImportAVAX called")
 
 	// Parse the sourceCHain
 	chainID, err := service.vm.ctx.BCLookup.Lookup(args.SourceChain)
@@ -1476,7 +1476,7 @@ func (service *Service) ImportAXC(_ *http.Request, args *ImportAXCArgs, response
 	}
 
 	// Parse the from addresses
-	fromAddrs, err := axc.ParseLocalAddresses(service.vm, args.From)
+	fromAddrs, err := avax.ParseLocalAddresses(service.vm, args.From)
 	if err != nil {
 		return err
 	}
@@ -1532,8 +1532,8 @@ func (service *Service) ImportAXC(_ *http.Request, args *ImportAXCArgs, response
 type CreateBlockchainArgs struct {
 	// User, password, from addrs, change addr
 	api.JSONSpendHeader
-	// ID of Allychain that validates the new blockchain
-	AllychainID ids.ID `json:"allychainID"`
+	// ID of Subnet that validates the new blockchain
+	SubnetID ids.ID `json:"subnetID"`
 	// ID of the VM the new blockchain is running
 	VMID string `json:"vmID"`
 	// IDs of the FXs the VM is running
@@ -1583,12 +1583,12 @@ func (service *Service) CreateBlockchain(_ *http.Request, args *CreateBlockchain
 		fxIDs = append(fxIDs, secp256k1fx.ID)
 	}
 
-	if args.AllychainID == constants.PrimaryNetworkID {
+	if args.SubnetID == constants.PrimaryNetworkID {
 		return errDSCantValidate
 	}
 
 	// Parse the from addresses
-	fromAddrs, err := axc.ParseLocalAddresses(service.vm, args.From)
+	fromAddrs, err := avax.ParseLocalAddresses(service.vm, args.From)
 	if err != nil {
 		return err
 	}
@@ -1619,7 +1619,7 @@ func (service *Service) CreateBlockchain(_ *http.Request, args *CreateBlockchain
 
 	// Create the transaction
 	tx, err := service.vm.newCreateChainTx(
-		args.AllychainID,
+		args.SubnetID,
 		genesisBytes,
 		vmID,
 		fxIDs,
@@ -1714,7 +1714,7 @@ func (service *Service) nodeValidates(blockchainID ids.ID) bool {
 		return false
 	}
 
-	validators, ok := service.vm.Validators.GetValidators(chain.AllychainID)
+	validators, ok := service.vm.Validators.GetValidators(chain.SubnetID)
 	if !ok {
 		return false
 	}
@@ -1754,17 +1754,17 @@ func (service *Service) chainExists(blockID ids.ID, chainID ids.ID) (bool, error
 
 // ValidatedByArgs is the arguments for calling ValidatedBy
 type ValidatedByArgs struct {
-	// ValidatedBy returns the ID of the Allychain validating the blockchain with this ID
+	// ValidatedBy returns the ID of the Subnet validating the blockchain with this ID
 	BlockchainID ids.ID `json:"blockchainID"`
 }
 
 // ValidatedByResponse is the reply from calling ValidatedBy
 type ValidatedByResponse struct {
-	// ID of the Allychain validating the specified blockchain
-	AllychainID ids.ID `json:"allychainID"`
+	// ID of the Subnet validating the specified blockchain
+	SubnetID ids.ID `json:"subnetID"`
 }
 
-// ValidatedBy returns the ID of the Allychain that validates [args.BlockchainID]
+// ValidatedBy returns the ID of the Subnet that validates [args.BlockchainID]
 func (service *Service) ValidatedBy(_ *http.Request, args *ValidatedByArgs, response *ValidatedByResponse) error {
 	service.vm.ctx.Log.Debug("Platform: ValidatedBy called")
 
@@ -1780,13 +1780,13 @@ func (service *Service) ValidatedBy(_ *http.Request, args *ValidatedByArgs, resp
 	if !ok {
 		return fmt.Errorf("%q is not a blockchain", args.BlockchainID)
 	}
-	response.AllychainID = chain.AllychainID
+	response.SubnetID = chain.SubnetID
 	return nil
 }
 
 // ValidatesArgs are the arguments to Validates
 type ValidatesArgs struct {
-	AllychainID ids.ID `json:"allychainID"`
+	SubnetID ids.ID `json:"subnetID"`
 }
 
 // ValidatesResponse is the response from calling Validates
@@ -1794,29 +1794,29 @@ type ValidatesResponse struct {
 	BlockchainIDs []ids.ID `json:"blockchainIDs"`
 }
 
-// Validates returns the IDs of the blockchains validated by [args.AllychainID]
+// Validates returns the IDs of the blockchains validated by [args.SubnetID]
 func (service *Service) Validates(_ *http.Request, args *ValidatesArgs, response *ValidatesResponse) error {
 	service.vm.ctx.Log.Debug("Platform: Validates called")
 
-	if args.AllychainID != constants.PrimaryNetworkID {
-		allychainTx, _, err := service.vm.internalState.GetTx(args.AllychainID)
+	if args.SubnetID != constants.PrimaryNetworkID {
+		subnetTx, _, err := service.vm.internalState.GetTx(args.SubnetID)
 		if err != nil {
 			return fmt.Errorf(
-				"problem retrieving allychain %q: %w",
-				args.AllychainID,
+				"problem retrieving subnet %q: %w",
+				args.SubnetID,
 				err,
 			)
 		}
-		_, ok := allychainTx.UnsignedTx.(*UnsignedCreateAllychainTx)
+		_, ok := subnetTx.UnsignedTx.(*UnsignedCreateSubnetTx)
 		if !ok {
-			return fmt.Errorf("%q is not a allychain", args.AllychainID)
+			return fmt.Errorf("%q is not a subnet", args.SubnetID)
 		}
 	}
 
 	// Get the chains that exist
-	chains, err := service.vm.internalState.GetChains(args.AllychainID)
+	chains, err := service.vm.internalState.GetChains(args.SubnetID)
 	if err != nil {
-		return fmt.Errorf("problem retrieving chains for allychain %q: %w", args.AllychainID, err)
+		return fmt.Errorf("problem retrieving chains for subnet %q: %w", args.SubnetID, err)
 	}
 
 	response.BlockchainIDs = make([]ids.ID, len(chains))
@@ -1834,8 +1834,8 @@ type APIBlockchain struct {
 	// Blockchain's (non-unique) human-readable name
 	Name string `json:"name"`
 
-	// Allychain that validates the blockchain
-	AllychainID ids.ID `json:"allychainID"`
+	// Subnet that validates the blockchain
+	SubnetID ids.ID `json:"subnetID"`
 
 	// Virtual Machine the blockchain runs
 	VMID ids.ID `json:"vmID"`
@@ -1851,19 +1851,19 @@ type GetBlockchainsResponse struct {
 func (service *Service) GetBlockchains(_ *http.Request, args *struct{}, response *GetBlockchainsResponse) error {
 	service.vm.ctx.Log.Debug("Platform: GetBlockchains called")
 
-	allychains, err := service.vm.internalState.GetAllychains()
+	subnets, err := service.vm.internalState.GetSubnets()
 	if err != nil {
-		return fmt.Errorf("couldn't retrieve allychains: %w", err)
+		return fmt.Errorf("couldn't retrieve subnets: %w", err)
 	}
 
 	response.Blockchains = []APIBlockchain{}
-	for _, allychain := range allychains {
-		allychainID := allychain.ID()
-		chains, err := service.vm.internalState.GetChains(allychainID)
+	for _, subnet := range subnets {
+		subnetID := subnet.ID()
+		chains, err := service.vm.internalState.GetChains(subnetID)
 		if err != nil {
 			return fmt.Errorf(
-				"couldn't retrieve chains for allychain %q: %w",
-				allychainID,
+				"couldn't retrieve chains for subnet %q: %w",
+				subnetID,
 				err,
 			)
 		}
@@ -1876,7 +1876,7 @@ func (service *Service) GetBlockchains(_ *http.Request, args *struct{}, response
 			response.Blockchains = append(response.Blockchains, APIBlockchain{
 				ID:       chain.ID(),
 				Name:     chain.ChainName,
-				AllychainID: allychainID,
+				SubnetID: subnetID,
 				VMID:     chain.VMID,
 			})
 		}
@@ -1884,7 +1884,7 @@ func (service *Service) GetBlockchains(_ *http.Request, args *struct{}, response
 
 	chains, err := service.vm.internalState.GetChains(constants.PrimaryNetworkID)
 	if err != nil {
-		return fmt.Errorf("couldn't retrieve allychains: %w", err)
+		return fmt.Errorf("couldn't retrieve subnets: %w", err)
 	}
 	for _, chainTx := range chains {
 		chain, ok := chainTx.UnsignedTx.(*UnsignedCreateChainTx)
@@ -1894,7 +1894,7 @@ func (service *Service) GetBlockchains(_ *http.Request, args *struct{}, response
 		response.Blockchains = append(response.Blockchains, APIBlockchain{
 			ID:       chain.ID(),
 			Name:     chain.ChainName,
-			AllychainID: constants.PrimaryNetworkID,
+			SubnetID: constants.PrimaryNetworkID,
 			VMID:     chain.VMID,
 		})
 	}
@@ -2047,7 +2047,7 @@ type GetStakeArgs struct {
 type GetStakeReply struct {
 	Staked json.Uint64 `json:"staked"`
 	// String representation of staked outputs
-	// Each is of type axc.TransferableOutput
+	// Each is of type avax.TransferableOutput
 	Outputs []string `json:"stakedOutputs"`
 	// Encoding of [Outputs]
 	Encoding formatting.Encoding `json:"encoding"`
@@ -2057,17 +2057,17 @@ type GetStakeReply struct {
 // Returns:
 // 1) The total amount staked by addresses in [addrs]
 // 2) The staked outputs
-func (service *Service) getStakeHelper(tx *Tx, addrs ids.ShortSet) (uint64, []axc.TransferableOutput, error) {
-	var outs []*axc.TransferableOutput
+func (service *Service) getStakeHelper(tx *Tx, addrs ids.ShortSet) (uint64, []avax.TransferableOutput, error) {
+	var outs []*avax.TransferableOutput
 	switch staker := tx.UnsignedTx.(type) {
 	case *UnsignedAddDelegatorTx:
 		outs = staker.Stake
 	case *UnsignedAddValidatorTx:
 		outs = staker.Stake
-	case *UnsignedAddAllychainValidatorTx:
+	case *UnsignedAddSubnetValidatorTx:
 		return 0, nil, nil
 	default:
-		err := fmt.Errorf("expected *UnsignedAddDelegatorTx, *UnsignedAddValidatorTx or *UnsignedAddAllychainValidatorTx but got %T", tx.UnsignedTx)
+		err := fmt.Errorf("expected *UnsignedAddDelegatorTx, *UnsignedAddValidatorTx or *UnsignedAddSubnetValidatorTx but got %T", tx.UnsignedTx)
 		service.vm.ctx.Log.Error("invalid tx type provided from validator set %s", err)
 		return 0, nil, err
 	}
@@ -2075,12 +2075,12 @@ func (service *Service) getStakeHelper(tx *Tx, addrs ids.ShortSet) (uint64, []ax
 	var (
 		totalAmountStaked uint64
 		err               error
-		stakedOuts        = make([]axc.TransferableOutput, 0, len(outs))
+		stakedOuts        = make([]avax.TransferableOutput, 0, len(outs))
 	)
 	// Go through all of the staked outputs
 	for _, stake := range outs {
-		// This output isn't AXC. Ignore.
-		if stake.AssetID() != service.vm.ctx.AXCAssetID {
+		// This output isn't AVAX. Ignore.
+		if stake.AssetID() != service.vm.ctx.AVAXAssetID {
 			continue
 		}
 		out := stake.Out
@@ -2116,12 +2116,12 @@ func (service *Service) getStakeHelper(tx *Tx, addrs ids.ShortSet) (uint64, []ax
 	return totalAmountStaked, stakedOuts, nil
 }
 
-// GetStake returns the amount of nAXC that [args.Addresses] have cumulatively
+// GetStake returns the amount of nAVAX that [args.Addresses] have cumulatively
 // staked on the Primary Network.
 //
 // This method assumes that each stake output has only owner
-// This method assumes only AXC can be staked
-// This method only concerns itself with the Primary Network, not allychains
+// This method assumes only AVAX can be staked
+// This method only concerns itself with the Primary Network, not subnets
 // TODO: Improve the performance of this method by maintaining this data
 // in a data structure rather than re-calculating it by iterating over stakers
 func (service *Service) GetStake(_ *http.Request, args *GetStakeArgs, response *GetStakeReply) error {
@@ -2145,7 +2145,7 @@ func (service *Service) GetStake(_ *http.Request, args *GetStakeArgs, response *
 
 	var (
 		totalStake uint64
-		stakedOuts = make([]axc.TransferableOutput, 0, len(stakers))
+		stakedOuts = make([]avax.TransferableOutput, 0, len(stakers))
 	)
 	for _, tx := range stakers { // Iterates over current stakers
 		stakedAmt, outs, err := service.getStakeHelper(tx, addrs)
@@ -2193,11 +2193,11 @@ func (service *Service) GetStake(_ *http.Request, args *GetStakeArgs, response *
 type GetMinStakeReply struct {
 	//  The minimum amount of tokens one must bond to be a validator
 	MinValidatorStake json.Uint64 `json:"minValidatorStake"`
-	// Minimum stake, in nAXC, that can be delegated on the primary network
+	// Minimum stake, in nAVAX, that can be delegated on the primary network
 	MinDelegatorStake json.Uint64 `json:"minDelegatorStake"`
 }
 
-// GetMinStake returns the minimum staking amount in nAXC.
+// GetMinStake returns the minimum staking amount in nAVAX.
 func (service *Service) GetMinStake(_ *http.Request, _ *struct{}, reply *GetMinStakeReply) error {
 	reply.MinValidatorStake = json.Uint64(service.vm.MinValidatorStake)
 	reply.MinDelegatorStake = json.Uint64(service.vm.MinDelegatorStake)
@@ -2221,7 +2221,7 @@ func (service *Service) GetTotalStake(_ *http.Request, _ *struct{}, reply *GetTo
 
 // GetMaxStakeAmountArgs is the request for calling GetMaxStakeAmount.
 type GetMaxStakeAmountArgs struct {
-	AllychainID  ids.ID      `json:"allychainID"`
+	SubnetID  ids.ID      `json:"subnetID"`
 	NodeID    string      `json:"nodeID"`
 	StartTime json.Uint64 `json:"startTime"`
 	EndTime   json.Uint64 `json:"endTime"`
@@ -2232,7 +2232,7 @@ type GetMaxStakeAmountReply struct {
 	Amount json.Uint64 `json:"amount"`
 }
 
-// GetMaxStakeAmount returns the maximum amount of nAXC staking to the named
+// GetMaxStakeAmount returns the maximum amount of nAVAX staking to the named
 // node during the time period.
 func (service *Service) GetMaxStakeAmount(_ *http.Request, args *GetMaxStakeAmountArgs, reply *GetMaxStakeAmountReply) error {
 	nodeID, err := ids.ShortFromPrefixedString(args.NodeID, constants.NodeIDPrefix)
@@ -2243,7 +2243,7 @@ func (service *Service) GetMaxStakeAmount(_ *http.Request, args *GetMaxStakeAmou
 	endTime := time.Unix(int64(args.EndTime), 0)
 
 	maxStakeAmount, err := service.vm.maxStakeAmount(
-		args.AllychainID,
+		args.SubnetID,
 		nodeID,
 		startTime,
 		endTime,
@@ -2308,7 +2308,7 @@ func (service *Service) GetTimestamp(_ *http.Request, args *struct{}, reply *Get
 // GetValidatorsAtArgs is the response from GetValidatorsAt
 type GetValidatorsAtArgs struct {
 	Height   json.Uint64 `json:"height"`
-	AllychainID ids.ID      `json:"allychainID"`
+	SubnetID ids.ID      `json:"subnetID"`
 }
 
 // GetValidatorsAtReply is the response from GetValidatorsAt
@@ -2316,16 +2316,16 @@ type GetValidatorsAtReply struct {
 	Validators map[string]uint64 `json:"validators"`
 }
 
-// GetValidatorsAt returns the weights of the validator set of a provided allychain
+// GetValidatorsAt returns the weights of the validator set of a provided subnet
 // at the specified height.
 func (service *Service) GetValidatorsAt(_ *http.Request, args *GetValidatorsAtArgs, reply *GetValidatorsAtReply) error {
 	service.vm.ctx.Log.Info(
-		"Platform: GetValidatorsAt called with Height %d and AllychainID %s",
+		"Platform: GetValidatorsAt called with Height %d and SubnetID %s",
 		args.Height,
-		args.AllychainID,
+		args.SubnetID,
 	)
 
-	validators, err := service.vm.GetValidatorSet(uint64(args.Height), args.AllychainID)
+	validators, err := service.vm.GetValidatorSet(uint64(args.Height), args.SubnetID)
 	if err != nil {
 		return fmt.Errorf("couldn't get validator set: %w", err)
 	}

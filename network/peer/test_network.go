@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package peer
@@ -23,7 +23,7 @@ type testNetwork struct {
 	ip        utils.IPDesc
 	version   version.Application
 	signer    crypto.Signer
-	allychains   ids.Set
+	subnets   ids.Set
 
 	uptime uint8
 }
@@ -35,7 +35,7 @@ func NewTestNetwork(
 	ipDesc utils.IPDesc,
 	version version.Application,
 	signer crypto.Signer,
-	allychains ids.Set,
+	subnets ids.Set,
 	uptime uint8,
 ) Network {
 	return &testNetwork{
@@ -44,7 +44,7 @@ func NewTestNetwork(
 		ip:        ipDesc,
 		version:   version,
 		signer:    signer,
-		allychains:   allychains,
+		subnets:   subnets,
 		uptime:    uptime,
 	}
 }
@@ -74,7 +74,7 @@ func (n *testNetwork) Version() (message.OutboundMessage, error) {
 		n.version.String(),
 		now,
 		signedIP.Signature,
-		n.allychains.List(),
+		n.subnets.List(),
 	)
 }
 

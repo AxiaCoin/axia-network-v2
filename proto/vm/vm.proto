@@ -37,24 +37,24 @@ service VM {
 
 message InitializeRequest {
   // reserved for backward compatibility
-  // axia <=v1.7.9 used the fields "11-19" as an id to
+  // avalanchego <=v1.7.9 used the fields "11-19" as an id to
   // identify the gRPC server address which served the messenger,
-  // keystore, shared memory, blockchain alias, allychain alias, and
+  // keystore, shared memory, blockchain alias, subnet alias, and
   // appSender services via the now removed service broker
   reserved 11 to 19;
   uint32 network_id = 1;
-  bytes allychain_id = 2;
+  bytes subnet_id = 2;
   bytes chain_id = 3;
   bytes node_id = 4;
   bytes x_chain_id = 5;
-  bytes axc_asset_id = 6;
+  bytes avax_asset_id = 6;
   bytes genesis_bytes = 7;
   bytes upgrade_bytes = 8;
   bytes config_bytes = 9;
   repeated VersionedDBServer db_servers = 10;
   // server_addr is the address of the gRPC server which serves
   // the messenger, keystore, shared memory, blockchain alias,
-  // allychain alias, and appSender services
+  // subnet alias, and appSender services
   string server_addr = 20;
 }
 
@@ -73,7 +73,7 @@ message InitializeResponse {
 
 message VersionedDBServer {
   // reserved for backward compatibility
-  // axia <=v1.7.9 used the field "1" as an id to identify the gRPC server
+  // avalanchego <=v1.7.9 used the field "1" as an id to identify the gRPC server
   // address which served the Database service via the now removed service broker
   reserved 1;
   string version = 2;
@@ -92,7 +92,7 @@ message CreateStaticHandlersResponse {
 
 message Handler {
   // reserved for backward compatibility
-  // axia <=v1.7.9 used the field "3" as an id to identify the gRPC server
+  // avalanchego <=v1.7.9 used the field "3" as an id to identify the gRPC server
   // address which served the HTTP service via the now removed service broker
   reserved 3;
   string prefix = 1;

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Start a number of Axia nodes on Amazon EC2
+Start a number of Avalanche nodes on Amazon EC2
 """
 
 import boto3
@@ -17,7 +17,7 @@ def runInstances(ec2, num: int, name: str):
             InstanceType="c5.large",
             MaxCount=num,
             MinCount=num,
-            AllychainId="allychain-0c80cf240e54118c8",
+            SubnetId="subnet-0c80cf240e54118c8",
             TagSpecifications=[
                 {"ResourceType": "instance", "Tags": [{"Key": "Name", "Value": name}]}
             ],

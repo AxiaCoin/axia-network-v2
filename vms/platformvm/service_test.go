@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package platformvm
@@ -27,7 +27,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/utils/formatting"
 	"github.com/axiacoin/axia-network-v2/utils/logging"
 	"github.com/axiacoin/axia-network-v2/version"
-	"github.com/axiacoin/axia-network-v2/vms/components/axc"
+	"github.com/axiacoin/axia-network-v2/vms/components/avax"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/status"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 
@@ -202,15 +202,15 @@ func TestGetTxStatus(t *testing.T) {
 	}
 
 	sm := m.NewSharedMemory(service.vm.ctx.ChainID)
-	peerSharedMemory := m.NewSharedMemory(swapChainID)
+	peerSharedMemory := m.NewSharedMemory(xChainID)
 
 	// #nosec G404
-	utxo := &axc.UTXO{
-		UTXOID: axc.UTXOID{
+	utxo := &avax.UTXO{
+		UTXOID: avax.UTXOID{
 			TxID:        ids.GenerateTestID(),
 			OutputIndex: rand.Uint32(),
 		},
-		Asset: axc.Asset{ID: axcAssetID},
+		Asset: avax.Asset{ID: avaxAssetID},
 		Out: &secp256k1fx.TransferOutput{
 			Amt: 1234567,
 			OutputOwners: secp256k1fx.OutputOwners{
@@ -236,10 +236,10 @@ func TestGetTxStatus(t *testing.T) {
 	}
 
 	oldAtomicUTXOManager := service.vm.AtomicUTXOManager
-	newAtomicUTXOManager := axc.NewAtomicUTXOManager(sm, Codec)
+	newAtomicUTXOManager := avax.NewAtomicUTXOManager(sm, Codec)
 
 	service.vm.AtomicUTXOManager = newAtomicUTXOManager
-	tx, err := service.vm.newImportTx(swapChainID, ids.ShortEmpty, []*crypto.PrivateKeySECP256K1R{recipientKey}, ids.ShortEmpty)
+	tx, err := service.vm.newImportTx(xChainID, ids.ShortEmpty, []*crypto.PrivateKeySECP256K1R{recipientKey}, ids.ShortEmpty)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -315,12 +315,12 @@ func TestGetTx(t *testing.T) {
 			"standard block",
 			func(service *Service) (*Tx, error) {
 				return service.vm.newCreateChainTx( // Test GetTx works for standard blocks
-					testAllychain1.ID(),
+					testSubnet1.ID(),
 					nil,
 					constants.AVMID,
 					nil,
 					"chain name",
-					[]*crypto.PrivateKeySECP256K1R{testAllychain1ControlKeys[0], testAllychain1ControlKeys[1]},
+					[]*crypto.PrivateKeySECP256K1R{testSubnet1ControlKeys[0], testSubnet1ControlKeys[1]},
 					keys[0].PublicKey().Address(), // change addr
 				)
 			},
@@ -345,7 +345,7 @@ func TestGetTx(t *testing.T) {
 			func(service *Service) (*Tx, error) {
 				return service.vm.newExportTx( // Test GetTx works for proposal blocks
 					100,
-					service.vm.ctx.SwapChainID,
+					service.vm.ctx.XChainID,
 					ids.GenerateTestShortID(),
 					[]*crypto.PrivateKeySECP256K1R{keys[0]},
 					keys[0].PublicKey().Address(), // change addr
@@ -488,7 +488,7 @@ func TestGetStake(t *testing.T) {
 		// Unmarshal into an output
 		outputBytes, err := formatting.Decode(args.Encoding, response.Outputs[0])
 		assert.NoError(err)
-		var output axc.TransferableOutput
+		var output avax.TransferableOutput
 		_, err = Codec.Unmarshal(outputBytes, &output)
 		assert.NoError(err)
 		out, ok := output.Out.(*secp256k1fx.TransferOutput)
@@ -515,7 +515,7 @@ func TestGetStake(t *testing.T) {
 	for _, outputStr := range response.Outputs {
 		outputBytes, err := formatting.Decode(args.Encoding, outputStr)
 		assert.NoError(err)
-		var output axc.TransferableOutput
+		var output avax.TransferableOutput
 		_, err = Codec.Unmarshal(outputBytes, &output)
 		assert.NoError(err)
 		out, ok := output.Out.(*secp256k1fx.TransferOutput)
@@ -558,7 +558,7 @@ func TestGetStake(t *testing.T) {
 	assert.EqualValues(oldStake+stakeAmt, uint64(response.Staked))
 	assert.Len(response.Outputs, 2)
 	// Unmarshal into transferableoutputs
-	outputs := make([]axc.TransferableOutput, 2)
+	outputs := make([]avax.TransferableOutput, 2)
 	for i := range outputs {
 		outputBytes, err := formatting.Decode(args.Encoding, response.Outputs[i])
 		assert.NoError(err)
@@ -599,7 +599,7 @@ func TestGetStake(t *testing.T) {
 	assert.NoError(err)
 	assert.EqualValues(oldStake+stakeAmt, response.Staked)
 	assert.Len(response.Outputs, 3)
-	outputs = make([]axc.TransferableOutput, 3)
+	outputs = make([]avax.TransferableOutput, 3)
 	// Unmarshal
 	for i := range outputs {
 		outputBytes, err := formatting.Decode(args.Encoding, response.Outputs[i])
@@ -626,7 +626,7 @@ func TestGetCurrentValidators(t *testing.T) {
 	genesis, _ := defaultGenesis()
 
 	// Call getValidators
-	args := GetCurrentValidatorsArgs{AllychainID: constants.PrimaryNetworkID}
+	args := GetCurrentValidatorsArgs{SubnetID: constants.PrimaryNetworkID}
 	response := GetCurrentValidatorsReply{}
 
 	err := service.GetCurrentValidators(nil, &args, &response)
@@ -703,7 +703,7 @@ func TestGetCurrentValidators(t *testing.T) {
 	}
 
 	// Call getCurrentValidators
-	args = GetCurrentValidatorsArgs{AllychainID: constants.PrimaryNetworkID}
+	args = GetCurrentValidatorsArgs{SubnetID: constants.PrimaryNetworkID}
 	err = service.GetCurrentValidators(nil, &args, &response)
 	switch {
 	case err != nil:

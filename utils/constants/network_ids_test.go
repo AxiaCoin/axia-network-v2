@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package constants
@@ -18,11 +18,11 @@ func TestGetHRP(t *testing.T) {
 		},
 		{
 			id:  TestnetID,
-			hrp: TestHRP,
+			hrp: FujiHRP,
 		},
 		{
-			id:  TestID,
-			hrp: TestHRP,
+			id:  FujiID,
+			hrp: FujiHRP,
 		},
 		{
 			id:  LocalID,
@@ -54,11 +54,11 @@ func TestNetworkName(t *testing.T) {
 		},
 		{
 			id:   TestnetID,
-			name: TestName,
+			name: FujiName,
 		},
 		{
-			id:   TestID,
-			name: TestName,
+			id:   FujiID,
+			name: FujiName,
 		},
 		{
 			id:   LocalID,
@@ -98,8 +98,8 @@ func TestNetworkID(t *testing.T) {
 			id:   TestnetID,
 		},
 		{
-			name: TestName,
-			id:   TestID,
+			name: FujiName,
+			id:   FujiID,
 		},
 		{
 			name: LocalName,

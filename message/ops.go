@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package message
@@ -177,7 +177,7 @@ var (
 	messages = map[Op][]Field{
 		// Handshake:
 		// TODO: remove NodeID from the Version message
-		Version:  {NetworkID, NodeID, MyTime, IP, VersionStr, VersionTime, SigBytes, TrackedAllychains},
+		Version:  {NetworkID, NodeID, MyTime, IP, VersionStr, VersionTime, SigBytes, TrackedSubnets},
 		PeerList: {Peers},
 		Ping:     {},
 		Pong:     {Uptime},

@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package state
@@ -22,7 +22,7 @@ import (
 func testBlockState(a *assert.Assertions, bs BlockState) {
 	parentID := ids.ID{1}
 	timestamp := time.Unix(123, 0)
-	coreChainHeight := uint64(2)
+	pChainHeight := uint64(2)
 	innerBlockBytes := []byte{3}
 	chainID := ids.ID{4}
 
@@ -35,7 +35,7 @@ func testBlockState(a *assert.Assertions, bs BlockState) {
 	b, err := block.Build(
 		parentID,
 		timestamp,
-		coreChainHeight,
+		pChainHeight,
 		cert,
 		innerBlockBytes,
 		chainID,

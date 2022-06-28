@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package block
@@ -30,7 +30,7 @@ type Block interface {
 type SignedBlock interface {
 	Block
 
-	CoreChainHeight() uint64
+	PChainHeight() uint64
 	Timestamp() time.Time
 	Proposer() ids.ShortID
 
@@ -40,7 +40,7 @@ type SignedBlock interface {
 type statelessUnsignedBlock struct {
 	ParentID     ids.ID `serialize:"true"`
 	Timestamp    int64  `serialize:"true"`
-	CoreChainHeight uint64 `serialize:"true"`
+	PChainHeight uint64 `serialize:"true"`
 	Certificate  []byte `serialize:"true"`
 	Block        []byte `serialize:"true"`
 }
@@ -85,7 +85,7 @@ func (b *statelessBlock) initialize(bytes []byte) error {
 	return nil
 }
 
-func (b *statelessBlock) CoreChainHeight() uint64  { return b.StatelessBlock.CoreChainHeight }
+func (b *statelessBlock) PChainHeight() uint64  { return b.StatelessBlock.PChainHeight }
 func (b *statelessBlock) Timestamp() time.Time  { return b.timestamp }
 func (b *statelessBlock) Proposer() ids.ShortID { return b.proposer }
 

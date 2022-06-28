@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package avm
@@ -11,12 +11,12 @@ import (
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow/choices"
 	"github.com/axiacoin/axia-network-v2/snow/consensus/snowstorm"
-	"github.com/axiacoin/axia-network-v2/vms/components/axc"
+	"github.com/axiacoin/axia-network-v2/vms/components/avax"
 )
 
 var (
 	errAssetIDMismatch = errors.New("asset IDs in the input don't match the utxo")
-	errWrongAssetID    = errors.New("asset ID must be AXC in the atomic tx")
+	errWrongAssetID    = errors.New("asset ID must be AVAX in the atomic tx")
 	errMissingUTXO     = errors.New("missing utxo")
 	errUnknownTx       = errors.New("transaction is unknown")
 	errRejectedTx      = errors.New("transaction is rejected")
@@ -43,8 +43,8 @@ type TxCachedState struct {
 	validity                          error
 
 	inputs     []ids.ID
-	inputUTXOs []*axc.UTXOID
-	utxos      []*axc.UTXO
+	inputUTXOs []*avax.UTXOID
+	utxos      []*avax.UTXO
 	deps       []snowstorm.Tx
 
 	status choices.Status
@@ -124,7 +124,7 @@ func (tx *UniqueTx) Accept() error {
 
 	// Fetch the input UTXOs
 	inputUTXOIDs := tx.InputUTXOs()
-	inputUTXOs := make([]*axc.UTXO, 0, len(inputUTXOIDs))
+	inputUTXOs := make([]*avax.UTXO, 0, len(inputUTXOIDs))
 	for _, utxoID := range inputUTXOIDs {
 		// Don't bother fetching the input UTXO if its symbolic
 		if utxoID.Symbolic() {
@@ -278,7 +278,7 @@ func (tx *UniqueTx) Whitelist() (ids.Set, error) {
 }
 
 // InputUTXOs returns the utxos that will be consumed on tx acceptance
-func (tx *UniqueTx) InputUTXOs() []*axc.UTXOID {
+func (tx *UniqueTx) InputUTXOs() []*avax.UTXOID {
 	tx.refresh()
 	if tx.Tx == nil || len(tx.inputUTXOs) != 0 {
 		return tx.inputUTXOs
@@ -288,7 +288,7 @@ func (tx *UniqueTx) InputUTXOs() []*axc.UTXOID {
 }
 
 // UTXOs returns the utxos that will be added to the UTXO set on tx acceptance
-func (tx *UniqueTx) UTXOs() []*axc.UTXO {
+func (tx *UniqueTx) UTXOs() []*avax.UTXO {
 	tx.refresh()
 	if tx.Tx == nil || len(tx.utxos) != 0 {
 		return tx.utxos

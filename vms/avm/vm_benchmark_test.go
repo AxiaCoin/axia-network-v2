@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package avm
@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/axiacoin/axia-network-v2/ids"
-	"github.com/axiacoin/axia-network-v2/vms/components/axc"
+	"github.com/axiacoin/axia-network-v2/vms/components/avax"
 	"github.com/axiacoin/axia-network-v2/vms/components/keystore"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 )
@@ -78,12 +78,12 @@ func GetAllUTXOsBenchmark(b *testing.B, utxoCount int) {
 
 	// #nosec G404
 	for i := 0; i < utxoCount; i++ {
-		utxo := &axc.UTXO{
-			UTXOID: axc.UTXOID{
+		utxo := &avax.UTXO{
+			UTXOID: avax.UTXOID{
 				TxID:        ids.GenerateTestID(),
 				OutputIndex: rand.Uint32(),
 			},
-			Asset: axc.Asset{ID: ids.ID{'y', 'e', 'e', 't'}},
+			Asset: avax.Asset{ID: ids.ID{'y', 'e', 'e', 't'}},
 			Out: &secp256k1fx.TransferOutput{
 				Amt: 100000,
 				OutputOwners: secp256k1fx.OutputOwners{
@@ -104,14 +104,14 @@ func GetAllUTXOsBenchmark(b *testing.B, utxoCount int) {
 
 	var (
 		err               error
-		notPaginatedUTXOs []*axc.UTXO
+		notPaginatedUTXOs []*avax.UTXO
 	)
 
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {
 		// Fetch all UTXOs older version
-		notPaginatedUTXOs, err = axc.GetAllUTXOs(vm.state, addrsSet)
+		notPaginatedUTXOs, err = avax.GetAllUTXOs(vm.state, addrsSet)
 		if err != nil {
 			b.Fatal(err)
 		}

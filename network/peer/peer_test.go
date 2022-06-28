@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package peer
@@ -84,7 +84,7 @@ func makeRawTestPeers(t *testing.T) (*rawTestPeer, *rawTestPeer) {
 		OutboundMsgThrottler: throttling.NewNoOutboundThrottler(),
 		VersionCompatibility: version.GetCompatibility(constants.LocalID),
 		VersionParser:        version.NewDefaultApplicationParser(),
-		MyAllychains:            ids.Set{},
+		MySubnets:            ids.Set{},
 		Beacons:              validators.NewSet(),
 		NetworkID:            constants.LocalID,
 		PingFrequency:        constants.DefaultPingFrequency,
@@ -104,7 +104,7 @@ func makeRawTestPeers(t *testing.T) (*rawTestPeer, *rawTestPeer) {
 		},
 		version: version.CurrentApp,
 		signer:  tlsCert0.PrivateKey.(crypto.Signer),
-		allychains: ids.Set{},
+		subnets: ids.Set{},
 
 		uptime: 100,
 	}
@@ -123,7 +123,7 @@ func makeRawTestPeers(t *testing.T) (*rawTestPeer, *rawTestPeer) {
 		},
 		version: version.CurrentApp,
 		signer:  tlsCert1.PrivateKey.(crypto.Signer),
-		allychains: ids.Set{},
+		subnets: ids.Set{},
 
 		uptime: 100,
 	}

@@ -7,8 +7,8 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 ### Networking
 
 - Improved vertex and block gossiping for validators with low stake weight.
-- Added peers metric by allychain.
-- Added percentage of stake connected metric by allychain.
+- Added peers metric by subnet.
+- Added percentage of stake connected metric by subnet.
 
 ### APIs
 
@@ -17,7 +17,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 
 ### PlatformVM
 
-- Introduced time based windowing of accepted Core-chain block heights to ensure that local networks update the proposer list timely in the `proposervm`.
+- Introduced time based windowing of accepted P-chain block heights to ensure that local networks update the proposer list timely in the `proposervm`.
 - Improved selection of decision transactions from the mempool.
 
 ### RPCChainVM
@@ -32,20 +32,20 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 
 - Fixed a bug where a deadlock on shutdown caused historical re-generation on restart.
 - Added an API endpoint to fetch the current VM Config.
-- Added Axia custom log formatting to the logs.
+- Added AvalancheGo custom log formatting to the logs.
 - Removed support for the JS Tracer.
 
 ### Logging
 
-- Added piping of allychain logs to stdout.
+- Added piping of subnet logs to stdout.
 - Lazily initialized logs to avoid opening files that are never written to.
-- Added support for arbitrarily deleted log files while axia is running.
+- Added support for arbitrarily deleted log files while avalanchego is running.
 - Removed redundant logging configs.
 
 ### Miscellaneous
 
 - Updated minimum go version to `v1.17.9`.
-- Added allychain bootstrapping health checks.
+- Added subnet bootstrapping health checks.
 - Supported multiple tags per codec instantiation.
 - Added minor fail-fast optimization to string packing.
 - Removed dead code.
@@ -59,7 +59,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 
 ### Updates
 
-- Improved allychain gossip to only send messages to nodes participating in that allychain.
+- Improved subnet gossip to only send messages to nodes participating in that subnet.
 - Fixed inlined VM initialization to correctly register static APIs.
 - Added logging for file descriptor limit errors.
 - Removed dead code from network packer.
@@ -88,13 +88,13 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 
 ### Miscellaneous
 
-- Fixed incorrect `BlockchainID` usage in the Swap-chain `ImportTx` builder.
-- Fixed incorrect `OutputOwners` in the Core-chain `ImportTx` builder.
+- Fixed incorrect `BlockchainID` usage in the X-chain `ImportTx` builder.
+- Fixed incorrect `OutputOwners` in the P-chain `ImportTx` builder.
 - Improved FD limit error logging and warnings.
 - Rounded bootstrapping ETAs to the nearest second.
-- Added gossip config support to the allychain configs.
+- Added gossip config support to the subnet configs.
 - Optimized various queue removals for improved memory freeing.
-- Added a basic Swap-chain E2E usage test to the new testing framework.
+- Added a basic X-chain E2E usage test to the new testing framework.
 
 ## [v1.7.7](https://github.com/axiacoin/axia-network-v2/releases/tag/v1.7.7)
 
@@ -140,7 +140,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 
 ### Miscellaneous
 
-- Fixed error reporting when making Axia chains that did not manually specify a primary alias.
+- Fixed error reporting when making Avalanche chains that did not manually specify a primary alias.
 - Added beacon utils for easier programmatic handling of beacon nodes.
 - Resolved the default log directory on initialization to avoid additional error handling.
 - Added support to the chain state module to specify an arbitrary new accepted block.
@@ -151,7 +151,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 
 ### Consensus
 
-- Introduced a new vertex type to support future `Axia` based network upgrades.
+- Introduced a new vertex type to support future `Avalanche` based network upgrades.
 - Added pending message metrics to the chain message queues.
 - Refactored event dispatchers to simplify dependencies and remove dead code.
 
@@ -163,14 +163,14 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 
 ### Coreth
 
-- Increased `FeeHistory` maximum historical limit to improve MetaMask UI on the AXC-Chain.
+- Increased `FeeHistory` maximum historical limit to improve MetaMask UI on the C-Chain.
 - Enabled chain state metrics.
 - Migrated go-ethereum v1.10.16 changes.
 
 ### Miscellaneous
 
 - Added the ability to load new VM plugins dynamically.
-- Implemented Swap-chain + Core-chain wallet that can be used to build and sign transactions. Without providing a full node private keys.
+- Implemented X-chain + P-chain wallet that can be used to build and sign transactions. Without providing a full node private keys.
 - Integrated e2e testing to the repo to avoid maintaining multiple synced repos.
 - Fixed `proposervm` height indexing check to correctly mark the indexer as repaired.
 - Introduced message throttling overrides to be used in future improvements to reliably send messages.
@@ -194,7 +194,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 
 ### Miscellaneous
 
-- Added tracked allychains to be reported in calls to the `info.peers` API.
+- Added tracked subnets to be reported in calls to the `info.peers` API.
 - Updated gRPC implementations to use `buf` tooling and standardized naming and locations.
 - Added a consistent hashing implementation to be used in future improvements.
 - Fixed database iteration invariants to report `ErrClosed` rather than silently exiting.
@@ -215,7 +215,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 
 This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axia-network-v2/releases/tag/v1.7.0). It is optional, but encouraged.
 
-**The first startup of the AXC-Chain will take a few minutes longer due to an index update.**
+**The first startup of the C-Chain will take a few minutes longer due to an index update.**
 
 ### Consensus
 
@@ -223,12 +223,12 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 - Updated bootstrapping logs to no longer reset counters after a node restart.
 - Added bootstrapping ETAs for fetching Snowman blocks and executing operations.
 - Renamed the `MultiPut` message to the `Ancestors` message to match other message naming conventions.
-- Introduced Whitelist conflicts into the Snowstorm specification that will be used in future Swap-chain improvements.
+- Introduced Whitelist conflicts into the Snowstorm specification that will be used in future X-chain improvements.
 - Refactored the separation between the Bootstrapping engine and the Consensus engine to support Fast-Sync.
 
 ### Coreth
 
-- Added an index mapping height to the list of accepted atomic operations at that height in a trie. Generating this index will cause the node to take a few minutes longer to startup the AXC-Chain for the first restart.
+- Added an index mapping height to the list of accepted atomic operations at that height in a trie. Generating this index will cause the node to take a few minutes longer to startup the C-Chain for the first restart.
 - Updated Geth dependency to `v1.10.15`.
 - Updated `networkID` to match `chainID`.
 
@@ -249,10 +249,10 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 
 - Added `--stake-max-consumption-rate` which defaults to `120,000`.
 - Added `--stake-min-consumption-rate` which defaults to `100,000`.
-- Added `--stake-supply-cap` which defaults to `720,000,000,000,000,000` nAXC.
+- Added `--stake-supply-cap` which defaults to `720,000,000,000,000,000` nAVAX.
 - Renamed `--bootstrap-multiput-max-containers-sent` to `--bootstrap-ancestors-max-containers-sent`.
 - Renamed `--bootstrap-multiput-max-containers-received` to `--bootstrap-ancestors-max-containers-received`.
-- Enforced that `--staking-enabled=false` can not be specified on public networks (`Test` and `Mainnet`).
+- Enforced that `--staking-enabled=false` can not be specified on public networks (`Fuji` and `Mainnet`).
 
 ### Metrics
 
@@ -271,11 +271,11 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 
 ### Consensus
 
-- Introduced a notion of vertex conflicts that will be used in future Swap-chain improvements.
+- Introduced a notion of vertex conflicts that will be used in future X-chain improvements.
 
 ### Coreth
 
-- Added an index mapping height to the list of accepted atomic transactions at that height. Generating this index will cause the node to take approximately 2 minutes longer to startup the AXC-Chain for the first restart.
+- Added an index mapping height to the list of accepted atomic transactions at that height. Generating this index will cause the node to take approximately 2 minutes longer to startup the C-Chain for the first restart.
 - Fixed bug in base fee estimation API that impacted custom defined networks.
 - Decreased minimum transaction re-gossiping interval from 1s to 500ms.
 - Removed websocket handler from the static vm APIs.
@@ -293,7 +293,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 
 - Notified VMs of peer versions on `Connected`.
 - Fixed acceptance broadcasting over IPC.
-- Fixed 32-bit architecture builds for Axia (not Coreth).
+- Fixed 32-bit architecture builds for AvalancheGo (not Coreth).
 
 ## [v1.7.2](https://github.com/axiacoin/axia-network-v2/releases/tag/v1.7.2)
 
@@ -341,7 +341,7 @@ This update is backwards compatible with [v1.7.0](https://github.com/axiacoin/ax
 
 ## [v1.7.0](https://github.com/axiacoin/axia-network-v2/releases/tag/v1.7.0)
 
-This upgrade adds support for issuing multiple atomic transactions into a single block and directly transferring assets between the Core-chain and the AXC-chain.
+This upgrade adds support for issuing multiple atomic transactions into a single block and directly transferring assets between the P-chain and the C-chain.
 
 The changes in the upgrade go into effect at 1 PM EST, December 2nd 2021 on Mainnet. One should upgrade their node before the changes go into effect, otherwise they may experience loss of uptime.
 
@@ -355,12 +355,12 @@ The changes in the upgrade go into effect at 1 PM EST, December 2nd 2021 on Main
 ### PlatformVM
 
 - Enabled `AtomicTx`s to be issued into `StandardBlock`s and deprecated `AtomicBlock`s.
-- Added the ability to export/import AXC to/from the AXC-chain.
+- Added the ability to export/import AVAX to/from the C-chain.
 
 ### Coreth
 
 - Enabled multiple `AtomicTx`s to be issued per block.
-- Added the ability to export/import AXC to/from the Core-chain.
+- Added the ability to export/import AVAX to/from the P-chain.
 - Updated dynamic fee calculations.
 
 ### ProposerVM
@@ -386,7 +386,7 @@ This version is backwards compatible to [v1.6.0](https://github.com/axiacoin/axi
 
 ### Metrics
 
-- Added `axia_{ChainID}_bootstrap_finished`, which is 1 if the chain is done bootstrapping, 0 otherwise.
+- Added `avalanche_{ChainID}_bootstrap_finished`, which is 1 if the chain is done bootstrapping, 0 otherwise.
 
 ### APIs
 
@@ -414,29 +414,29 @@ This version is backwards compatible to [v1.6.0](https://github.com/axiacoin/axi
 
 ### Metrics
 
-- Updated `axia_{ChainID}_handler_gossip_{count,sum}` to `axia_{ChainID}_handler_gossip_request_{count,sum}`.
-- Updated `axia_{ChainID}_lat_get_accepted_{count,sum}` to `axia_{ChainID}_lat_accepted_{count,sum}`.
-- Updated `axia_{ChainID}_lat_get_accepted_frontier_{count,sum}` to `axia_{ChainID}_lat_accepted_frontier_{count,sum}`.
-- Updated `axia_{ChainID}_lat_get_ancestors_{count,sum}` to `axia_{ChainID}_lat_multi_put_{count,sum}`.
-- Combined `axia_{ChainID}_lat_pull_query_{count,sum}` and `axia_{ChainID}_lat_push_query_{count,sum}` to `axia_{ChainID}_lat_chits_{count,sum}`.
-- Added `axia_{ChainID}_app_response_{count,sum}`.
-- Added `axia_network_bandwidth_throttler_inbound_acquire_latency_{count,sum}`
-- Added `axia_network_bandwidth_throttler_inbound_awaiting_acquire`
-- Added `axia_P_vm_votes_won`
-- Added `axia_P_vm_votes_lost`
+- Updated `avalanche_{ChainID}_handler_gossip_{count,sum}` to `avalanche_{ChainID}_handler_gossip_request_{count,sum}`.
+- Updated `avalanche_{ChainID}_lat_get_accepted_{count,sum}` to `avalanche_{ChainID}_lat_accepted_{count,sum}`.
+- Updated `avalanche_{ChainID}_lat_get_accepted_frontier_{count,sum}` to `avalanche_{ChainID}_lat_accepted_frontier_{count,sum}`.
+- Updated `avalanche_{ChainID}_lat_get_ancestors_{count,sum}` to `avalanche_{ChainID}_lat_multi_put_{count,sum}`.
+- Combined `avalanche_{ChainID}_lat_pull_query_{count,sum}` and `avalanche_{ChainID}_lat_push_query_{count,sum}` to `avalanche_{ChainID}_lat_chits_{count,sum}`.
+- Added `avalanche_{ChainID}_app_response_{count,sum}`.
+- Added `avalanche_network_bandwidth_throttler_inbound_acquire_latency_{count,sum}`
+- Added `avalanche_network_bandwidth_throttler_inbound_awaiting_acquire`
+- Added `avalanche_P_vm_votes_won`
+- Added `avalanche_P_vm_votes_lost`
 
 ### Indexer
 
 - Added method `GetContainerByID` to client implementation.
 - Client methods now return `[]byte` rather than `string` representations of a container.
 
-### AXC-Chain
+### C-Chain
 
 - Updated Geth dependency to 1.10.11.
 - Added a new admin API for updating the log level and measuring performance.
 - Added a new `--allow-unprotected-txs` flag to allow issuance of transactions without EIP-155 replay protection.
 
-### Allychain & Custom VMs
+### Subnet & Custom VMs
 
 - Ensured that all possible chains are run in `--staking-enabled=false` networks.
 
@@ -454,22 +454,22 @@ This version is backwards compatible to [v1.6.0](https://github.com/axiacoin/axi
 
 ### Metrics
 
-- Changed the behavior of `axia_network_buffer_throttler_inbound_awaiting_acquire` to only increment if the message is actually blocking.
-- Changed the behavior of `axia_network_byte_throttler_inbound_awaiting_acquire` to only increment if the message is actually blocking.
+- Changed the behavior of `avalanche_network_buffer_throttler_inbound_awaiting_acquire` to only increment if the message is actually blocking.
+- Changed the behavior of `avalanche_network_byte_throttler_inbound_awaiting_acquire` to only increment if the message is actually blocking.
 - Added `Block/Tx` metrics on `meterVM`s.
-  - Added `axia_{ChainID}_vm_metervm_build_block_err_{count,sum}`.
-  - Added `axia_{ChainID}_vm_metervm_parse_block_err_{count,sum}`.
-  - Added `axia_{ChainID}_vm_metervm_get_block_err_{count,sum}`.
-  - Added `axia_{ChainID}_vm_metervm_verify_{count,sum}`.
-  - Added `axia_{ChainID}_vm_metervm_verify_err_{count,sum}`.
-  - Added `axia_{ChainID}_vm_metervm_accept_{count,sum}`.
-  - Added `axia_{ChainID}_vm_metervm_reject_{count,sum}`.
-  - Added `axia_{DAGID}_vm_metervm_parse_tx_err_{count,sum}`.
-  - Added `axia_{DAGID}_vm_metervm_get_tx_err_{count,sum}`.
-  - Added `axia_{DAGID}_vm_metervm_verify_tx_{count,sum}`.
-  - Added `axia_{DAGID}_vm_metervm_verify_tx_err_{count,sum}`.
-  - Added `axia_{DAGID}_vm_metervm_accept_{count,sum}`.
-  - Added `axia_{DAGID}_vm_metervm_reject_{count,sum}`.
+  - Added `avalanche_{ChainID}_vm_metervm_build_block_err_{count,sum}`.
+  - Added `avalanche_{ChainID}_vm_metervm_parse_block_err_{count,sum}`.
+  - Added `avalanche_{ChainID}_vm_metervm_get_block_err_{count,sum}`.
+  - Added `avalanche_{ChainID}_vm_metervm_verify_{count,sum}`.
+  - Added `avalanche_{ChainID}_vm_metervm_verify_err_{count,sum}`.
+  - Added `avalanche_{ChainID}_vm_metervm_accept_{count,sum}`.
+  - Added `avalanche_{ChainID}_vm_metervm_reject_{count,sum}`.
+  - Added `avalanche_{DAGID}_vm_metervm_parse_tx_err_{count,sum}`.
+  - Added `avalanche_{DAGID}_vm_metervm_get_tx_err_{count,sum}`.
+  - Added `avalanche_{DAGID}_vm_metervm_verify_tx_{count,sum}`.
+  - Added `avalanche_{DAGID}_vm_metervm_verify_tx_err_{count,sum}`.
+  - Added `avalanche_{DAGID}_vm_metervm_accept_{count,sum}`.
+  - Added `avalanche_{DAGID}_vm_metervm_reject_{count,sum}`.
 
 ### Coreth
 

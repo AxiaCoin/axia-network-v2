@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package platformvm
@@ -15,7 +15,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/utils/crypto"
 	"github.com/axiacoin/axia-network-v2/utils/logging"
-	"github.com/axiacoin/axia-network-v2/vms/components/axc"
+	"github.com/axiacoin/axia-network-v2/vms/components/avax"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 )
 
@@ -62,12 +62,12 @@ func TestNewImportTx(t *testing.T) {
 		peerSharedMemory := m.NewSharedMemory(peerChain)
 
 		// #nosec G404
-		utxo := &axc.UTXO{
-			UTXOID: axc.UTXOID{
+		utxo := &avax.UTXO{
+			UTXOID: avax.UTXOID{
 				TxID:        ids.GenerateTestID(),
 				OutputIndex: rand.Uint32(),
 			},
-			Asset: axc.Asset{ID: axcAssetID},
+			Asset: avax.Asset{ID: avaxAssetID},
 			Out: &secp256k1fx.TransferOutput{
 				Amt: amt,
 				OutputOwners: secp256k1fx.OutputOwners{
@@ -98,23 +98,23 @@ func TestNewImportTx(t *testing.T) {
 	tests := []test{
 		{
 			description:   "can't pay fee",
-			sourceChainID: swapChainID,
-			sharedMemory:  fundedSharedMemory(swapChainID, vm.TxFee-1),
+			sourceChainID: xChainID,
+			sharedMemory:  fundedSharedMemory(xChainID, vm.TxFee-1),
 			sourceKeys:    []*crypto.PrivateKeySECP256K1R{sourceKey},
 			shouldErr:     true,
 		},
 		{
 			description:   "can barely pay fee",
-			sourceChainID: swapChainID,
-			sharedMemory:  fundedSharedMemory(swapChainID, vm.TxFee),
+			sourceChainID: xChainID,
+			sharedMemory:  fundedSharedMemory(xChainID, vm.TxFee),
 			sourceKeys:    []*crypto.PrivateKeySECP256K1R{sourceKey},
 			shouldErr:     false,
 			shouldVerify:  true,
 		},
 		{
-			description:   "attempting to import from AXC-chain",
-			sourceChainID: axcChainID,
-			sharedMemory:  fundedSharedMemory(axcChainID, vm.TxFee),
+			description:   "attempting to import from C-chain",
+			sourceChainID: cChainID,
+			sharedMemory:  fundedSharedMemory(cChainID, vm.TxFee),
 			sourceKeys:    []*crypto.PrivateKeySECP256K1R{sourceKey},
 			timestamp:     vm.ApricotPhase5Time,
 			shouldErr:     false,
@@ -128,7 +128,7 @@ func TestNewImportTx(t *testing.T) {
 			assert := assert.New(t)
 
 			vm.ctx.SharedMemory = tt.sharedMemory
-			vm.AtomicUTXOManager = axc.NewAtomicUTXOManager(tt.sharedMemory, Codec)
+			vm.AtomicUTXOManager = avax.NewAtomicUTXOManager(tt.sharedMemory, Codec)
 			tx, err := vm.newImportTx(tt.sourceChainID, to, tt.sourceKeys, ids.ShortEmpty)
 			if tt.shouldErr {
 				assert.Error(err)

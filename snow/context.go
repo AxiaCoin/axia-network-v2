@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package snow
@@ -28,8 +28,8 @@ type EventDispatcher interface {
 	Rejector
 }
 
-type AllychainLookup interface {
-	AllychainID(chainID ids.ID) (ids.ID, error)
+type SubnetLookup interface {
+	SubnetID(chainID ids.ID) (ids.ID, error)
 }
 
 // ContextInitializable represents an object that can be initialized
@@ -45,23 +45,23 @@ type ContextInitializable interface {
 // [NodeID] is the ID of this node
 type Context struct {
 	NetworkID uint32
-	AllychainID  ids.ID
+	SubnetID  ids.ID
 	ChainID   ids.ID
 	NodeID    ids.ShortID
 
-	SwapChainID    ids.ID
-	AXCAssetID ids.ID
+	XChainID    ids.ID
+	AVAXAssetID ids.ID
 
 	Log          logging.Logger
 	Lock         sync.RWMutex
 	Keystore     keystore.BlockchainKeystore
 	SharedMemory atomic.SharedMemory
 	BCLookup     ids.AliaserReader
-	SNLookup     AllychainLookup
+	SNLookup     SubnetLookup
 	Metrics      metrics.OptionalGatherer
 
 	// snowman++ attributes
-	ValidatorState    validators.State  // interface for Core-Chain validators
+	ValidatorState    validators.State  // interface for P-Chain validators
 	StakingLeafSigner crypto.Signer     // block signer
 	StakingCertLeaf   *x509.Certificate // block certificate
 }
@@ -117,7 +117,7 @@ func (ctx *ConsensusContext) SetValidatorOnly() {
 func DefaultContextTest() *Context {
 	return &Context{
 		NetworkID: 0,
-		AllychainID:  ids.Empty,
+		SubnetID:  ids.Empty,
 		ChainID:   ids.Empty,
 		NodeID:    ids.ShortEmpty,
 		Log:       logging.NoLog{},

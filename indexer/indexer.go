@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package indexer
@@ -22,7 +22,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/database"
 	"github.com/axiacoin/axia-network-v2/database/prefixdb"
 	"github.com/axiacoin/axia-network-v2/ids"
-	"github.com/axiacoin/axia-network-v2/snow/engine/axia"
+	"github.com/axiacoin/axia-network-v2/snow/engine/avalanche"
 	"github.com/axiacoin/axia-network-v2/snow/engine/common"
 	"github.com/axiacoin/axia-network-v2/snow/engine/snowman"
 	"github.com/axiacoin/axia-network-v2/snow/triggers"
@@ -151,7 +151,7 @@ func (i *indexer) RegisterChain(name string, engine common.Engine) {
 	if i.closed {
 		i.log.Debug("not registering chain %s because indexer is closed", name)
 		return
-	} else if ctx.AllychainID != constants.PrimaryNetworkID {
+	} else if ctx.SubnetID != constants.PrimaryNetworkID {
 		i.log.Debug("not registering chain %s because it's not in primary network", name)
 		return
 	}
@@ -233,7 +233,7 @@ func (i *indexer) RegisterChain(name string, engine common.Engine) {
 			return
 		}
 		i.blockIndices[chainID] = index
-	case axia.Engine:
+	case avalanche.Engine:
 		vtxIndex, err := i.registerChainHelper(chainID, vtxPrefix, name, "vtx", i.consensusDispatcher)
 		if err != nil {
 			i.log.Fatal("couldn't create vertex index for %s: %s", name, err)

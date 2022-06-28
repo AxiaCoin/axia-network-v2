@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package validators
@@ -13,21 +13,21 @@ import (
 
 var _ Manager = &manager{}
 
-// Manager holds the validator set of each allychain
+// Manager holds the validator set of each subnet
 type Manager interface {
 	fmt.Stringer
 
-	// Set a allychain's validator set
+	// Set a subnet's validator set
 	Set(ids.ID, Set) error
 
-	// AddWeight adds weight to a given validator on the given allychain
+	// AddWeight adds weight to a given validator on the given subnet
 	AddWeight(ids.ID, ids.ShortID, uint64) error
 
-	// RemoveWeight removes weight from a given validator on a given allychain
+	// RemoveWeight removes weight from a given validator on a given subnet
 	RemoveWeight(ids.ID, ids.ShortID, uint64) error
 
-	// GetValidators returns the validator set for the given allychain
-	// Returns false if the allychain doesn't exist
+	// GetValidators returns the validator set for the given subnet
+	// Returns false if the subnet doesn't exist
 	GetValidators(ids.ID) (Set, bool)
 
 	// MaskValidator hides the named validator from future samplings
@@ -45,37 +45,37 @@ type Manager interface {
 // NewManager returns a new, empty manager
 func NewManager() Manager {
 	return &manager{
-		allychainToVdrs: make(map[ids.ID]Set),
+		subnetToVdrs: make(map[ids.ID]Set),
 	}
 }
 
 type manager struct {
 	lock sync.Mutex
 
-	// Key: Allychain ID
-	// Value: The validators that validate the allychain
-	allychainToVdrs map[ids.ID]Set
+	// Key: Subnet ID
+	// Value: The validators that validate the subnet
+	subnetToVdrs map[ids.ID]Set
 
 	maskedVdrs ids.ShortSet
 }
 
-func (m *manager) Set(allychainID ids.ID, newSet Set) error {
+func (m *manager) Set(subnetID ids.ID, newSet Set) error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
-	oldSet, exists := m.allychainToVdrs[allychainID]
+	oldSet, exists := m.subnetToVdrs[subnetID]
 	if !exists {
-		m.allychainToVdrs[allychainID] = newSet
+		m.subnetToVdrs[subnetID] = newSet
 		return nil
 	}
 	return oldSet.Set(newSet.List())
 }
 
-func (m *manager) AddWeight(allychainID ids.ID, vdrID ids.ShortID, weight uint64) error {
+func (m *manager) AddWeight(subnetID ids.ID, vdrID ids.ShortID, weight uint64) error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
-	vdrs, ok := m.allychainToVdrs[allychainID]
+	vdrs, ok := m.subnetToVdrs[subnetID]
 	if !ok {
 		vdrs = NewSet()
 		for _, maskedVdrID := range m.maskedVdrs.List() {
@@ -83,26 +83,26 @@ func (m *manager) AddWeight(allychainID ids.ID, vdrID ids.ShortID, weight uint64
 				return err
 			}
 		}
-		m.allychainToVdrs[allychainID] = vdrs
+		m.subnetToVdrs[subnetID] = vdrs
 	}
 	return vdrs.AddWeight(vdrID, weight)
 }
 
-func (m *manager) RemoveWeight(allychainID ids.ID, vdrID ids.ShortID, weight uint64) error {
+func (m *manager) RemoveWeight(subnetID ids.ID, vdrID ids.ShortID, weight uint64) error {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
-	if vdrs, ok := m.allychainToVdrs[allychainID]; ok {
+	if vdrs, ok := m.subnetToVdrs[subnetID]; ok {
 		return vdrs.RemoveWeight(vdrID, weight)
 	}
 	return nil
 }
 
-func (m *manager) GetValidators(allychainID ids.ID) (Set, bool) {
+func (m *manager) GetValidators(subnetID ids.ID) (Set, bool) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
-	vdrs, ok := m.allychainToVdrs[allychainID]
+	vdrs, ok := m.subnetToVdrs[subnetID]
 	return vdrs, ok
 }
 
@@ -115,7 +115,7 @@ func (m *manager) MaskValidator(vdrID ids.ShortID) error {
 	}
 	m.maskedVdrs.Add(vdrID)
 
-	for _, vdrs := range m.allychainToVdrs {
+	for _, vdrs := range m.subnetToVdrs {
 		if err := vdrs.MaskValidator(vdrID); err != nil {
 			return err
 		}
@@ -132,7 +132,7 @@ func (m *manager) RevealValidator(vdrID ids.ShortID) error {
 	}
 	m.maskedVdrs.Remove(vdrID)
 
-	for _, vdrs := range m.allychainToVdrs {
+	for _, vdrs := range m.subnetToVdrs {
 		if err := vdrs.RevealValidator(vdrID); err != nil {
 			return err
 		}
@@ -140,11 +140,11 @@ func (m *manager) RevealValidator(vdrID ids.ShortID) error {
 	return nil
 }
 
-func (m *manager) Contains(allychainID ids.ID, vdrID ids.ShortID) bool {
+func (m *manager) Contains(subnetID ids.ID, vdrID ids.ShortID) bool {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
-	vdrs, ok := m.allychainToVdrs[allychainID]
+	vdrs, ok := m.subnetToVdrs[subnetID]
 	if ok {
 		return vdrs.Contains(vdrID)
 	}
@@ -155,22 +155,22 @@ func (m *manager) String() string {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 
-	allychains := make([]ids.ID, 0, len(m.allychainToVdrs))
-	for allychainID := range m.allychainToVdrs {
-		allychains = append(allychains, allychainID)
+	subnets := make([]ids.ID, 0, len(m.subnetToVdrs))
+	for subnetID := range m.subnetToVdrs {
+		subnets = append(subnets, subnetID)
 	}
-	ids.SortIDs(allychains)
+	ids.SortIDs(subnets)
 
 	sb := strings.Builder{}
 
 	sb.WriteString(fmt.Sprintf("Validator Manager: (Size = %d)",
-		len(allychains),
+		len(subnets),
 	))
-	for _, allychainID := range allychains {
-		vdrs := m.allychainToVdrs[allychainID]
+	for _, subnetID := range subnets {
+		vdrs := m.subnetToVdrs[subnetID]
 		sb.WriteString(fmt.Sprintf(
-			"\n    Allychain[%s]: %s",
-			allychainID,
+			"\n    Subnet[%s]: %s",
+			subnetID,
 			vdrs.PrefixedString("    "),
 		))
 	}

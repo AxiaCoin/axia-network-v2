@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package version
@@ -37,12 +37,12 @@ func TestNewDefaultVersionParser(t *testing.T) {
 func TestNewDefaultApplicationParser(t *testing.T) {
 	p := NewDefaultApplicationParser()
 
-	v, err := p.Parse("axia/1.2.3")
+	v, err := p.Parse("avalanche/1.2.3")
 
 	assert.NoError(t, err)
 	assert.NotNil(t, v)
-	assert.Equal(t, "axia/1.2.3", v.String())
-	assert.Equal(t, "axia", v.App())
+	assert.Equal(t, "avalanche/1.2.3", v.String())
+	assert.Equal(t, "avalanche", v.App())
 	assert.Equal(t, 1, v.Major())
 	assert.Equal(t, 2, v.Minor())
 	assert.Equal(t, 3, v.Patch())
@@ -51,10 +51,10 @@ func TestNewDefaultApplicationParser(t *testing.T) {
 
 	badVersions := []string{
 		"",
-		"axia/",
-		"axia/z.0.0",
-		"axia/0.z.0",
-		"axia/0.0.z",
+		"avalanche/",
+		"avalanche/z.0.0",
+		"avalanche/0.z.0",
+		"avalanche/0.0.z",
 	}
 	for _, badVersion := range badVersions {
 		_, err := p.Parse(badVersion)
@@ -65,12 +65,12 @@ func TestNewDefaultApplicationParser(t *testing.T) {
 func TestNewApplicationParser(t *testing.T) {
 	p := NewApplicationParser(":", ",")
 
-	v, err := p.Parse("axia:1,2,3")
+	v, err := p.Parse("avalanche:1,2,3")
 
 	assert.NoError(t, err)
 	assert.NotNil(t, v)
-	assert.Equal(t, "axia:1,2,3", v.String())
-	assert.Equal(t, "axia", v.App())
+	assert.Equal(t, "avalanche:1,2,3", v.String())
+	assert.Equal(t, "avalanche", v.App())
 	assert.Equal(t, 1, v.Major())
 	assert.Equal(t, 2, v.Minor())
 	assert.Equal(t, 3, v.Patch())

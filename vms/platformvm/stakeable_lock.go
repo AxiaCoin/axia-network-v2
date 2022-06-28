@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package platformvm
@@ -6,7 +6,7 @@ package platformvm
 import (
 	"errors"
 
-	"github.com/axiacoin/axia-network-v2/vms/components/axc"
+	"github.com/axiacoin/axia-network-v2/vms/components/avax"
 )
 
 var (
@@ -16,11 +16,11 @@ var (
 
 type StakeableLockOut struct {
 	Locktime             uint64 `serialize:"true" json:"locktime"`
-	axc.TransferableOut `serialize:"true" json:"output"`
+	avax.TransferableOut `serialize:"true" json:"output"`
 }
 
 func (s *StakeableLockOut) Addresses() [][]byte {
-	if addressable, ok := s.TransferableOut.(axc.Addressable); ok {
+	if addressable, ok := s.TransferableOut.(avax.Addressable); ok {
 		return addressable.Addresses()
 	}
 	return nil
@@ -38,7 +38,7 @@ func (s *StakeableLockOut) Verify() error {
 
 type StakeableLockIn struct {
 	Locktime            uint64 `serialize:"true" json:"locktime"`
-	axc.TransferableIn `serialize:"true" json:"input"`
+	avax.TransferableIn `serialize:"true" json:"input"`
 }
 
 func (s *StakeableLockIn) Verify() error {

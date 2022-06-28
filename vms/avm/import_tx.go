@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package avm
@@ -11,7 +11,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/database"
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow"
-	"github.com/axiacoin/axia-network-v2/vms/components/axc"
+	"github.com/axiacoin/axia-network-v2/vms/components/avax"
 	"github.com/axiacoin/axia-network-v2/vms/components/verify"
 )
 
@@ -29,7 +29,7 @@ type ImportTx struct {
 	SourceChain ids.ID `serialize:"true" json:"sourceChain"`
 
 	// The inputs to this transaction
-	ImportedIns []*axc.TransferableInput `serialize:"true" json:"importedInputs"`
+	ImportedIns []*avax.TransferableInput `serialize:"true" json:"importedInputs"`
 }
 
 func (t *ImportTx) Init(vm *VM) error {
@@ -44,7 +44,7 @@ func (t *ImportTx) Init(vm *VM) error {
 }
 
 // InputUTXOs track which UTXOs this transaction is consuming.
-func (t *ImportTx) InputUTXOs() []*axc.UTXOID {
+func (t *ImportTx) InputUTXOs() []*avax.UTXOID {
 	utxos := t.BaseTx.InputUTXOs()
 	for _, in := range t.ImportedIns {
 		in.Symbol = true
@@ -94,14 +94,14 @@ func (t *ImportTx) SyntacticVerify(
 		return err
 	}
 
-	return axc.VerifyTx(
+	return avax.VerifyTx(
 		txFee,
 		txFeeAssetID,
-		[][]*axc.TransferableInput{
+		[][]*avax.TransferableInput{
 			t.Ins,
 			t.ImportedIns,
 		},
-		[][]*axc.TransferableOutput{t.Outs},
+		[][]*avax.TransferableOutput{t.Outs},
 		c,
 	)
 }
@@ -116,7 +116,7 @@ func (t *ImportTx) SemanticVerify(vm *VM, tx UnsignedTx, creds []verify.Verifiab
 		return nil
 	}
 
-	if err := verify.SameAllychain(vm.ctx, t.SourceChain); err != nil {
+	if err := verify.SameSubnet(vm.ctx, t.SourceChain); err != nil {
 		return err
 	}
 
@@ -132,7 +132,7 @@ func (t *ImportTx) SemanticVerify(vm *VM, tx UnsignedTx, creds []verify.Verifiab
 
 	offset := t.BaseTx.NumCredentials()
 	for i, in := range t.ImportedIns {
-		utxo := axc.UTXO{}
+		utxo := avax.UTXO{}
 		if _, err := vm.codec.Unmarshal(allUTXOBytes[i], &utxo); err != nil {
 			return err
 		}

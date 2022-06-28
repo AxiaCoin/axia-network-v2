@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2022, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2022, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 // Implements static handlers tests for avm and platformvm
@@ -137,7 +137,7 @@ var _ = ginkgo.Describe("[StaticHandlers]", func() {
 			addr, err := formatting.FormatBech32(hrp, id.Bytes())
 			gomega.Expect(err).Should(gomega.BeNil())
 			genesisUTXOs[i] = platformvm.APIUTXO{
-				Amount:  json.Uint64(50000 * units.MilliAxc),
+				Amount:  json.Uint64(50000 * units.MilliAvax),
 				Address: addr,
 			}
 		}
@@ -167,12 +167,12 @@ var _ = ginkgo.Describe("[StaticHandlers]", func() {
 
 		buildGenesisArgs := platformvm.BuildGenesisArgs{
 			NetworkID:     json.Uint32(constants.UnitTestID),
-			AxcAssetID:   ids.ID{'a', 'v', 'a', 'x'},
+			AvaxAssetID:   ids.ID{'a', 'v', 'a', 'x'},
 			UTXOs:         genesisUTXOs,
 			Validators:    genesisValidators,
 			Chains:        nil,
 			Time:          json.Uint64(time.Date(1997, 1, 1, 0, 0, 0, 0, time.UTC).Unix()),
-			InitialSupply: json.Uint64(360 * units.MegaAxc),
+			InitialSupply: json.Uint64(360 * units.MegaAvax),
 			Encoding:      formatting.CB58,
 		}
 

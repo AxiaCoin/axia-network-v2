@@ -1,4 +1,4 @@
-// Copyright (C) 2019-2021, Axia Systems, Inc. All rights reserved.
+// Copyright (C) 2019-2021, Ava Labs, Inc. All rights reserved.
 // See the file LICENSE for licensing terms.
 
 package platformvm
@@ -13,7 +13,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/snow"
 	"github.com/axiacoin/axia-network-v2/utils/crypto"
 	"github.com/axiacoin/axia-network-v2/utils/math"
-	"github.com/axiacoin/axia-network-v2/vms/components/axc"
+	"github.com/axiacoin/axia-network-v2/vms/components/avax"
 	"github.com/axiacoin/axia-network-v2/vms/components/verify"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 )
@@ -35,7 +35,7 @@ type UnsignedImportTx struct {
 	SourceChain ids.ID `serialize:"true" json:"sourceChain"`
 
 	// Inputs that consume UTXOs produced on the chain
-	ImportedInputs []*axc.TransferableInput `serialize:"true" json:"importedInputs"`
+	ImportedInputs []*avax.TransferableInput `serialize:"true" json:"importedInputs"`
 }
 
 // InitCtx sets the FxID fields in the inputs and outputs of this
@@ -84,7 +84,7 @@ func (tx *UnsignedImportTx) SyntacticVerify(ctx *snow.Context) error {
 			return fmt.Errorf("input failed verification: %w", err)
 		}
 	}
-	if !axc.IsSortedAndUniqueTransferableInputs(tx.ImportedInputs) {
+	if !avax.IsSortedAndUniqueTransferableInputs(tx.ImportedInputs) {
 		return errInputsNotSortedUnique
 	}
 
@@ -108,7 +108,7 @@ func (tx *UnsignedImportTx) Execute(
 		return nil, err
 	}
 
-	utxos := make([]*axc.UTXO, len(tx.Ins)+len(tx.ImportedInputs))
+	utxos := make([]*avax.UTXO, len(tx.Ins)+len(tx.ImportedInputs))
 	for index, input := range tx.Ins {
 		utxo, err := vs.GetUTXO(input.InputID())
 		if err != nil {
@@ -118,7 +118,7 @@ func (tx *UnsignedImportTx) Execute(
 	}
 
 	if vm.bootstrapped.GetValue() {
-		if err := verify.SameAllychain(vm.ctx, tx.SourceChain); err != nil {
+		if err := verify.SameSubnet(vm.ctx, tx.SourceChain); err != nil {
 			return nil, err
 		}
 
@@ -133,18 +133,18 @@ func (tx *UnsignedImportTx) Execute(
 		}
 
 		for i, utxoBytes := range allUTXOBytes {
-			utxo := &axc.UTXO{}
+			utxo := &avax.UTXO{}
 			if _, err := Codec.Unmarshal(utxoBytes, utxo); err != nil {
 				return nil, fmt.Errorf("failed to unmarshal UTXO: %w", err)
 			}
 			utxos[i+len(tx.Ins)] = utxo
 		}
 
-		ins := make([]*axc.TransferableInput, len(tx.Ins)+len(tx.ImportedInputs))
+		ins := make([]*avax.TransferableInput, len(tx.Ins)+len(tx.ImportedInputs))
 		copy(ins, tx.Ins)
 		copy(ins[len(tx.Ins):], tx.ImportedInputs)
 
-		if err := vm.semanticVerifySpendUTXOs(tx, utxos, ins, tx.Outs, stx.Creds, vm.TxFee, vm.ctx.AXCAssetID); err != nil {
+		if err := vm.semanticVerifySpendUTXOs(tx, utxos, ins, tx.Outs, stx.Creds, vm.TxFee, vm.ctx.AVAXAssetID); err != nil {
 			return nil, err
 		}
 	}
@@ -153,7 +153,7 @@ func (tx *UnsignedImportTx) Execute(
 	consumeInputs(vs, tx.Ins)
 	// Produce the UTXOS
 	txID := tx.ID()
-	produceOutputs(vs, txID, vm.ctx.AXCAssetID, tx.Outs)
+	produceOutputs(vs, txID, vm.ctx.AVAXAssetID, tx.Outs)
 	return nil, nil
 }
 
@@ -210,20 +210,20 @@ func (vm *VM) newImportTx(
 		return nil, fmt.Errorf("problem retrieving atomic UTXOs: %w", err)
 	}
 
-	importedInputs := []*axc.TransferableInput{}
+	importedInputs := []*avax.TransferableInput{}
 	signers := [][]*crypto.PrivateKeySECP256K1R{}
 
 	importedAmount := uint64(0)
 	now := vm.clock.Unix()
 	for _, utxo := range atomicUTXOs {
-		if utxo.AssetID() != vm.ctx.AXCAssetID {
+		if utxo.AssetID() != vm.ctx.AVAXAssetID {
 			continue
 		}
 		inputIntf, utxoSigners, err := kc.Spend(utxo.Out, now)
 		if err != nil {
 			continue
 		}
-		input, ok := inputIntf.(axc.TransferableIn)
+		input, ok := inputIntf.(avax.TransferableIn)
 		if !ok {
 			continue
 		}
@@ -231,21 +231,21 @@ func (vm *VM) newImportTx(
 		if err != nil {
 			return nil, err
 		}
-		importedInputs = append(importedInputs, &axc.TransferableInput{
+		importedInputs = append(importedInputs, &avax.TransferableInput{
 			UTXOID: utxo.UTXOID,
 			Asset:  utxo.Asset,
 			In:     input,
 		})
 		signers = append(signers, utxoSigners)
 	}
-	axc.SortTransferableInputsWithSigners(importedInputs, signers)
+	avax.SortTransferableInputsWithSigners(importedInputs, signers)
 
 	if importedAmount == 0 {
 		return nil, errNoFunds // No imported UTXOs were spendable
 	}
 
-	ins := []*axc.TransferableInput{}
-	outs := []*axc.TransferableOutput{}
+	ins := []*avax.TransferableInput{}
+	outs := []*avax.TransferableOutput{}
 	if importedAmount < vm.TxFee { // imported amount goes toward paying tx fee
 		var baseSigners [][]*crypto.PrivateKeySECP256K1R
 		ins, outs, _, baseSigners, err = vm.stake(keys, 0, vm.TxFee-importedAmount, changeAddr)
@@ -254,8 +254,8 @@ func (vm *VM) newImportTx(
 		}
 		signers = append(baseSigners, signers...)
 	} else if importedAmount > vm.TxFee {
-		outs = append(outs, &axc.TransferableOutput{
-			Asset: axc.Asset{ID: vm.ctx.AXCAssetID},
+		outs = append(outs, &avax.TransferableOutput{
+			Asset: avax.Asset{ID: vm.ctx.AVAXAssetID},
 			Out: &secp256k1fx.TransferOutput{
 				Amt: importedAmount - vm.TxFee,
 				OutputOwners: secp256k1fx.OutputOwners{
@@ -269,7 +269,7 @@ func (vm *VM) newImportTx(
 
 	// Create the transaction
 	utx := &UnsignedImportTx{
-		BaseTx: BaseTx{BaseTx: axc.BaseTx{
+		BaseTx: BaseTx{BaseTx: avax.BaseTx{
 			NetworkID:    vm.ctx.NetworkID,
 			BlockchainID: vm.ctx.ChainID,
 			Outs:         outs,
