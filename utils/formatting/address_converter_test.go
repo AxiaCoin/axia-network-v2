@@ -20,7 +20,7 @@ func TestAddressConversion(t *testing.T) {
 		expectedAddrs []string
 	}{
 		{
-			chain: "X",
+			chain: "Swap",
 			hrp:   "custom",
 			srcAddrs: []string{
 				"X-local1g65uqn6t77p656w64023nh8nd9updzmxyymev2",
@@ -32,7 +32,7 @@ func TestAddressConversion(t *testing.T) {
 			},
 		},
 		{
-			chain: "X",
+			chain: "Swap",
 			hrp:   "local",
 			srcAddrs: []string{
 				"X-local1g65uqn6t77p656w64023nh8nd9updzmxyymev2",

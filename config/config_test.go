@@ -50,12 +50,12 @@ func TestGetChainConfigsFromFiles(t *testing.T) {
 			}(),
 		},
 		"valid alias": {
-			configs:  map[string]string{"C": "hello", "X": "world"},
+			configs:  map[string]string{"C": "hello", "Swap": "world"},
 			upgrades: map[string]string{"C": "upgradess"},
 			expected: func() map[string]chains.ChainConfig {
 				m := map[string]chains.ChainConfig{}
 				m["C"] = chains.ChainConfig{Config: []byte("hello"), Upgrade: []byte("upgradess")}
-				m["X"] = chains.ChainConfig{Config: []byte("world"), Upgrade: []byte(nil)}
+				m["Swap"] = chains.ChainConfig{Config: []byte("world"), Upgrade: []byte(nil)}
 
 				return m
 			}(),
@@ -218,12 +218,12 @@ func TestGetChainConfigsFromFlags(t *testing.T) {
 		"valid alias": {
 			fullConfigs: map[string]chains.ChainConfig{
 				"C": {Config: []byte("hello"), Upgrade: []byte("upgradess")},
-				"X": {Config: []byte("world"), Upgrade: []byte(nil)},
+				"Swap": {Config: []byte("world"), Upgrade: []byte(nil)},
 			},
 			expected: func() map[string]chains.ChainConfig {
 				m := map[string]chains.ChainConfig{}
 				m["C"] = chains.ChainConfig{Config: []byte("hello"), Upgrade: []byte("upgradess")}
-				m["X"] = chains.ChainConfig{Config: []byte("world"), Upgrade: []byte(nil)}
+				m["Swap"] = chains.ChainConfig{Config: []byte("world"), Upgrade: []byte(nil)}
 
 				return m
 			}(),
