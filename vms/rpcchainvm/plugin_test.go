@@ -78,7 +78,7 @@ func TestHelperProcess(*testing.T) {
 	plugin.Serve(&plugin.ServeConfig{
 		HandshakeConfig: TestHandshake,
 		Plugins: map[string]plugin.Plugin{
-			"vm": NewTestVM(&TestSubnetVM{logger: pluginLogger}),
+			"vm": NewTestVM(&TestAllychainVM{logger: pluginLogger}),
 		},
 
 		GRPCServer: grpcutils.NewDefaultServer,
@@ -91,7 +91,7 @@ type testVMPlugin struct {
 	vm TestVM
 }
 
-func NewTestVM(vm *TestSubnetVM) plugin.Plugin {
+func NewTestVM(vm *TestAllychainVM) plugin.Plugin {
 	return &testVMPlugin{vm: vm}
 }
 

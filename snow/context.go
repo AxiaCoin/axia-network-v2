@@ -28,8 +28,8 @@ type EventDispatcher interface {
 	Rejector
 }
 
-type SubnetLookup interface {
-	SubnetID(chainID ids.ID) (ids.ID, error)
+type AllychainLookup interface {
+	AllychainID(chainID ids.ID) (ids.ID, error)
 }
 
 // ContextInitializable represents an object that can be initialized
@@ -45,7 +45,7 @@ type ContextInitializable interface {
 // [NodeID] is the ID of this node
 type Context struct {
 	NetworkID uint32
-	SubnetID  ids.ID
+	AllychainID  ids.ID
 	ChainID   ids.ID
 	NodeID    ids.ShortID
 
@@ -57,7 +57,7 @@ type Context struct {
 	Keystore     keystore.BlockchainKeystore
 	SharedMemory atomic.SharedMemory
 	BCLookup     ids.AliaserReader
-	SNLookup     SubnetLookup
+	SNLookup     AllychainLookup
 	Metrics      metrics.OptionalGatherer
 
 	// snowman++ attributes
@@ -117,7 +117,7 @@ func (ctx *ConsensusContext) SetValidatorOnly() {
 func DefaultContextTest() *Context {
 	return &Context{
 		NetworkID: 0,
-		SubnetID:  ids.Empty,
+		AllychainID:  ids.Empty,
 		ChainID:   ids.Empty,
 		NodeID:    ids.ShortEmpty,
 		Log:       logging.NoLog{},

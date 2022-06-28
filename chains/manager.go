@@ -95,8 +95,8 @@ type Manager interface {
 	// Given an alias, return the ID of the VM associated with that alias
 	LookupVM(string) (ids.ID, error)
 
-	// Returns the ID of the subnet that is validating the provided chain
-	SubnetID(chainID ids.ID) (ids.ID, error)
+	// Returns the ID of the allychain that is validating the provided chain
+	AllychainID(chainID ids.ID) (ids.ID, error)
 
 	// Returns true iff the chain with the given ID exists and is finished bootstrapping
 	IsBootstrapped(ids.ID) bool
@@ -107,7 +107,7 @@ type Manager interface {
 // ChainParameters defines the chain being created
 type ChainParameters struct {
 	ID          ids.ID   // The ID of the chain being created
-	SubnetID    ids.ID   // ID of the subnet that validates this chain
+	AllychainID    ids.ID   // ID of the allychain that validates this chain
 	GenesisData []byte   // The genesis data of this chain's ledger
 	VMAlias     string   // The ID of the vm this chain is running
 	FxAliases   []string // The IDs of the feature extensions this chain is running
@@ -152,12 +152,12 @@ type ManagerConfig struct {
 	AXCAssetID                 ids.ID
 	SwapChainID                    ids.ID
 	CriticalChains              ids.Set         // Chains that can't exit gracefully
-	WhitelistedSubnets          ids.Set         // Subnets to validate
+	WhitelistedAllychains          ids.Set         // Allychains to validate
 	TimeoutManager              timeout.Manager // Manages request timeouts when sending messages to other validators
 	Health                      health.Registerer
 	RetryBootstrap              bool                    // Should Bootstrap be retried
 	RetryBootstrapWarnFrequency int                     // Max number of times to retry bootstrap before warning the node operator
-	SubnetConfigs               map[ids.ID]SubnetConfig // ID -> SubnetConfig
+	AllychainConfigs               map[ids.ID]AllychainConfig // ID -> AllychainConfig
 	ChainConfigs                map[string]ChainConfig  // alias -> ChainConfig
 	// ShutdownNodeFunc allows the chain manager to issue a request to shutdown the node
 	ShutdownNodeFunc func(exitCode int)
@@ -195,9 +195,9 @@ type manager struct {
 	unblocked     bool
 	blockedChains []ChainParameters
 
-	// Key: Subnet's ID
-	// Value: Subnet description
-	subnets map[ids.ID]Subnet
+	// Key: Allychain's ID
+	// Value: Allychain description
+	allychains map[ids.ID]Allychain
 
 	chainsLock sync.Mutex
 	// Key: Chain's ID
@@ -213,7 +213,7 @@ func New(config *ManagerConfig) Manager {
 	return &manager{
 		Aliaser:       ids.NewAliaser(),
 		ManagerConfig: *config,
-		subnets:       make(map[ids.ID]Subnet),
+		allychains:       make(map[ids.ID]Allychain),
 		chains:        make(map[ids.ID]handler.Handler),
 	}
 }
@@ -233,7 +233,7 @@ func (m *manager) CreateChain(chain ChainParameters) {
 // Create a chain, this is only called from the Core-chain thread, except for
 // creating the Core-chain.
 func (m *manager) ForceCreateChain(chainParams ChainParameters) {
-	if m.StakingEnabled && chainParams.SubnetID != constants.PrimaryNetworkID && !m.WhitelistedSubnets.Contains(chainParams.SubnetID) {
+	if m.StakingEnabled && chainParams.AllychainID != constants.PrimaryNetworkID && !m.WhitelistedAllychains.Contains(chainParams.AllychainID) {
 		m.Log.Debug("Skipped creating non-whitelisted chain:\n"+
 			"    ID: %s\n"+
 			"    VMID:%s",
@@ -257,10 +257,10 @@ func (m *manager) ForceCreateChain(chainParams ChainParameters) {
 		chainParams.VMAlias,
 	)
 
-	sb, exists := m.subnets[chainParams.SubnetID]
+	sb, exists := m.allychains[chainParams.AllychainID]
 	if !exists {
-		sb = newSubnet()
-		m.subnets[chainParams.SubnetID] = sb
+		sb = newAllychain()
+		m.allychains[chainParams.AllychainID] = sb
 	}
 
 	sb.addChain(chainParams.ID)
@@ -323,7 +323,7 @@ func (m *manager) ForceCreateChain(chainParams ChainParameters) {
 }
 
 // Create a chain
-func (m *manager) buildChain(chainParams ChainParameters, sb Subnet) (*chain, error) {
+func (m *manager) buildChain(chainParams ChainParameters, sb Allychain) (*chain, error) {
 	vmID, err := m.VMManager.Lookup(chainParams.VMAlias)
 	if err != nil {
 		return nil, fmt.Errorf("error while looking up VM: %w", err)
@@ -355,7 +355,7 @@ func (m *manager) buildChain(chainParams ChainParameters, sb Subnet) (*chain, er
 	ctx := &snow.ConsensusContext{
 		Context: &snow.Context{
 			NetworkID: m.NetworkID,
-			SubnetID:  chainParams.SubnetID,
+			AllychainID:  chainParams.AllychainID,
 			ChainID:   chainParams.ID,
 			NodeID:    m.NodeID,
 
@@ -382,7 +382,7 @@ func (m *manager) buildChain(chainParams ChainParameters, sb Subnet) (*chain, er
 	// cause a panic.
 	ctx.SetState(snow.Bootstrapping)
 
-	if sbConfigs, ok := m.SubnetConfigs[chainParams.SubnetID]; ok {
+	if sbConfigs, ok := m.AllychainConfigs[chainParams.AllychainID]; ok {
 		if sbConfigs.ValidatorOnly {
 			ctx.SetValidatorOnly()
 		}
@@ -427,7 +427,7 @@ func (m *manager) buildChain(chainParams ChainParameters, sb Subnet) (*chain, er
 	}
 
 	consensusParams := m.ConsensusParams
-	if sbConfigs, ok := m.SubnetConfigs[chainParams.SubnetID]; ok && chainParams.SubnetID != constants.PrimaryNetworkID {
+	if sbConfigs, ok := m.AllychainConfigs[chainParams.AllychainID]; ok && chainParams.AllychainID != constants.PrimaryNetworkID {
 		consensusParams = sbConfigs.ConsensusParameters
 	}
 
@@ -435,12 +435,12 @@ func (m *manager) buildChain(chainParams ChainParameters, sb Subnet) (*chain, er
 	var vdrs validators.Set // Validators validating this blockchain
 	var ok bool
 	if m.StakingEnabled {
-		vdrs, ok = m.Validators.GetValidators(chainParams.SubnetID)
-	} else { // Staking is disabled. Every peer validates every subnet.
+		vdrs, ok = m.Validators.GetValidators(chainParams.AllychainID)
+	} else { // Staking is disabled. Every peer validates every allychain.
 		vdrs, ok = m.Validators.GetValidators(constants.PrimaryNetworkID)
 	}
 	if !ok {
-		return nil, fmt.Errorf("couldn't get validator set of subnet with ID %s. The subnet may not exist", chainParams.SubnetID)
+		return nil, fmt.Errorf("couldn't get validator set of allychain with ID %s. The allychain may not exist", chainParams.AllychainID)
 	}
 
 	beacons := vdrs
@@ -515,7 +515,7 @@ func (m *manager) createAxiaChain(
 	fxs []*common.Fx,
 	consensusParams avcon.Parameters,
 	bootstrapWeight uint64,
-	sb Subnet,
+	sb Allychain,
 ) (*chain, error) {
 	ctx.Lock.Lock()
 	defer ctx.Lock.Unlock()
@@ -546,7 +546,7 @@ func (m *manager) createAxiaChain(
 	msgChan := make(chan common.Message, defaultChannelSize)
 
 	gossipConfig := m.GossipConfig
-	if sbConfigs, ok := m.SubnetConfigs[ctx.SubnetID]; ok && ctx.SubnetID != constants.PrimaryNetworkID {
+	if sbConfigs, ok := m.AllychainConfigs[ctx.AllychainID]; ok && ctx.AllychainID != constants.PrimaryNetworkID {
 		gossipConfig = sbConfigs.GossipConfig
 	}
 
@@ -626,7 +626,7 @@ func (m *manager) createAxiaChain(
 		StartupAlpha:                   (3*bootstrapWeight + 3) / 4,
 		Alpha:                          bootstrapWeight/2 + 1, // must be > 50%
 		Sender:                         sender,
-		Subnet:                         sb,
+		Allychain:                         sb,
 		Timer:                          handler,
 		RetryBootstrap:                 m.RetryBootstrap,
 		RetryBootstrapWarnFrequency:    m.RetryBootstrapWarnFrequency,
@@ -717,7 +717,7 @@ func (m *manager) createSnowmanChain(
 	fxs []*common.Fx,
 	consensusParams snowball.Parameters,
 	bootstrapWeight uint64,
-	sb Subnet,
+	sb Allychain,
 ) (*chain, error) {
 	ctx.Lock.Lock()
 	defer ctx.Lock.Unlock()
@@ -742,7 +742,7 @@ func (m *manager) createSnowmanChain(
 	msgChan := make(chan common.Message, defaultChannelSize)
 
 	gossipConfig := m.GossipConfig
-	if sbConfigs, ok := m.SubnetConfigs[ctx.SubnetID]; ok && ctx.SubnetID != constants.PrimaryNetworkID {
+	if sbConfigs, ok := m.AllychainConfigs[ctx.AllychainID]; ok && ctx.AllychainID != constants.PrimaryNetworkID {
 		gossipConfig = sbConfigs.GossipConfig
 	}
 
@@ -835,7 +835,7 @@ func (m *manager) createSnowmanChain(
 		StartupAlpha:                   (3*bootstrapWeight + 3) / 4,
 		Alpha:                          bootstrapWeight/2 + 1, // must be > 50%
 		Sender:                         sender,
-		Subnet:                         sb,
+		Allychain:                         sb,
 		Timer:                          handler,
 		RetryBootstrap:                 m.RetryBootstrap,
 		RetryBootstrapWarnFrequency:    m.RetryBootstrapWarnFrequency,
@@ -913,7 +913,7 @@ func (m *manager) createSnowmanChain(
 	}, nil
 }
 
-func (m *manager) SubnetID(chainID ids.ID) (ids.ID, error) {
+func (m *manager) AllychainID(chainID ids.ID) (ids.ID, error) {
 	m.chainsLock.Lock()
 	defer m.chainsLock.Unlock()
 
@@ -921,7 +921,7 @@ func (m *manager) SubnetID(chainID ids.ID) (ids.ID, error) {
 	if !exists {
 		return ids.ID{}, errUnknownChainID
 	}
-	return chain.Context().SubnetID, nil
+	return chain.Context().AllychainID, nil
 }
 
 func (m *manager) IsBootstrapped(id ids.ID) bool {

@@ -104,13 +104,13 @@ func (v *APIStaker) weight() uint64 {
 // [VMID] is the ID of the VM this chain runs.
 // [FxIDs] are the IDs of the Fxs the chain supports.
 // [Name] is a human-readable, non-unique name for the chain.
-// [SubnetID] is the ID of the subnet that validates the chain
+// [AllychainID] is the ID of the allychain that validates the chain
 type APIChain struct {
 	GenesisData string   `json:"genesisData"`
 	VMID        ids.ID   `json:"vmID"`
 	FxIDs       []ids.ID `json:"fxIDs"`
 	Name        string   `json:"name"`
-	SubnetID    ids.ID   `json:"subnetID"`
+	AllychainID    ids.ID   `json:"allychainID"`
 }
 
 // BuildGenesisArgs are the arguments used to create
@@ -322,12 +322,12 @@ func (ss *StaticService) BuildGenesis(_ *http.Request, args *BuildGenesisArgs, r
 				NetworkID:    uint32(args.NetworkID),
 				BlockchainID: ids.Empty,
 			}},
-			SubnetID:    chain.SubnetID,
+			AllychainID:    chain.AllychainID,
 			ChainName:   chain.Name,
 			VMID:        chain.VMID,
 			FxIDs:       chain.FxIDs,
 			GenesisData: genesisBytes,
-			SubnetAuth:  &secp256k1fx.Input{},
+			AllychainAuth:  &secp256k1fx.Input{},
 		}}
 		if err := tx.Sign(GenesisCodec, nil); err != nil {
 			return err

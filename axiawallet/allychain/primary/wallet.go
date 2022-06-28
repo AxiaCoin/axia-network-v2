@@ -13,7 +13,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 	"github.com/axiacoin/axia-network-v2/axiawallet/chain/p"
 	"github.com/axiacoin/axia-network-v2/axiawallet/chain/x"
-	"github.com/axiacoin/axia-network-v2/axiawallet/subnet/primary/common"
+	"github.com/axiacoin/axia-network-v2/axiawallet/allychain/primary/common"
 )
 
 var _ AxiaWallet = &axiawallet{}

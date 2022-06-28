@@ -80,7 +80,7 @@ func (t *ExportTx) SyntacticVerify(
 // SemanticVerify that this transaction is valid to be spent.
 func (t *ExportTx) SemanticVerify(vm *VM, tx UnsignedTx, creds []verify.Verifiable) error {
 	if vm.bootstrapped {
-		if err := verify.SameSubnet(vm.ctx, t.DestinationChain); err != nil {
+		if err := verify.SameAllychain(vm.ctx, t.DestinationChain); err != nil {
 			return err
 		}
 	}

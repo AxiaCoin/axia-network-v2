@@ -485,7 +485,7 @@ func maxStakeAmount(
 }
 
 func (vm *VM) maxStakeAmount(
-	subnetID ids.ID,
+	allychainID ids.ID,
 	nodeID ids.ShortID,
 	startTime time.Time,
 	endTime time.Time,
@@ -496,20 +496,20 @@ func (vm *VM) maxStakeAmount(
 	if timestamp := vm.internalState.GetTimestamp(); startTime.Before(timestamp) {
 		return 0, errStartTimeTooEarly
 	}
-	if subnetID == constants.PrimaryNetworkID {
-		return vm.maxPrimarySubnetStakeAmount(nodeID, startTime, endTime)
+	if allychainID == constants.PrimaryNetworkID {
+		return vm.maxPrimaryAllychainStakeAmount(nodeID, startTime, endTime)
 	}
-	return vm.maxSubnetStakeAmount(subnetID, nodeID, startTime, endTime)
+	return vm.maxAllychainStakeAmount(allychainID, nodeID, startTime, endTime)
 }
 
-func (vm *VM) maxSubnetStakeAmount(
-	subnetID ids.ID,
+func (vm *VM) maxAllychainStakeAmount(
+	allychainID ids.ID,
 	nodeID ids.ShortID,
 	startTime time.Time,
 	endTime time.Time,
 ) (uint64, error) {
 	var (
-		vdrTx  *UnsignedAddSubnetValidatorTx
+		vdrTx  *UnsignedAddAllychainValidatorTx
 		exists bool
 	)
 
@@ -520,12 +520,12 @@ func (vm *VM) maxSubnetStakeAmount(
 	currentValidator, err := currentStakers.GetValidator(nodeID)
 	switch err {
 	case nil:
-		vdrTx, exists = currentValidator.SubnetValidators()[subnetID]
+		vdrTx, exists = currentValidator.AllychainValidators()[allychainID]
 		if !exists {
-			vdrTx = pendingValidator.SubnetValidators()[subnetID]
+			vdrTx = pendingValidator.AllychainValidators()[allychainID]
 		}
 	case database.ErrNotFound:
-		vdrTx = pendingValidator.SubnetValidators()[subnetID]
+		vdrTx = pendingValidator.AllychainValidators()[allychainID]
 	default:
 		return 0, err
 	}
@@ -542,7 +542,7 @@ func (vm *VM) maxSubnetStakeAmount(
 	return vdrTx.Weight(), nil
 }
 
-func (vm *VM) maxPrimarySubnetStakeAmount(
+func (vm *VM) maxPrimaryAllychainStakeAmount(
 	nodeID ids.ShortID,
 	startTime time.Time,
 	endTime time.Time,

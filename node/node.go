@@ -253,7 +253,7 @@ func (n *Node) initNetworking() error {
 	n.Config.NetworkConfig.Beacons = n.beacons
 	n.Config.NetworkConfig.TLSConfig = tlsConfig
 	n.Config.NetworkConfig.TLSKey = tlsKey
-	n.Config.NetworkConfig.WhitelistedSubnets = n.Config.WhitelistedSubnets
+	n.Config.NetworkConfig.WhitelistedAllychains = n.Config.WhitelistedAllychains
 	n.Config.NetworkConfig.UptimeCalculator = n.uptimeCalculator
 	n.Config.NetworkConfig.UptimeRequirement = n.Config.UptimeRequirement
 
@@ -474,7 +474,7 @@ func (n *Node) initChains(genesisBytes []byte) {
 	// Create the Platform Chain
 	n.chainManager.ForceCreateChain(chains.ChainParameters{
 		ID:            constants.PlatformChainID,
-		SubnetID:      constants.PrimaryNetworkID,
+		AllychainID:      constants.PrimaryNetworkID,
 		GenesisData:   genesisBytes, // Specifies other chains to create
 		VMAlias:       constants.PlatformVMID.String(),
 		CustomBeacons: n.beacons,
@@ -620,13 +620,13 @@ func (n *Node) initChainManager(axcAssetID ids.ID) error {
 		CriticalChains:                          criticalChains,
 		TimeoutManager:                          timeoutManager,
 		Health:                                  n.health,
-		WhitelistedSubnets:                      n.Config.WhitelistedSubnets,
+		WhitelistedAllychains:                      n.Config.WhitelistedAllychains,
 		RetryBootstrap:                          n.Config.RetryBootstrap,
 		RetryBootstrapWarnFrequency:             n.Config.RetryBootstrapWarnFrequency,
 		ShutdownNodeFunc:                        n.Shutdown,
 		MeterVMEnabled:                          n.Config.MeterVMEnabled,
 		Metrics:                                 n.MetricsGatherer,
-		SubnetConfigs:                           n.Config.SubnetConfigs,
+		AllychainConfigs:                           n.Config.AllychainConfigs,
 		ChainConfigs:                            n.Config.ChainConfigs,
 		ConsensusGossipFrequency:                n.Config.ConsensusGossipFrequency,
 		GossipConfig:                            n.Config.GossipConfig,
@@ -649,7 +649,7 @@ func (n *Node) initVMs() error {
 
 	vdrs := n.vdrs
 
-	// If staking is disabled, ignore updates to Subnets' validator sets
+	// If staking is disabled, ignore updates to Allychains' validator sets
 	// Instead of updating node's validator manager, platform chain makes changes
 	// to its own local validator manager (which isn't used for sampling)
 	if !n.Config.EnableStaking {
@@ -670,10 +670,10 @@ func (n *Node) initVMs() error {
 			Validators:             vdrs,
 			UptimeLockedCalculator: n.uptimeCalculator,
 			StakingEnabled:         n.Config.EnableStaking,
-			WhitelistedSubnets:     n.Config.WhitelistedSubnets,
+			WhitelistedAllychains:     n.Config.WhitelistedAllychains,
 			TxFee:                  n.Config.TxFee,
 			CreateAssetTxFee:       n.Config.CreateAssetTxFee,
-			CreateSubnetTxFee:      n.Config.CreateSubnetTxFee,
+			CreateAllychainTxFee:      n.Config.CreateAllychainTxFee,
 			CreateBlockchainTxFee:  n.Config.CreateBlockchainTxFee,
 			UptimePercentage:       n.Config.UptimeRequirement,
 			MinValidatorStake:      n.Config.MinValidatorStake,
@@ -854,7 +854,7 @@ func (n *Node) initInfoAPI() error {
 			NetworkID:             n.Config.NetworkID,
 			TxFee:                 n.Config.TxFee,
 			CreateAssetTxFee:      n.Config.CreateAssetTxFee,
-			CreateSubnetTxFee:     n.Config.CreateSubnetTxFee,
+			CreateAllychainTxFee:     n.Config.CreateAllychainTxFee,
 			CreateBlockchainTxFee: n.Config.CreateBlockchainTxFee,
 			VMManager:             n.Config.VMManager,
 		},

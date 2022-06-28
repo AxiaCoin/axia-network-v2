@@ -31,7 +31,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/version"
 	"github.com/axiacoin/axia-network-v2/vms/rpcchainvm/ghttp"
 	"github.com/axiacoin/axia-network-v2/vms/rpcchainvm/grpcutils"
-	"github.com/axiacoin/axia-network-v2/vms/rpcchainvm/gsubnetlookup"
+	"github.com/axiacoin/axia-network-v2/vms/rpcchainvm/gallychainlookup"
 	"github.com/axiacoin/axia-network-v2/vms/rpcchainvm/messenger"
 
 	aliasreaderpb "github.com/axiacoin/axia-network-v2/proto/pb/aliasreader"
@@ -41,7 +41,7 @@ import (
 	messengerpb "github.com/axiacoin/axia-network-v2/proto/pb/messenger"
 	rpcdbpb "github.com/axiacoin/axia-network-v2/proto/pb/rpcdb"
 	sharedmemorypb "github.com/axiacoin/axia-network-v2/proto/pb/sharedmemory"
-	subnetlookuppb "github.com/axiacoin/axia-network-v2/proto/pb/subnetlookup"
+	allychainlookuppb "github.com/axiacoin/axia-network-v2/proto/pb/allychainlookup"
 	vmpb "github.com/axiacoin/axia-network-v2/proto/pb/vm"
 )
 
@@ -71,7 +71,7 @@ func NewServer(vm block.ChainVM) *VMServer {
 }
 
 func (vm *VMServer) Initialize(_ context.Context, req *vmpb.InitializeRequest) (*vmpb.InitializeResponse, error) {
-	subnetID, err := ids.ToID(req.SubnetId)
+	allychainID, err := ids.ToID(req.AllychainId)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +136,7 @@ func (vm *VMServer) Initialize(_ context.Context, req *vmpb.InitializeRequest) (
 	keystoreClient := gkeystore.NewClient(keystorepb.NewKeystoreClient(clientConn))
 	sharedMemoryClient := gsharedmemory.NewClient(sharedmemorypb.NewSharedMemoryClient(clientConn))
 	bcLookupClient := galiasreader.NewClient(aliasreaderpb.NewAliasReaderClient(clientConn))
-	snLookupClient := gsubnetlookup.NewClient(subnetlookuppb.NewSubnetLookupClient(clientConn))
+	snLookupClient := gallychainlookup.NewClient(allychainlookuppb.NewAllychainLookupClient(clientConn))
 	appSenderClient := appsender.NewClient(appsenderpb.NewAppSenderClient(clientConn))
 
 	toEngine := make(chan common.Message, 1)
@@ -158,7 +158,7 @@ func (vm *VMServer) Initialize(_ context.Context, req *vmpb.InitializeRequest) (
 
 	vm.ctx = &snow.Context{
 		NetworkID: req.NetworkId,
-		SubnetID:  subnetID,
+		AllychainID:  allychainID,
 		ChainID:   chainID,
 		NodeID:    nodeID,
 

@@ -39,7 +39,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/vms/components/chain"
 	"github.com/axiacoin/axia-network-v2/vms/rpcchainvm/ghttp"
 	"github.com/axiacoin/axia-network-v2/vms/rpcchainvm/grpcutils"
-	"github.com/axiacoin/axia-network-v2/vms/rpcchainvm/gsubnetlookup"
+	"github.com/axiacoin/axia-network-v2/vms/rpcchainvm/gallychainlookup"
 	"github.com/axiacoin/axia-network-v2/vms/rpcchainvm/messenger"
 
 	aliasreaderpb "github.com/axiacoin/axia-network-v2/proto/pb/aliasreader"
@@ -49,7 +49,7 @@ import (
 	messengerpb "github.com/axiacoin/axia-network-v2/proto/pb/messenger"
 	rpcdbpb "github.com/axiacoin/axia-network-v2/proto/pb/rpcdb"
 	sharedmemorypb "github.com/axiacoin/axia-network-v2/proto/pb/sharedmemory"
-	subnetlookuppb "github.com/axiacoin/axia-network-v2/proto/pb/subnetlookup"
+	allychainlookuppb "github.com/axiacoin/axia-network-v2/proto/pb/allychainlookup"
 	vmpb "github.com/axiacoin/axia-network-v2/proto/pb/vm"
 )
 
@@ -78,7 +78,7 @@ type VMClient struct {
 	keystore     *gkeystore.Server
 	sharedMemory *gsharedmemory.Server
 	bcLookup     *galiasreader.Server
-	snLookup     *gsubnetlookup.Server
+	snLookup     *gallychainlookup.Server
 	appSender    *appsender.Server
 
 	serverCloser grpcutils.ServerCloser
@@ -162,7 +162,7 @@ func (vm *VMClient) Initialize(
 	vm.keystore = gkeystore.NewServer(ctx.Keystore)
 	vm.sharedMemory = gsharedmemory.NewServer(ctx.SharedMemory, dbManager.Current().Database)
 	vm.bcLookup = galiasreader.NewServer(ctx.BCLookup)
-	vm.snLookup = gsubnetlookup.NewServer(ctx.SNLookup)
+	vm.snLookup = gallychainlookup.NewServer(ctx.SNLookup)
 	vm.appSender = appsender.NewServer(appSender)
 
 	serverListener, err := grpcutils.NewListener()
@@ -179,7 +179,7 @@ func (vm *VMClient) Initialize(
 
 	resp, err := vm.client.Initialize(context.Background(), &vmpb.InitializeRequest{
 		NetworkId:    ctx.NetworkID,
-		SubnetId:     ctx.SubnetID[:],
+		AllychainId:     ctx.AllychainID[:],
 		ChainId:      ctx.ChainID[:],
 		NodeId:       ctx.NodeID.Bytes(),
 		SwapChainId:     ctx.SwapChainID[:],
@@ -303,8 +303,8 @@ func (vm *VMClient) getInitServer(opts []grpc.ServerOption) *grpc.Server {
 	sharedmemorypb.RegisterSharedMemoryServer(server, vm.sharedMemory)
 	// register the blockchain alias service
 	aliasreaderpb.RegisterAliasReaderServer(server, vm.bcLookup)
-	// register the subnet alias service
-	subnetlookuppb.RegisterSubnetLookupServer(server, vm.snLookup)
+	// register the allychain alias service
+	allychainlookuppb.RegisterAllychainLookupServer(server, vm.snLookup)
 	// register the app sender service
 	appsenderpb.RegisterAppSenderServer(server, vm.appSender)
 	// register the health service

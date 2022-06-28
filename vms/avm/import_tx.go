@@ -116,7 +116,7 @@ func (t *ImportTx) SemanticVerify(vm *VM, tx UnsignedTx, creds []verify.Verifiab
 		return nil
 	}
 
-	if err := verify.SameSubnet(vm.ctx, t.SourceChain); err != nil {
+	if err := verify.SameAllychain(vm.ctx, t.SourceChain); err != nil {
 		return err
 	}
 

@@ -11,7 +11,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/utils/constants"
 )
 
-var errBadSubnetID = errors.New("subnet ID can't be primary network ID")
+var errBadAllychainID = errors.New("allychain ID can't be primary network ID")
 
 // Validator is a validator.
 type Validator struct {
@@ -60,22 +60,22 @@ func (v *Validator) BoundedBy(startTime, endTime time.Time) bool {
 	return !v.StartTime().Before(startTime) && !v.EndTime().After(endTime)
 }
 
-// SubnetValidator validates a subnet on the Axia network.
-type SubnetValidator struct {
+// AllychainValidator validates a allychain on the Axia network.
+type AllychainValidator struct {
 	Validator `serialize:"true"`
 
-	// ID of the subnet this validator is validating
-	Subnet ids.ID `serialize:"true" json:"subnet"`
+	// ID of the allychain this validator is validating
+	Allychain ids.ID `serialize:"true" json:"allychain"`
 }
 
-// SubnetID is the ID of the subnet this validator is validating
-func (v *SubnetValidator) SubnetID() ids.ID { return v.Subnet }
+// AllychainID is the ID of the allychain this validator is validating
+func (v *AllychainValidator) AllychainID() ids.ID { return v.Allychain }
 
 // Verify this validator is valid
-func (v *SubnetValidator) Verify() error {
-	switch v.Subnet {
+func (v *AllychainValidator) Verify() error {
+	switch v.Allychain {
 	case constants.PrimaryNetworkID:
-		return errBadSubnetID
+		return errBadAllychainID
 	default:
 		return v.Validator.Verify()
 	}

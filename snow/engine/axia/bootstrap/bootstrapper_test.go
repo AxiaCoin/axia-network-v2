@@ -40,7 +40,7 @@ func newConfig(t *testing.T) (Config, ids.ShortID, *common.SenderTest, *vertex.T
 	vm.T = t
 
 	isBootstrapped := false
-	subnet := &common.SubnetTest{
+	allychain := &common.AllychainTest{
 		T:               t,
 		IsBootstrappedF: func() bool { return isBootstrapped },
 		BootstrappedF:   func(ids.ID) { isBootstrapped = true },
@@ -73,7 +73,7 @@ func newConfig(t *testing.T) (Config, ids.ShortID, *common.SenderTest, *vertex.T
 		SampleK:                        peers.Len(),
 		Alpha:                          peers.Weight()/2 + 1,
 		Sender:                         sender,
-		Subnet:                         subnet,
+		Allychain:                         allychain,
 		Timer:                          &common.TimerTest{},
 		AncestorsMaxContainersSent:     2000,
 		AncestorsMaxContainersReceived: 2000,

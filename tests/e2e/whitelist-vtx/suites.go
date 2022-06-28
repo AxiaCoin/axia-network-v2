@@ -22,8 +22,8 @@ import (
 	"github.com/axiacoin/axia-network-v2/vms/avm"
 	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
-	"github.com/axiacoin/axia-network-v2/axiawallet/subnet/primary"
-	"github.com/axiacoin/axia-network-v2/axiawallet/subnet/primary/common"
+	"github.com/axiacoin/axia-network-v2/axiawallet/allychain/primary"
+	"github.com/axiacoin/axia-network-v2/axiawallet/allychain/primary/common"
 )
 
 var keyFactory crypto.FactorySECP256K1R

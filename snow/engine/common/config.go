@@ -22,7 +22,7 @@ type Config struct {
 	Alpha         uint64
 	Sender        Sender
 	Bootstrapable Bootstrapable
-	Subnet        Subnet
+	Allychain        Allychain
 	Timer         Timer
 
 	// Should Bootstrap be retried
