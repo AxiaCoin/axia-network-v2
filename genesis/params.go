@@ -6,6 +6,7 @@ package genesis
 import (
 	"time"
 
+	"github.com/axiacoin/axia-network-v2/utils/units"
 	"github.com/axiacoin/axia-network-v2/utils/constants"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/reward"
 )
@@ -48,6 +49,32 @@ type Params struct {
 	StakingConfig
 	TxFeeConfig
 }
+
+var (
+	TestParams = Params{
+		TxFeeConfig: TxFeeConfig{
+			TxFee:                 units.MilliAxc,
+			CreateAssetTxFee:      10 * units.MilliAxc,
+			CreateAllychainTxFee:     100 * units.MilliAxc,
+			CreateBlockchainTxFee: 100 * units.MilliAxc,
+		},
+		StakingConfig: StakingConfig{
+			UptimeRequirement: .8, // 80%
+			MinValidatorStake: 1 * units.Axc,
+			MaxValidatorStake: 3 * units.MegaAxc,
+			MinDelegatorStake: 1 * units.Axc,
+			MinDelegationFee:  20000, // 2%
+			MinStakeDuration:  24 * time.Hour,
+			MaxStakeDuration:  365 * 24 * time.Hour,
+			RewardConfig: reward.Config{
+				MaxConsumptionRate: .12 * reward.PercentDenominator,
+				MinConsumptionRate: .10 * reward.PercentDenominator,
+				MintingPeriod:      365 * 24 * time.Hour,
+				SupplyCap:          720 * units.MegaAxc,
+			},
+		},
+	}
+)
 
 func GetTxFeeConfig(networkID uint32) TxFeeConfig {
 	switch networkID {

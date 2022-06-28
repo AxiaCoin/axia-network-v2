@@ -18,7 +18,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	coreth "github.com/ava-labs/coreth/plugin/evm"
+	coreth "github.com/axiacoin/axia-network-v2-coreth/plugin/evm"
 
 	"github.com/axiacoin/axia-network-v2/api/admin"
 	"github.com/axiacoin/axia-network-v2/api/auth"
