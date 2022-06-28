@@ -15,7 +15,7 @@ import (
 
 	"github.com/onsi/gomega"
 
-	runner_client "github.com/ava-labs/avalanche-network-runner/client"
+	runner_client "github.com/ava-labs/axia-network-runner/client"
 
 	"github.com/axiacoin/axia-network-v2/tests"
 )
@@ -49,15 +49,15 @@ func init() {
 
 	flag.StringVar(
 		&execPath,
-		"avalanchego-path",
+		"axia-path",
 		"",
-		"avalanchego executable path",
+		"axia executable path",
 	)
 	flag.StringVar(
 		&execPathToUpgrade,
-		"avalanchego-path-to-upgrade",
+		"axia-path-to-upgrade",
 		"",
-		"avalanchego executable path (to upgrade to, only required for upgrade tests with local network-runner)",
+		"axia executable path (to upgrade to, only required for upgrade tests with local network-runner)",
 	)
 }
 

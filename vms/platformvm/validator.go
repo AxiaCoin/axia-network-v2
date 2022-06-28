@@ -60,7 +60,7 @@ func (v *Validator) BoundedBy(startTime, endTime time.Time) bool {
 	return !v.StartTime().Before(startTime) && !v.EndTime().After(endTime)
 }
 
-// SubnetValidator validates a subnet on the Avalanche network.
+// SubnetValidator validates a subnet on the Axia network.
 type SubnetValidator struct {
 	Validator `serialize:"true"`
 

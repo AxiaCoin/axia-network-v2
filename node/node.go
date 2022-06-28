@@ -76,7 +76,7 @@ var (
 	errShuttingDown  = errors.New("server shutting down")
 )
 
-// Node is an instance of an Avalanche node.
+// Node is an instance of an Axia node.
 type Node struct {
 	Log        logging.Logger
 	LogFactory logging.Factory
@@ -643,7 +643,7 @@ func (n *Node) initChainManager(avaxAssetID ids.ID) error {
 	return nil
 }
 
-// initVMs initializes the VMs Avalanche supports + any additional vms installed as plugins.
+// initVMs initializes the VMs Axia supports + any additional vms installed as plugins.
 func (n *Node) initVMs() error {
 	n.Log.Info("initializing VMs")
 
@@ -662,7 +662,7 @@ func (n *Node) initVMs() error {
 		VMManager: n.Config.VMManager,
 	})
 
-	// Register the VMs that Avalanche supports
+	// Register the VMs that Axia supports
 	errs := wrappers.Errs{}
 	errs.Add(
 		vmRegisterer.Register(constants.PlatformVMID, &platformvm.Factory{

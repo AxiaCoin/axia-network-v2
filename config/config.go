@@ -28,7 +28,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/network/dialer"
 	"github.com/axiacoin/axia-network-v2/network/throttling"
 	"github.com/axiacoin/axia-network-v2/node"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/avalanche"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/axia"
 	"github.com/axiacoin/axia-network-v2/snow/consensus/snowball"
 	"github.com/axiacoin/axia-network-v2/snow/networking/benchlist"
 	"github.com/axiacoin/axia-network-v2/snow/networking/router"
@@ -80,7 +80,7 @@ func GetRunnerConfig(v *viper.Viper) (runner.Config, error) {
 	// Build directory should have this structure:
 	//
 	// build
-	// ├── avalanchego (the binary from compiling the app directory)
+	// ├── axia (the binary from compiling the app directory)
 	// └── plugins
 	//     └── evm
 	validBuildDir := func(dir string) bool {
@@ -114,8 +114,8 @@ func GetRunnerConfig(v *viper.Viper) (runner.Config, error) {
 	return config, nil
 }
 
-func getConsensusConfig(v *viper.Viper) avalanche.Parameters {
-	return avalanche.Parameters{
+func getConsensusConfig(v *viper.Viper) axia.Parameters {
+	return axia.Parameters{
 		Parameters: snowball.Parameters{
 			K:                     v.GetInt(SnowSampleSizeKey),
 			Alpha:                 v.GetInt(SnowQuorumSizeKey),
@@ -126,8 +126,8 @@ func getConsensusConfig(v *viper.Viper) avalanche.Parameters {
 			MaxOutstandingItems:   v.GetInt(SnowMaxProcessingKey),
 			MaxItemProcessingTime: v.GetDuration(SnowMaxTimeProcessingKey),
 		},
-		BatchSize: v.GetInt(SnowAvalancheBatchSizeKey),
-		Parents:   v.GetInt(SnowAvalancheNumParentsKey),
+		BatchSize: v.GetInt(SnowAxiaBatchSizeKey),
+		Parents:   v.GetInt(SnowAxiaNumParentsKey),
 	}
 }
 

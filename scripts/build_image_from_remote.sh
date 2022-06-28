@@ -5,12 +5,12 @@ set -o nounset
 set -o pipefail
 
 # Note: this script will build a docker image by cloning a remote version of
-# avalanchego into a temporary location and using that version's Dockerfile to
+# axia into a temporary location and using that version's Dockerfile to
 # build the image.
 
 SRC_DIR="$(dirname "${BASH_SOURCE[0]}")"
 
-DOCKERHUB_REPO="avaplatform/avalanchego"
+DOCKERHUB_REPO="avaplatform/axia"
 REMOTE="https://github.com/axiacoin/axia-network-v2.git"
 BRANCH="master"
 
@@ -39,7 +39,7 @@ if [[ "$keep_existing" != 1 ]]; then
 fi
 
 # Clone the remote and checkout the specified branch to build the Docker image
-AVALANCHE_CLONE="$WORKPREFIX/avalanchego"
+AVALANCHE_CLONE="$WORKPREFIX/axia"
 
 if [[ ! -d "$WORKPREFIX" ]]; then
     mkdir -p "$WORKPREFIX"

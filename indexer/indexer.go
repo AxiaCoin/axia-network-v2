@@ -22,7 +22,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/database"
 	"github.com/axiacoin/axia-network-v2/database/prefixdb"
 	"github.com/axiacoin/axia-network-v2/ids"
-	"github.com/axiacoin/axia-network-v2/snow/engine/avalanche"
+	"github.com/axiacoin/axia-network-v2/snow/engine/axia"
 	"github.com/axiacoin/axia-network-v2/snow/engine/common"
 	"github.com/axiacoin/axia-network-v2/snow/engine/snowman"
 	"github.com/axiacoin/axia-network-v2/snow/triggers"
@@ -233,7 +233,7 @@ func (i *indexer) RegisterChain(name string, engine common.Engine) {
 			return
 		}
 		i.blockIndices[chainID] = index
-	case avalanche.Engine:
+	case axia.Engine:
 		vtxIndex, err := i.registerChainHelper(chainID, vtxPrefix, name, "vtx", i.consensusDispatcher)
 		if err != nil {
 			i.log.Fatal("couldn't create vertex index for %s: %s", name, err)

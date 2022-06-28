@@ -11,7 +11,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow"
 	"github.com/axiacoin/axia-network-v2/snow/consensus/snowstorm"
-	"github.com/axiacoin/axia-network-v2/snow/engine/avalanche/vertex"
+	"github.com/axiacoin/axia-network-v2/snow/engine/axia/vertex"
 	"github.com/axiacoin/axia-network-v2/snow/engine/common"
 	"github.com/axiacoin/axia-network-v2/utils/timer/mockable"
 )

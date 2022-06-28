@@ -12,7 +12,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/nat"
 	"github.com/axiacoin/axia-network-v2/network"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/avalanche"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/axia"
 	"github.com/axiacoin/axia-network-v2/snow/networking/benchlist"
 	"github.com/axiacoin/axia-network-v2/snow/networking/router"
 	"github.com/axiacoin/axia-network-v2/snow/networking/sender"
@@ -125,7 +125,7 @@ type DatabaseConfig struct {
 	Config []byte `json:"-"`
 }
 
-// Config contains all of the configurations of an Avalanche node.
+// Config contains all of the configurations of an Axia node.
 type Config struct {
 	HTTPConfig          `json:"httpConfig"`
 	IPConfig            `json:"ipConfig"`
@@ -173,7 +173,7 @@ type Config struct {
 	FdLimit uint64 `json:"fdLimit"`
 
 	// Consensus configuration
-	ConsensusParams avalanche.Parameters `json:"consensusParams"`
+	ConsensusParams axia.Parameters `json:"consensusParams"`
 
 	// Metrics
 	MeterVMEnabled bool `json:"meterVMEnabled"`

@@ -93,20 +93,20 @@ type EndpointRequester interface {
 	SendRequest(ctx context.Context, method string, params interface{}, reply interface{}, options ...Option) error
 }
 
-type avalancheEndpointRequester struct {
+type axiaEndpointRequester struct {
 	requester      Requester
 	endpoint, base string
 }
 
 func NewEndpointRequester(uri, endpoint, base string) EndpointRequester {
-	return &avalancheEndpointRequester{
+	return &axiaEndpointRequester{
 		requester: NewRPCRequester(uri),
 		endpoint:  endpoint,
 		base:      base,
 	}
 }
 
-func (e *avalancheEndpointRequester) SendRequest(
+func (e *axiaEndpointRequester) SendRequest(
 	ctx context.Context,
 	method string,
 	params interface{},

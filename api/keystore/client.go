@@ -14,7 +14,7 @@ import (
 // Interface compliance
 var _ Client = &client{}
 
-// Client interface for Avalanche Keystore API Endpoint
+// Client interface for Axia Keystore API Endpoint
 type Client interface {
 	CreateUser(context.Context, api.UserPass, ...rpc.Option) (bool, error)
 	// Returns the usernames of all keystore users
@@ -27,7 +27,7 @@ type Client interface {
 	DeleteUser(context.Context, api.UserPass, ...rpc.Option) (bool, error)
 }
 
-// Client implementation for Avalanche Keystore API Endpoint
+// Client implementation for Axia Keystore API Endpoint
 type client struct {
 	requester rpc.EndpointRequester
 }

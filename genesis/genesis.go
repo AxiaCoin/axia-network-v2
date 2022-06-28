@@ -165,7 +165,7 @@ func validateConfig(networkID uint32, config *Config) error {
 
 // FromFile returns the genesis data of the Platform Chain.
 //
-// Since an Avalanche network has exactly one Platform Chain, and the Platform
+// Since an Axia network has exactly one Platform Chain, and the Platform
 // Chain defines the genesis state of the network (who is staking, which chains
 // exist, etc.), defining the genesis state of the Platform Chain is the same as
 // defining the genesis state of the network.
@@ -206,7 +206,7 @@ func FromFile(networkID uint32, filepath string) ([]byte, ids.ID, error) {
 
 // FromFlag returns the genesis data of the Platform Chain.
 //
-// Since an Avalanche network has exactly one Platform Chain, and the Platform
+// Since an Axia network has exactly one Platform Chain, and the Platform
 // Chain defines the genesis state of the network (who is staking, which chains
 // exist, etc.), defining the genesis state of the Platform Chain is the same as
 // defining the genesis state of the network.
@@ -261,7 +261,7 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 	}
 	{
 		avax := avm.AssetDefinition{
-			Name:         "Avalanche",
+			Name:         "Axia",
 			Symbol:       "AVAX",
 			Denomination: 9,
 			InitialState: map[string][]interface{}{},
