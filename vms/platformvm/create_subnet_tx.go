@@ -11,7 +11,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow"
 	"github.com/axiacoin/axia-network-v2/utils/crypto"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 )
 
@@ -123,7 +123,7 @@ func (vm *VM) newCreateSubnetTx(
 
 	// Create the tx
 	utx := &UnsignedCreateSubnetTx{
-		BaseTx: BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    vm.ctx.NetworkID,
 			BlockchainID: vm.ctx.ChainID,
 			Ins:          ins,

@@ -62,7 +62,7 @@ func setupWSWithKeys(t *testing.T, isAXCAsset bool) ([]byte, *VM, *WalletService
 func TestWalletService_SendMultiple(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			_, vm, ws, _, genesisTx := setupWSWithKeys(t, tc.avaxAsset)
+			_, vm, ws, _, genesisTx := setupWSWithKeys(t, tc.axcAsset)
 			defer func() {
 				if err := vm.Shutdown(); err != nil {
 					t.Fatal(err)

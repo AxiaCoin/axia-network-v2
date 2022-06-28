@@ -6,7 +6,7 @@ package x
 import (
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/vms/avm"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/components/verify"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 	"github.com/axiacoin/axia-network-v2/wallet/subnet/primary/common"
@@ -37,7 +37,7 @@ func (w *walletWithOptions) Builder() Builder {
 }
 
 func (w *walletWithOptions) IssueBaseTx(
-	outputs []*avax.TransferableOutput,
+	outputs []*axc.TransferableOutput,
 	options ...common.Option,
 ) (ids.ID, error) {
 	return w.Wallet.IssueBaseTx(
@@ -132,7 +132,7 @@ func (w *walletWithOptions) IssueImportTx(
 
 func (w *walletWithOptions) IssueExportTx(
 	chainID ids.ID,
-	outputs []*avax.TransferableOutput,
+	outputs []*axc.TransferableOutput,
 	options ...common.Option,
 ) (ids.ID, error) {
 	return w.Wallet.IssueExportTx(

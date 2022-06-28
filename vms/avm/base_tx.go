@@ -10,7 +10,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/database"
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/components/verify"
 )
 
@@ -22,7 +22,7 @@ var (
 
 // BaseTx is the basis of all transactions.
 type BaseTx struct {
-	avax.BaseTx `serialize:"true"`
+	axc.BaseTx `serialize:"true"`
 }
 
 // Init sets the FxID fields in the inputs and outputs of this [BaseTx]
@@ -64,11 +64,11 @@ func (t *BaseTx) SyntacticVerify(
 		return err
 	}
 
-	return avax.VerifyTx(
+	return axc.VerifyTx(
 		txFee,
 		txFeeAssetID,
-		[][]*avax.TransferableInput{t.Ins},
-		[][]*avax.TransferableOutput{t.Outs},
+		[][]*axc.TransferableInput{t.Ins},
+		[][]*axc.TransferableOutput{t.Outs},
 		c,
 	)
 }

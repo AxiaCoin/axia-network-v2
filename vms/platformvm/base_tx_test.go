@@ -10,7 +10,7 @@ import (
 
 	"github.com/axiacoin/axia-network-v2/ids"
 
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 )
 
 func TestBaseTxMarshalJSON(t *testing.T) {
@@ -27,22 +27,22 @@ func TestBaseTxMarshalJSON(t *testing.T) {
 	utxoTxID := ids.ID{2}
 	assetID := ids.ID{3}
 	fxID := ids.ID{4}
-	tx := &BaseTx{BaseTx: avax.BaseTx{
+	tx := &BaseTx{BaseTx: axc.BaseTx{
 		BlockchainID: blockchainID,
 		NetworkID:    4,
-		Ins: []*avax.TransferableInput{
+		Ins: []*axc.TransferableInput{
 			{
 				FxID:   fxID,
-				UTXOID: avax.UTXOID{TxID: utxoTxID, OutputIndex: 5},
-				Asset:  avax.Asset{ID: assetID},
-				In:     &avax.TestTransferable{Val: 100},
+				UTXOID: axc.UTXOID{TxID: utxoTxID, OutputIndex: 5},
+				Asset:  axc.Asset{ID: assetID},
+				In:     &axc.TestTransferable{Val: 100},
 			},
 		},
-		Outs: []*avax.TransferableOutput{
+		Outs: []*axc.TransferableOutput{
 			{
 				FxID:  fxID,
-				Asset: avax.Asset{ID: assetID},
-				Out:   &avax.TestTransferable{Val: 100},
+				Asset: axc.Asset{ID: assetID},
+				Out:   &axc.TestTransferable{Val: 100},
 			},
 		},
 		Memo: []byte{1, 2, 3},

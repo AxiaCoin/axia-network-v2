@@ -16,7 +16,7 @@ var errInvalidETHAddress = errors.New("invalid eth address")
 
 type UnparsedAllocation struct {
 	ETHAddr        string         `json:"ethAddr"`
-	AXCAddr       string         `json:"avaxAddr"`
+	AXCAddr       string         `json:"axcAddr"`
 	InitialAmount  uint64         `json:"initialAmount"`
 	UnlockSchedule []LockedAmount `json:"unlockSchedule"`
 }
@@ -41,15 +41,15 @@ func (ua UnparsedAllocation) Parse() (Allocation, error) {
 	}
 	a.ETHAddr = ethAddr
 
-	_, _, avaxAddrBytes, err := formatting.ParseAddress(ua.AXCAddr)
+	_, _, axcAddrBytes, err := formatting.ParseAddress(ua.AXCAddr)
 	if err != nil {
 		return a, err
 	}
-	avaxAddr, err := ids.ToShortID(avaxAddrBytes)
+	axcAddr, err := ids.ToShortID(axcAddrBytes)
 	if err != nil {
 		return a, err
 	}
-	a.AXCAddr = avaxAddr
+	a.AXCAddr = axcAddr
 
 	return a, nil
 }
@@ -71,15 +71,15 @@ func (us UnparsedStaker) Parse() (Staker, error) {
 	}
 	s.NodeID = nodeID
 
-	_, _, avaxAddrBytes, err := formatting.ParseAddress(us.RewardAddress)
+	_, _, axcAddrBytes, err := formatting.ParseAddress(us.RewardAddress)
 	if err != nil {
 		return s, err
 	}
-	avaxAddr, err := ids.ToShortID(avaxAddrBytes)
+	axcAddr, err := ids.ToShortID(axcAddrBytes)
 	if err != nil {
 		return s, err
 	}
-	s.RewardAddress = avaxAddr
+	s.RewardAddress = axcAddr
 	return s, nil
 }
 
@@ -120,15 +120,15 @@ func (uc UnparsedConfig) Parse() (Config, error) {
 		c.Allocations[i] = a
 	}
 	for i, isa := range uc.InitialStakedFunds {
-		_, _, avaxAddrBytes, err := formatting.ParseAddress(isa)
+		_, _, axcAddrBytes, err := formatting.ParseAddress(isa)
 		if err != nil {
 			return c, err
 		}
-		avaxAddr, err := ids.ToShortID(avaxAddrBytes)
+		axcAddr, err := ids.ToShortID(axcAddrBytes)
 		if err != nil {
 			return c, err
 		}
-		c.InitialStakedFunds[i] = avaxAddr
+		c.InitialStakedFunds[i] = axcAddr
 	}
 	for i, uis := range uc.InitialStakers {
 		is, err := uis.Parse()

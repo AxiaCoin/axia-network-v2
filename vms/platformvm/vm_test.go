@@ -44,7 +44,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/utils/units"
 	"github.com/axiacoin/axia-network-v2/utils/wrappers"
 	"github.com/axiacoin/axia-network-v2/version"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/reward"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/status"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
@@ -62,11 +62,11 @@ var (
 		MaxConsumptionRate: .12 * reward.PercentDenominator,
 		MinConsumptionRate: .10 * reward.PercentDenominator,
 		MintingPeriod:      365 * 24 * time.Hour,
-		SupplyCap:          720 * units.MegaAvax,
+		SupplyCap:          720 * units.MegaAxc,
 	}
 
 	// AXC asset ID in tests
-	avaxAssetID = ids.ID{'y', 'e', 'e', 't'}
+	axcAssetID = ids.ID{'y', 'e', 'e', 't'}
 
 	defaultTxFee = uint64(100)
 
@@ -82,9 +82,9 @@ var (
 	// each key controls an address that has [defaultBalance] AXC at genesis
 	keys []*crypto.PrivateKeySECP256K1R
 
-	defaultMinValidatorStake = 5 * units.MilliAvax
-	defaultMaxValidatorStake = 500 * units.MilliAvax
-	defaultMinDelegatorStake = 1 * units.MilliAvax
+	defaultMinValidatorStake = 5 * units.MilliAxc
+	defaultMaxValidatorStake = 500 * units.MilliAxc
+	defaultMinDelegatorStake = 1 * units.MilliAxc
 
 	// amount all genesis validators have in defaultVM
 	defaultBalance = 100 * defaultMinValidatorStake
@@ -144,7 +144,7 @@ func defaultContext() *snow.Context {
 	ctx := snow.DefaultContextTest()
 	ctx.NetworkID = testNetworkID
 	ctx.SwapChainID = swapChainID
-	ctx.AXCAssetID = avaxAssetID
+	ctx.AXCAssetID = axcAssetID
 	aliaser := ids.NewAliaser()
 
 	errs := wrappers.Errs{}
@@ -217,12 +217,12 @@ func defaultGenesis() (*BuildGenesisArgs, []byte) {
 	buildGenesisArgs := BuildGenesisArgs{
 		Encoding:      formatting.Hex,
 		NetworkID:     json.Uint32(testNetworkID),
-		AvaxAssetID:   avaxAssetID,
+		AxcAssetID:   axcAssetID,
 		UTXOs:         genesisUTXOs,
 		Validators:    genesisValidators,
 		Chains:        nil,
 		Time:          json.Uint64(defaultGenesisTime.Unix()),
-		InitialSupply: json.Uint64(360 * units.MegaAvax),
+		InitialSupply: json.Uint64(360 * units.MegaAxc),
 	}
 
 	buildGenesisResponse := BuildGenesisReply{}
@@ -291,12 +291,12 @@ func BuildGenesisTestWithArgs(t *testing.T, args *BuildGenesisArgs) (*BuildGenes
 
 	buildGenesisArgs := BuildGenesisArgs{
 		NetworkID:     json.Uint32(testNetworkID),
-		AvaxAssetID:   avaxAssetID,
+		AxcAssetID:   axcAssetID,
 		UTXOs:         genesisUTXOs,
 		Validators:    genesisValidators,
 		Chains:        nil,
 		Time:          json.Uint64(defaultGenesisTime.Unix()),
-		InitialSupply: json.Uint64(360 * units.MegaAvax),
+		InitialSupply: json.Uint64(360 * units.MegaAxc),
 		Encoding:      formatting.CB58,
 	}
 
@@ -499,7 +499,7 @@ func TestGenesis(t *testing.T) {
 		}
 		addrs := ids.ShortSet{}
 		addrs.Add(addr)
-		utxos, err := avax.GetAllUTXOs(vm.internalState, addrs)
+		utxos, err := axc.GetAllUTXOs(vm.internalState, addrs)
 		if err != nil {
 			t.Fatal("couldn't find UTXO")
 		} else if len(utxos) != 1 {
@@ -1550,7 +1550,7 @@ func TestAtomicImport(t *testing.T) {
 		vm.ctx.Lock.Unlock()
 	}()
 
-	utxoID := avax.UTXOID{
+	utxoID := axc.UTXOID{
 		TxID:        ids.Empty.Prefix(1),
 		OutputIndex: 1,
 	}
@@ -1563,7 +1563,7 @@ func TestAtomicImport(t *testing.T) {
 		t.Fatal(err)
 	}
 	vm.ctx.SharedMemory = m.NewSharedMemory(vm.ctx.ChainID)
-	vm.AtomicUTXOManager = avax.NewAtomicUTXOManager(vm.ctx.SharedMemory, Codec)
+	vm.AtomicUTXOManager = axc.NewAtomicUTXOManager(vm.ctx.SharedMemory, Codec)
 	peerSharedMemory := m.NewSharedMemory(vm.ctx.SwapChainID)
 
 	if _, err := vm.newImportTx(
@@ -1577,9 +1577,9 @@ func TestAtomicImport(t *testing.T) {
 
 	// Provide the avm UTXO
 
-	utxo := &avax.UTXO{
+	utxo := &axc.UTXO{
 		UTXOID: utxoID,
-		Asset:  avax.Asset{ID: avaxAssetID},
+		Asset:  axc.Asset{ID: axcAssetID},
 		Out: &secp256k1fx.TransferOutput{
 			Amt: amount,
 			OutputOwners: secp256k1fx.OutputOwners{
@@ -1644,17 +1644,17 @@ func TestOptimisticAtomicImport(t *testing.T) {
 	}()
 
 	tx := Tx{UnsignedTx: &UnsignedImportTx{
-		BaseTx: BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    vm.ctx.NetworkID,
 			BlockchainID: vm.ctx.ChainID,
 		}},
 		SourceChain: vm.ctx.SwapChainID,
-		ImportedInputs: []*avax.TransferableInput{{
-			UTXOID: avax.UTXOID{
+		ImportedInputs: []*axc.TransferableInput{{
+			UTXOID: axc.UTXOID{
 				TxID:        ids.Empty.Prefix(1),
 				OutputIndex: 1,
 			},
-			Asset: avax.Asset{ID: vm.ctx.AXCAssetID},
+			Asset: axc.Asset{ID: vm.ctx.AXCAssetID},
 			In: &secp256k1fx.TransferInput{
 				Amt: 50000,
 			},
@@ -2539,11 +2539,11 @@ func TestRejectedStateRegressionInvalidValidatorTimestamp(t *testing.T) {
 	}
 
 	// Create the UTXO that will be added to shared memory
-	utxo := &avax.UTXO{
-		UTXOID: avax.UTXOID{
+	utxo := &axc.UTXO{
+		UTXOID: axc.UTXOID{
 			TxID: ids.GenerateTestID(),
 		},
-		Asset: avax.Asset{
+		Asset: axc.Asset{
 			ID: vm.ctx.AXCAssetID,
 		},
 		Out: &secp256k1fx.TransferOutput{
@@ -2554,12 +2554,12 @@ func TestRejectedStateRegressionInvalidValidatorTimestamp(t *testing.T) {
 
 	// Create the import tx that will fail verification
 	unsignedImportTx := &UnsignedImportTx{
-		BaseTx: BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    vm.ctx.NetworkID,
 			BlockchainID: vm.ctx.ChainID,
 		}},
 		SourceChain: vm.ctx.SwapChainID,
-		ImportedInputs: []*avax.TransferableInput{
+		ImportedInputs: []*axc.TransferableInput{
 			{
 				UTXOID: utxo.UTXOID,
 				Asset:  utxo.Asset,
@@ -2599,7 +2599,7 @@ func TestRejectedStateRegressionInvalidValidatorTimestamp(t *testing.T) {
 	assert.NoError(err)
 
 	vm.ctx.SharedMemory = m.NewSharedMemory(vm.ctx.ChainID)
-	vm.AtomicUTXOManager = avax.NewAtomicUTXOManager(vm.ctx.SharedMemory, Codec)
+	vm.AtomicUTXOManager = axc.NewAtomicUTXOManager(vm.ctx.SharedMemory, Codec)
 	peerSharedMemory := m.NewSharedMemory(vm.ctx.SwapChainID)
 
 	utxoBytes, err := Codec.Marshal(CodecVersion, utxo)
@@ -2811,11 +2811,11 @@ func TestRejectedStateRegressionInvalidValidatorReward(t *testing.T) {
 	}
 
 	// Create the UTXO that will be added to shared memory
-	utxo := &avax.UTXO{
-		UTXOID: avax.UTXOID{
+	utxo := &axc.UTXO{
+		UTXOID: axc.UTXOID{
 			TxID: ids.GenerateTestID(),
 		},
-		Asset: avax.Asset{
+		Asset: axc.Asset{
 			ID: vm.ctx.AXCAssetID,
 		},
 		Out: &secp256k1fx.TransferOutput{
@@ -2826,12 +2826,12 @@ func TestRejectedStateRegressionInvalidValidatorReward(t *testing.T) {
 
 	// Create the import tx that will fail verification
 	unsignedImportTx := &UnsignedImportTx{
-		BaseTx: BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    vm.ctx.NetworkID,
 			BlockchainID: vm.ctx.ChainID,
 		}},
 		SourceChain: vm.ctx.SwapChainID,
-		ImportedInputs: []*avax.TransferableInput{
+		ImportedInputs: []*axc.TransferableInput{
 			{
 				UTXOID: utxo.UTXOID,
 				Asset:  utxo.Asset,
@@ -2871,7 +2871,7 @@ func TestRejectedStateRegressionInvalidValidatorReward(t *testing.T) {
 	assert.NoError(err)
 
 	vm.ctx.SharedMemory = m.NewSharedMemory(vm.ctx.ChainID)
-	vm.AtomicUTXOManager = avax.NewAtomicUTXOManager(vm.ctx.SharedMemory, Codec)
+	vm.AtomicUTXOManager = axc.NewAtomicUTXOManager(vm.ctx.SharedMemory, Codec)
 	peerSharedMemory := m.NewSharedMemory(vm.ctx.SwapChainID)
 
 	utxoBytes, err := Codec.Marshal(CodecVersion, utxo)

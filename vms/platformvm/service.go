@@ -19,7 +19,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/utils/json"
 	"github.com/axiacoin/axia-network-v2/utils/math"
 	"github.com/axiacoin/axia-network-v2/utils/wrappers"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/components/keystore"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/reward"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/status"
@@ -190,7 +190,7 @@ type GetBalanceResponse struct {
 	Unlocked           json.Uint64    `json:"unlocked"`
 	LockedStakeable    json.Uint64    `json:"lockedStakeable"`
 	LockedNotStakeable json.Uint64    `json:"lockedNotStakeable"`
-	UTXOIDs            []*avax.UTXOID `json:"utxoIDs"`
+	UTXOIDs            []*axc.UTXOID `json:"utxoIDs"`
 }
 
 // GetBalance gets the balance of an address
@@ -211,7 +211,7 @@ func (service *Service) GetBalance(_ *http.Request, args *GetBalanceRequest, res
 		addrs.Add(addr)
 	}
 
-	utxos, err := avax.GetAllUTXOs(service.vm.internalState, addrs)
+	utxos, err := axc.GetAllUTXOs(service.vm.internalState, addrs)
 	if err != nil {
 		return fmt.Errorf("couldn't get UTXO set of %v: %w", args.Addresses, err)
 	}
@@ -423,7 +423,7 @@ func (service *Service) GetUTXOs(_ *http.Request, args *GetUTXOsArgs, response *
 	}
 
 	var (
-		utxos     []*avax.UTXO
+		utxos     []*axc.UTXO
 		endAddr   ids.ShortID
 		endUTXOID ids.ID
 		err       error
@@ -433,7 +433,7 @@ func (service *Service) GetUTXOs(_ *http.Request, args *GetUTXOsArgs, response *
 		limit = maxPageSize
 	}
 	if sourceChain == service.vm.ctx.ChainID {
-		utxos, endAddr, endUTXOID, err = avax.GetPaginatedUTXOs(
+		utxos, endAddr, endUTXOID, err = axc.GetPaginatedUTXOs(
 			service.vm.internalState,
 			addrSet,
 			startAddr,
@@ -1021,7 +1021,7 @@ func (service *Service) AddValidator(_ *http.Request, args *AddValidatorArgs, re
 	}
 
 	// Parse the from addresses
-	fromAddrs, err := avax.ParseLocalAddresses(service.vm, args.From)
+	fromAddrs, err := axc.ParseLocalAddresses(service.vm, args.From)
 	if err != nil {
 		return err
 	}
@@ -1134,7 +1134,7 @@ func (service *Service) AddDelegator(_ *http.Request, args *AddDelegatorArgs, re
 	}
 
 	// Parse the from addresses
-	fromAddrs, err := avax.ParseLocalAddresses(service.vm, args.From)
+	fromAddrs, err := axc.ParseLocalAddresses(service.vm, args.From)
 	if err != nil {
 		return err
 	}
@@ -1238,7 +1238,7 @@ func (service *Service) AddSubnetValidator(_ *http.Request, args *AddSubnetValid
 	}
 
 	// Parse the from addresses
-	fromAddrs, err := avax.ParseLocalAddresses(service.vm, args.From)
+	fromAddrs, err := axc.ParseLocalAddresses(service.vm, args.From)
 	if err != nil {
 		return err
 	}
@@ -1306,13 +1306,13 @@ func (service *Service) CreateSubnet(_ *http.Request, args *CreateSubnetArgs, re
 	service.vm.ctx.Log.Debug("Platform: CreateSubnet called")
 
 	// Parse the control keys
-	controlKeys, err := avax.ParseLocalAddresses(service.vm, args.ControlKeys)
+	controlKeys, err := axc.ParseLocalAddresses(service.vm, args.ControlKeys)
 	if err != nil {
 		return err
 	}
 
 	// Parse the from addresses
-	fromAddrs, err := avax.ParseLocalAddresses(service.vm, args.From)
+	fromAddrs, err := axc.ParseLocalAddresses(service.vm, args.From)
 	if err != nil {
 		return err
 	}
@@ -1393,7 +1393,7 @@ func (service *Service) ExportAXC(_ *http.Request, args *ExportAXCArgs, response
 	}
 
 	// Parse the from addresses
-	fromAddrs, err := avax.ParseLocalAddresses(service.vm, args.From)
+	fromAddrs, err := axc.ParseLocalAddresses(service.vm, args.From)
 	if err != nil {
 		return err
 	}
@@ -1476,7 +1476,7 @@ func (service *Service) ImportAXC(_ *http.Request, args *ImportAXCArgs, response
 	}
 
 	// Parse the from addresses
-	fromAddrs, err := avax.ParseLocalAddresses(service.vm, args.From)
+	fromAddrs, err := axc.ParseLocalAddresses(service.vm, args.From)
 	if err != nil {
 		return err
 	}
@@ -1588,7 +1588,7 @@ func (service *Service) CreateBlockchain(_ *http.Request, args *CreateBlockchain
 	}
 
 	// Parse the from addresses
-	fromAddrs, err := avax.ParseLocalAddresses(service.vm, args.From)
+	fromAddrs, err := axc.ParseLocalAddresses(service.vm, args.From)
 	if err != nil {
 		return err
 	}
@@ -2047,7 +2047,7 @@ type GetStakeArgs struct {
 type GetStakeReply struct {
 	Staked json.Uint64 `json:"staked"`
 	// String representation of staked outputs
-	// Each is of type avax.TransferableOutput
+	// Each is of type axc.TransferableOutput
 	Outputs []string `json:"stakedOutputs"`
 	// Encoding of [Outputs]
 	Encoding formatting.Encoding `json:"encoding"`
@@ -2057,8 +2057,8 @@ type GetStakeReply struct {
 // Returns:
 // 1) The total amount staked by addresses in [addrs]
 // 2) The staked outputs
-func (service *Service) getStakeHelper(tx *Tx, addrs ids.ShortSet) (uint64, []avax.TransferableOutput, error) {
-	var outs []*avax.TransferableOutput
+func (service *Service) getStakeHelper(tx *Tx, addrs ids.ShortSet) (uint64, []axc.TransferableOutput, error) {
+	var outs []*axc.TransferableOutput
 	switch staker := tx.UnsignedTx.(type) {
 	case *UnsignedAddDelegatorTx:
 		outs = staker.Stake
@@ -2075,7 +2075,7 @@ func (service *Service) getStakeHelper(tx *Tx, addrs ids.ShortSet) (uint64, []av
 	var (
 		totalAmountStaked uint64
 		err               error
-		stakedOuts        = make([]avax.TransferableOutput, 0, len(outs))
+		stakedOuts        = make([]axc.TransferableOutput, 0, len(outs))
 	)
 	// Go through all of the staked outputs
 	for _, stake := range outs {
@@ -2145,7 +2145,7 @@ func (service *Service) GetStake(_ *http.Request, args *GetStakeArgs, response *
 
 	var (
 		totalStake uint64
-		stakedOuts = make([]avax.TransferableOutput, 0, len(stakers))
+		stakedOuts = make([]axc.TransferableOutput, 0, len(stakers))
 	)
 	for _, tx := range stakers { // Iterates over current stakers
 		stakedAmt, outs, err := service.getStakeHelper(tx, addrs)

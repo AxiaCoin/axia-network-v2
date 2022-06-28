@@ -26,7 +26,7 @@ type Context interface {
 type context struct {
 	networkID             uint32
 	hrp                   string
-	avaxAssetID           ids.ID
+	axcAssetID           ids.ID
 	baseTxFee             uint64
 	createSubnetTxFee     uint64
 	createBlockchainTxFee uint64
@@ -69,7 +69,7 @@ func NewContextFromClients(
 
 func NewContext(
 	networkID uint32,
-	avaxAssetID ids.ID,
+	axcAssetID ids.ID,
 	baseTxFee uint64,
 	createSubnetTxFee uint64,
 	createBlockchainTxFee uint64,
@@ -77,7 +77,7 @@ func NewContext(
 	return &context{
 		networkID:             networkID,
 		hrp:                   constants.GetHRP(networkID),
-		avaxAssetID:           avaxAssetID,
+		axcAssetID:           axcAssetID,
 		baseTxFee:             baseTxFee,
 		createSubnetTxFee:     createSubnetTxFee,
 		createBlockchainTxFee: createBlockchainTxFee,
@@ -86,7 +86,7 @@ func NewContext(
 
 func (c *context) NetworkID() uint32             { return c.networkID }
 func (c *context) HRP() string                   { return c.hrp }
-func (c *context) AXCAssetID() ids.ID           { return c.avaxAssetID }
+func (c *context) AXCAssetID() ids.ID           { return c.axcAssetID }
 func (c *context) BaseTxFee() uint64             { return c.baseTxFee }
 func (c *context) CreateSubnetTxFee() uint64     { return c.createSubnetTxFee }
 func (c *context) CreateBlockchainTxFee() uint64 { return c.createBlockchainTxFee }

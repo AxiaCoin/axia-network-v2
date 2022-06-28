@@ -55,13 +55,13 @@ func validateInitialStakedFunds(config *Config) error {
 	initialStakedFundsSet := ids.ShortSet{}
 	for _, allocation := range config.Allocations {
 		// It is ok to have duplicates as different
-		// ethAddrs could claim to the same avaxAddr.
+		// ethAddrs could claim to the same axcAddr.
 		allocationSet.Add(allocation.AXCAddr)
 	}
 
 	for _, staker := range config.InitialStakedFunds {
 		if initialStakedFundsSet.Contains(staker) {
-			avaxAddr, err := formatting.FormatAddress(
+			axcAddr, err := formatting.FormatAddress(
 				configChainIDAlias,
 				constants.GetHRP(config.NetworkID),
 				staker.Bytes(),
@@ -75,13 +75,13 @@ func validateInitialStakedFunds(config *Config) error {
 
 			return fmt.Errorf(
 				"address %s is duplicated in initial staked funds",
-				avaxAddr,
+				axcAddr,
 			)
 		}
 		initialStakedFundsSet.Add(staker)
 
 		if !allocationSet.Contains(staker) {
-			avaxAddr, err := formatting.FormatAddress(
+			axcAddr, err := formatting.FormatAddress(
 				configChainIDAlias,
 				constants.GetHRP(config.NetworkID),
 				staker.Bytes(),
@@ -95,7 +95,7 @@ func validateInitialStakedFunds(config *Config) error {
 
 			return fmt.Errorf(
 				"address %s does not have an allocation to stake",
-				avaxAddr,
+				axcAddr,
 			)
 		}
 	}
@@ -260,7 +260,7 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 		Encoding:  defaultEncoding,
 	}
 	{
-		avax := avm.AssetDefinition{
+		axc := avm.AssetDefinition{
 			Name:         "Axia",
 			Symbol:       "AXC",
 			Denomination: 9,
@@ -281,7 +281,7 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 				return nil, ids.ID{}, err
 			}
 
-			avax.InitialState["fixedCap"] = append(avax.InitialState["fixedCap"], avm.Holder{
+			axc.InitialState["fixedCap"] = append(axc.InitialState["fixedCap"], avm.Holder{
 				Amount:  json.Uint64(allocation.InitialAmount),
 				Address: addr,
 			})
@@ -290,12 +290,12 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 		}
 
 		var err error
-		avax.Memo, err = formatting.EncodeWithChecksum(defaultEncoding, memoBytes)
+		axc.Memo, err = formatting.EncodeWithChecksum(defaultEncoding, memoBytes)
 		if err != nil {
 			return nil, ids.Empty, fmt.Errorf("couldn't parse memo bytes to string: %w", err)
 		}
 		avmArgs.GenesisData = map[string]avm.AssetDefinition{
-			"AXC": avax, // The AVM starts out with one asset: AXC
+			"AXC": axc, // The AVM starts out with one asset: AXC
 		}
 	}
 	avmReply := avm.BuildGenesisReply{}
@@ -310,7 +310,7 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 	if err != nil {
 		return nil, ids.ID{}, fmt.Errorf("couldn't parse avm genesis reply: %w", err)
 	}
-	avaxAssetID, err := AXCAssetID(bytes)
+	axcAssetID, err := AXCAssetID(bytes)
 	if err != nil {
 		return nil, ids.ID{}, fmt.Errorf("couldn't generate AXC asset ID: %w", err)
 	}
@@ -327,7 +327,7 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 
 	// Specify the initial state of the Platform Chain
 	platformvmArgs := platformvm.BuildGenesisArgs{
-		AvaxAssetID:   avaxAssetID,
+		AxcAssetID:   axcAssetID,
 		NetworkID:     json.Uint32(config.NetworkID),
 		Time:          json.Uint64(config.StartTime),
 		InitialSupply: json.Uint64(initialSupply),
@@ -451,7 +451,7 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 		return nil, ids.ID{}, fmt.Errorf("problem parsing platformvm genesis bytes: %w", err)
 	}
 
-	return genesisBytes, avaxAssetID, nil
+	return genesisBytes, axcAssetID, nil
 }
 
 func splitAllocations(allocations []Allocation, numSplits int) [][]Allocation {

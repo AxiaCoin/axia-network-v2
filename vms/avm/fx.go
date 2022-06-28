@@ -6,7 +6,7 @@ package avm
 import (
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/components/verify"
 	"github.com/axiacoin/axia-network-v2/vms/nftfx"
 	"github.com/axiacoin/axia-network-v2/vms/propertyfx"
@@ -52,7 +52,7 @@ type Fx interface {
 type FxOperation interface {
 	verify.Verifiable
 	snow.ContextInitializable
-	avax.Coster
+	axc.Coster
 
 	Outs() []verify.State
 }

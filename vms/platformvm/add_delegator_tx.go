@@ -15,7 +15,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/utils/constants"
 	"github.com/axiacoin/axia-network-v2/utils/crypto"
 	"github.com/axiacoin/axia-network-v2/utils/math"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/components/verify"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 )
@@ -36,7 +36,7 @@ type UnsignedAddDelegatorTx struct {
 	// Describes the delegatee
 	Validator Validator `serialize:"true" json:"validator"`
 	// Where to send staked tokens when done validating
-	Stake []*avax.TransferableOutput `serialize:"true" json:"stake"`
+	Stake []*axc.TransferableOutput `serialize:"true" json:"stake"`
 	// Where to send staking rewards when done validating
 	RewardsOwner Owner `serialize:"true" json:"rewardsOwner"`
 }
@@ -97,7 +97,7 @@ func (tx *UnsignedAddDelegatorTx) SyntacticVerify(ctx *snow.Context) error {
 	}
 
 	switch {
-	case !avax.IsSortedTransferableOutputs(tx.Stake, Codec):
+	case !axc.IsSortedTransferableOutputs(tx.Stake, Codec):
 		return errOutputsNotSorted
 	case totalStakeWeight != tx.Validator.Wght:
 		return fmt.Errorf("delegator weight %d is not equal to total stake weight %d", tx.Validator.Wght, totalStakeWeight)
@@ -151,7 +151,7 @@ func (tx *UnsignedAddDelegatorTx) Execute(
 		return nil, nil, errWeightTooSmall
 	}
 
-	outs := make([]*avax.TransferableOutput, len(tx.Outs)+len(tx.Stake))
+	outs := make([]*axc.TransferableOutput, len(tx.Outs)+len(tx.Stake))
 	copy(outs, tx.Outs)
 	copy(outs[len(tx.Outs):], tx.Stake)
 
@@ -302,7 +302,7 @@ func (vm *VM) newAddDelegatorTx(
 	}
 	// Create the tx
 	utx := &UnsignedAddDelegatorTx{
-		BaseTx: BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    vm.ctx.NetworkID,
 			BlockchainID: vm.ctx.ChainID,
 			Ins:          ins,

@@ -35,7 +35,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/utils/window"
 	"github.com/axiacoin/axia-network-v2/utils/wrappers"
 	"github.com/axiacoin/axia-network-v2/version"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/reward"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 
@@ -74,8 +74,8 @@ var (
 type VM struct {
 	Factory
 	metrics
-	avax.AddressManager
-	avax.AtomicUTXOManager
+	axc.AddressManager
+	axc.AtomicUTXOManager
 	*network
 
 	// Used to get time. Useful for faking time during tests.
@@ -154,10 +154,10 @@ func (vm *VM) Initialize(
 	}
 
 	// Initialize the utility to parse addresses
-	vm.AddressManager = avax.NewAddressManager(ctx)
+	vm.AddressManager = axc.NewAddressManager(ctx)
 
 	// Initialize the utility to fetch atomic UTXOs
-	vm.AtomicUTXOManager = avax.NewAtomicUTXOManager(ctx.SharedMemory, Codec)
+	vm.AtomicUTXOManager = axc.NewAtomicUTXOManager(ctx.SharedMemory, Codec)
 
 	vm.fx = &secp256k1fx.Fx{}
 

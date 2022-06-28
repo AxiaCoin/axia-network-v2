@@ -14,7 +14,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/utils/crypto"
 	"github.com/axiacoin/axia-network-v2/utils/hashing"
 	"github.com/axiacoin/axia-network-v2/utils/units"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 )
 
@@ -328,7 +328,7 @@ func TestCreateChainTxAP3FeeChange(t *testing.T) {
 		{
 			name:         "post-fork - incorrectly priced",
 			time:         ap3Time,
-			fee:          100*defaultTxFee - 1*units.NanoAvax,
+			fee:          100*defaultTxFee - 1*units.NanoAxc,
 			expectsError: true,
 		},
 		{
@@ -363,7 +363,7 @@ func TestCreateChainTxAP3FeeChange(t *testing.T) {
 			// Create the tx
 
 			utx := &UnsignedCreateChainTx{
-				BaseTx: BaseTx{BaseTx: avax.BaseTx{
+				BaseTx: BaseTx{BaseTx: axc.BaseTx{
 					NetworkID:    vm.ctx.NetworkID,
 					BlockchainID: vm.ctx.ChainID,
 					Ins:          ins,

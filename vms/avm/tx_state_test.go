@@ -15,7 +15,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/utils/crypto"
 	"github.com/axiacoin/axia-network-v2/utils/units"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 )
 
@@ -31,17 +31,17 @@ func TestTxState(t *testing.T) {
 	_, err = s.GetTx(ids.Empty)
 	assert.Equal(database.ErrNotFound, err)
 
-	tx := &Tx{UnsignedTx: &BaseTx{BaseTx: avax.BaseTx{
+	tx := &Tx{UnsignedTx: &BaseTx{BaseTx: axc.BaseTx{
 		NetworkID:    networkID,
 		BlockchainID: chainID,
-		Ins: []*avax.TransferableInput{{
-			UTXOID: avax.UTXOID{
+		Ins: []*axc.TransferableInput{{
+			UTXOID: axc.UTXOID{
 				TxID:        ids.Empty,
 				OutputIndex: 0,
 			},
-			Asset: avax.Asset{ID: assetID},
+			Asset: axc.Asset{ID: assetID},
 			In: &secp256k1fx.TransferInput{
-				Amt: 20 * units.KiloAvax,
+				Amt: 20 * units.KiloAxc,
 				Input: secp256k1fx.Input{
 					SigIndices: []uint32{
 						0,

@@ -14,7 +14,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/utils/crypto"
 	"github.com/axiacoin/axia-network-v2/utils/logging"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/status"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 )
@@ -30,7 +30,7 @@ func TestAtomicTxImports(t *testing.T) {
 	}()
 	assert := assert.New(t)
 
-	utxoID := avax.UTXOID{
+	utxoID := axc.UTXOID{
 		TxID:        ids.Empty.Prefix(1),
 		OutputIndex: 1,
 	}
@@ -43,11 +43,11 @@ func TestAtomicTxImports(t *testing.T) {
 		t.Fatal(err)
 	}
 	vm.ctx.SharedMemory = m.NewSharedMemory(vm.ctx.ChainID)
-	vm.AtomicUTXOManager = avax.NewAtomicUTXOManager(vm.ctx.SharedMemory, Codec)
+	vm.AtomicUTXOManager = axc.NewAtomicUTXOManager(vm.ctx.SharedMemory, Codec)
 	peerSharedMemory := m.NewSharedMemory(vm.ctx.SwapChainID)
-	utxo := &avax.UTXO{
+	utxo := &axc.UTXO{
 		UTXOID: utxoID,
-		Asset:  avax.Asset{ID: avaxAssetID},
+		Asset:  axc.Asset{ID: axcAssetID},
 		Out: &secp256k1fx.TransferOutput{
 			Amt: amount,
 			OutputOwners: secp256k1fx.OutputOwners{

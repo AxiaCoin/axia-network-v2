@@ -11,7 +11,7 @@ import (
 
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/pubsub"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 )
 
@@ -27,8 +27,8 @@ func TestFilter(t *testing.T) {
 	assert := assert.New(t)
 
 	addrID := ids.ShortID{1}
-	tx := Tx{UnsignedTx: &BaseTx{BaseTx: avax.BaseTx{
-		Outs: []*avax.TransferableOutput{
+	tx := Tx{UnsignedTx: &BaseTx{BaseTx: axc.BaseTx{
+		Outs: []*axc.TransferableOutput{
 			{
 				Out: &secp256k1fx.TransferOutput{
 					OutputOwners: secp256k1fx.OutputOwners{

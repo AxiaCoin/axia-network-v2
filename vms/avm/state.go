@@ -10,7 +10,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/codec"
 	"github.com/axiacoin/axia-network-v2/database"
 	"github.com/axiacoin/axia-network-v2/database/prefixdb"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 )
 
 const (
@@ -28,17 +28,17 @@ var (
 // State persistently maintains a set of UTXOs, transaction, statuses, and
 // singletons.
 type State interface {
-	avax.UTXOState
-	avax.StatusState
-	avax.SingletonState
+	axc.UTXOState
+	axc.StatusState
+	axc.SingletonState
 	TxState
 	DeduplicateTx(tx *UniqueTx) *UniqueTx
 }
 
 type state struct {
-	avax.UTXOState
-	avax.StatusState
-	avax.SingletonState
+	axc.UTXOState
+	axc.StatusState
+	axc.SingletonState
 	TxState
 
 	uniqueTxs cache.Deduplicator
@@ -56,12 +56,12 @@ func NewState(config StateConfig) (State, error) {
 	singletonDB := prefixdb.New(singletonStatePrefix, config.DB)
 	txDB := prefixdb.New(txStatePrefix, config.DB)
 
-	utxoState, err := avax.NewMeteredUTXOState(utxoDB, config.Codec, config.Metrics)
+	utxoState, err := axc.NewMeteredUTXOState(utxoDB, config.Codec, config.Metrics)
 	if err != nil {
 		return nil, err
 	}
 
-	statusState, err := avax.NewMeteredStatusState(statusDB, config.Metrics)
+	statusState, err := axc.NewMeteredStatusState(statusDB, config.Metrics)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func NewState(config StateConfig) (State, error) {
 	return &state{
 		UTXOState:      utxoState,
 		StatusState:    statusState,
-		SingletonState: avax.NewSingletonState(singletonDB),
+		SingletonState: axc.NewSingletonState(singletonDB),
 		TxState:        txState,
 
 		uniqueTxs: &cache.EvictableLRU{

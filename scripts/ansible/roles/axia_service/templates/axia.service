@@ -2,7 +2,7 @@
 
 [Unit]
 Description=Axia node
-Documentation=https://docs.avax.network/
+Documentation=https://docs.axc.network/
 After=network.target
 StartLimitIntervalSec=0
 

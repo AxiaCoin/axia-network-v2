@@ -12,7 +12,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/snow"
 	"github.com/axiacoin/axia-network-v2/utils/crypto"
 	"github.com/axiacoin/axia-network-v2/utils/hashing"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/components/verify"
 	"github.com/axiacoin/axia-network-v2/vms/nftfx"
 	"github.com/axiacoin/axia-network-v2/vms/propertyfx"
@@ -30,8 +30,8 @@ type UnsignedTx interface {
 	AssetIDs() ids.Set
 
 	NumCredentials() int
-	InputUTXOs() []*avax.UTXOID
-	UTXOs() []*avax.UTXO
+	InputUTXOs() []*axc.UTXOID
+	UTXOs() []*axc.UTXO
 
 	SyntacticVerify(
 		ctx *snow.Context,

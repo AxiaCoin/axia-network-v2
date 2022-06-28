@@ -6,7 +6,7 @@ package platformvm
 import (
 	"errors"
 
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 )
 
 var (
@@ -16,11 +16,11 @@ var (
 
 type StakeableLockOut struct {
 	Locktime             uint64 `serialize:"true" json:"locktime"`
-	avax.TransferableOut `serialize:"true" json:"output"`
+	axc.TransferableOut `serialize:"true" json:"output"`
 }
 
 func (s *StakeableLockOut) Addresses() [][]byte {
-	if addressable, ok := s.TransferableOut.(avax.Addressable); ok {
+	if addressable, ok := s.TransferableOut.(axc.Addressable); ok {
 		return addressable.Addresses()
 	}
 	return nil
@@ -38,7 +38,7 @@ func (s *StakeableLockOut) Verify() error {
 
 type StakeableLockIn struct {
 	Locktime            uint64 `serialize:"true" json:"locktime"`
-	avax.TransferableIn `serialize:"true" json:"input"`
+	axc.TransferableIn `serialize:"true" json:"input"`
 }
 
 func (s *StakeableLockIn) Verify() error {

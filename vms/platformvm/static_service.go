@@ -14,7 +14,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/utils/constants"
 	"github.com/axiacoin/axia-network-v2/utils/formatting"
 	"github.com/axiacoin/axia-network-v2/utils/json"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 
 	safemath "github.com/axiacoin/axia-network-v2/utils/math"
@@ -121,7 +121,7 @@ type APIChain struct {
 // [Chains] are the chains that exist at genesis.
 // [Time] is the Platform Chain's time at network genesis.
 type BuildGenesisArgs struct {
-	AvaxAssetID   ids.ID                `json:"avaxAssetID"`
+	AxcAssetID   ids.ID                `json:"axcAssetID"`
 	NetworkID     json.Uint32           `json:"networkID"`
 	UTXOs         []APIUTXO             `json:"utxos"`
 	Validators    []APIPrimaryValidator `json:"validators"`
@@ -140,7 +140,7 @@ type BuildGenesisReply struct {
 
 // GenesisUTXO adds messages to UTXOs
 type GenesisUTXO struct {
-	avax.UTXO `serialize:"true"`
+	axc.UTXO `serialize:"true"`
 	Message   []byte `serialize:"true" json:"message"`
 }
 
@@ -190,12 +190,12 @@ func (ss *StaticService) BuildGenesis(_ *http.Request, args *BuildGenesisArgs, r
 			return err
 		}
 
-		utxo := avax.UTXO{
-			UTXOID: avax.UTXOID{
+		utxo := axc.UTXO{
+			UTXOID: axc.UTXOID{
 				TxID:        ids.Empty,
 				OutputIndex: uint32(i),
 			},
-			Asset: avax.Asset{ID: args.AvaxAssetID},
+			Asset: axc.Asset{ID: args.AxcAssetID},
 			Out: &secp256k1fx.TransferOutput{
 				Amt: uint64(apiUTXO.Amount),
 				OutputOwners: secp256k1fx.OutputOwners{
@@ -208,7 +208,7 @@ func (ss *StaticService) BuildGenesis(_ *http.Request, args *BuildGenesisArgs, r
 		if apiUTXO.Locktime > args.Time {
 			utxo.Out = &StakeableLockOut{
 				Locktime:        uint64(apiUTXO.Locktime),
-				TransferableOut: utxo.Out.(avax.TransferableOut),
+				TransferableOut: utxo.Out.(axc.TransferableOut),
 			}
 		}
 		messageBytes, err := formatting.Decode(args.Encoding, apiUTXO.Message)
@@ -225,7 +225,7 @@ func (ss *StaticService) BuildGenesis(_ *http.Request, args *BuildGenesisArgs, r
 	validators := newTxHeapByEndTime()
 	for _, validator := range args.Validators {
 		weight := uint64(0)
-		stake := make([]*avax.TransferableOutput, len(validator.Staked))
+		stake := make([]*axc.TransferableOutput, len(validator.Staked))
 		sortAPIUTXOs(validator.Staked)
 		for i, apiUTXO := range validator.Staked {
 			addrID, err := bech32ToID(apiUTXO.Address)
@@ -233,8 +233,8 @@ func (ss *StaticService) BuildGenesis(_ *http.Request, args *BuildGenesisArgs, r
 				return err
 			}
 
-			utxo := &avax.TransferableOutput{
-				Asset: avax.Asset{ID: args.AvaxAssetID},
+			utxo := &axc.TransferableOutput{
+				Asset: axc.Asset{ID: args.AxcAssetID},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: uint64(apiUTXO.Amount),
 					OutputOwners: secp256k1fx.OutputOwners{
@@ -289,7 +289,7 @@ func (ss *StaticService) BuildGenesis(_ *http.Request, args *BuildGenesisArgs, r
 		}
 
 		tx := &Tx{UnsignedTx: &UnsignedAddValidatorTx{
-			BaseTx: BaseTx{BaseTx: avax.BaseTx{
+			BaseTx: BaseTx{BaseTx: axc.BaseTx{
 				NetworkID:    uint32(args.NetworkID),
 				BlockchainID: ids.Empty,
 			}},
@@ -318,7 +318,7 @@ func (ss *StaticService) BuildGenesis(_ *http.Request, args *BuildGenesisArgs, r
 			return fmt.Errorf("problem decoding chain genesis data: %w", err)
 		}
 		tx := &Tx{UnsignedTx: &UnsignedCreateChainTx{
-			BaseTx: BaseTx{BaseTx: avax.BaseTx{
+			BaseTx: BaseTx{BaseTx: axc.BaseTx{
 				NetworkID:    uint32(args.NetworkID),
 				BlockchainID: ids.Empty,
 			}},

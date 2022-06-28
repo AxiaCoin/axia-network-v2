@@ -12,7 +12,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/codec"
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 )
 
 const (
@@ -61,18 +61,18 @@ func (t *CreateAssetTx) Init(vm *VM) error {
 func (t *CreateAssetTx) InitialStates() []*InitialState { return t.States }
 
 // UTXOs returns the UTXOs transaction is producing.
-func (t *CreateAssetTx) UTXOs() []*avax.UTXO {
+func (t *CreateAssetTx) UTXOs() []*axc.UTXO {
 	txID := t.ID()
 	utxos := t.BaseTx.UTXOs()
 
 	for _, state := range t.States {
 		for _, out := range state.Outs {
-			utxos = append(utxos, &avax.UTXO{
-				UTXOID: avax.UTXOID{
+			utxos = append(utxos, &axc.UTXO{
+				UTXOID: axc.UTXOID{
 					TxID:        txID,
 					OutputIndex: uint32(len(utxos)),
 				},
-				Asset: avax.Asset{
+				Asset: axc.Asset{
 					ID: txID,
 				},
 				Out: out,

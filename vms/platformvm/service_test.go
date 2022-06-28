@@ -27,7 +27,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/utils/formatting"
 	"github.com/axiacoin/axia-network-v2/utils/logging"
 	"github.com/axiacoin/axia-network-v2/version"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/status"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 
@@ -205,12 +205,12 @@ func TestGetTxStatus(t *testing.T) {
 	peerSharedMemory := m.NewSharedMemory(swapChainID)
 
 	// #nosec G404
-	utxo := &avax.UTXO{
-		UTXOID: avax.UTXOID{
+	utxo := &axc.UTXO{
+		UTXOID: axc.UTXOID{
 			TxID:        ids.GenerateTestID(),
 			OutputIndex: rand.Uint32(),
 		},
-		Asset: avax.Asset{ID: avaxAssetID},
+		Asset: axc.Asset{ID: axcAssetID},
 		Out: &secp256k1fx.TransferOutput{
 			Amt: 1234567,
 			OutputOwners: secp256k1fx.OutputOwners{
@@ -236,7 +236,7 @@ func TestGetTxStatus(t *testing.T) {
 	}
 
 	oldAtomicUTXOManager := service.vm.AtomicUTXOManager
-	newAtomicUTXOManager := avax.NewAtomicUTXOManager(sm, Codec)
+	newAtomicUTXOManager := axc.NewAtomicUTXOManager(sm, Codec)
 
 	service.vm.AtomicUTXOManager = newAtomicUTXOManager
 	tx, err := service.vm.newImportTx(swapChainID, ids.ShortEmpty, []*crypto.PrivateKeySECP256K1R{recipientKey}, ids.ShortEmpty)
@@ -488,7 +488,7 @@ func TestGetStake(t *testing.T) {
 		// Unmarshal into an output
 		outputBytes, err := formatting.Decode(args.Encoding, response.Outputs[0])
 		assert.NoError(err)
-		var output avax.TransferableOutput
+		var output axc.TransferableOutput
 		_, err = Codec.Unmarshal(outputBytes, &output)
 		assert.NoError(err)
 		out, ok := output.Out.(*secp256k1fx.TransferOutput)
@@ -515,7 +515,7 @@ func TestGetStake(t *testing.T) {
 	for _, outputStr := range response.Outputs {
 		outputBytes, err := formatting.Decode(args.Encoding, outputStr)
 		assert.NoError(err)
-		var output avax.TransferableOutput
+		var output axc.TransferableOutput
 		_, err = Codec.Unmarshal(outputBytes, &output)
 		assert.NoError(err)
 		out, ok := output.Out.(*secp256k1fx.TransferOutput)
@@ -558,7 +558,7 @@ func TestGetStake(t *testing.T) {
 	assert.EqualValues(oldStake+stakeAmt, uint64(response.Staked))
 	assert.Len(response.Outputs, 2)
 	// Unmarshal into transferableoutputs
-	outputs := make([]avax.TransferableOutput, 2)
+	outputs := make([]axc.TransferableOutput, 2)
 	for i := range outputs {
 		outputBytes, err := formatting.Decode(args.Encoding, response.Outputs[i])
 		assert.NoError(err)
@@ -599,7 +599,7 @@ func TestGetStake(t *testing.T) {
 	assert.NoError(err)
 	assert.EqualValues(oldStake+stakeAmt, response.Staked)
 	assert.Len(response.Outputs, 3)
-	outputs = make([]avax.TransferableOutput, 3)
+	outputs = make([]axc.TransferableOutput, 3)
 	// Unmarshal
 	for i := range outputs {
 		outputBytes, err := formatting.Decode(args.Encoding, response.Outputs[i])

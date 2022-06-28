@@ -13,7 +13,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/snow"
 	"github.com/axiacoin/axia-network-v2/utils/constants"
 	"github.com/axiacoin/axia-network-v2/utils/crypto"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/components/verify"
 )
 
@@ -273,7 +273,7 @@ func (vm *VM) newAddSubnetValidatorTx(
 
 	// Create the tx
 	utx := &UnsignedAddSubnetValidatorTx{
-		BaseTx: BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    vm.ctx.NetworkID,
 			BlockchainID: vm.ctx.ChainID,
 			Ins:          ins,

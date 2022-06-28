@@ -14,7 +14,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/utils/crypto"
 	"github.com/axiacoin/axia-network-v2/utils/hashing"
 	"github.com/axiacoin/axia-network-v2/vms/avm"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/components/verify"
 	"github.com/axiacoin/axia-network-v2/vms/nftfx"
 	"github.com/axiacoin/axia-network-v2/vms/propertyfx"
@@ -41,7 +41,7 @@ type Signer interface {
 }
 
 type SignerBackend interface {
-	GetUTXO(ctx stdcontext.Context, chainID, utxoID ids.ID) (*avax.UTXO, error)
+	GetUTXO(ctx stdcontext.Context, chainID, utxoID ids.ID) (*axc.UTXO, error)
 }
 
 type signer struct {
@@ -132,7 +132,7 @@ func (s *signer) signExportTx(ctx stdcontext.Context, tx *avm.Tx, utx *avm.Expor
 	return s.sign(tx, txCreds, txSigners)
 }
 
-func (s *signer) getSigners(ctx stdcontext.Context, sourceChainID ids.ID, ins []*avax.TransferableInput) ([]verify.Verifiable, [][]*crypto.PrivateKeySECP256K1R, error) {
+func (s *signer) getSigners(ctx stdcontext.Context, sourceChainID ids.ID, ins []*axc.TransferableInput) ([]verify.Verifiable, [][]*crypto.PrivateKeySECP256K1R, error) {
 	txCreds := make([]verify.Verifiable, len(ins))
 	txSigners := make([][]*crypto.PrivateKeySECP256K1R, len(ins))
 	for credIndex, transferInput := range ins {

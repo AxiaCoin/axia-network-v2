@@ -11,7 +11,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/database"
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/components/verify"
 )
 
@@ -29,7 +29,7 @@ type ImportTx struct {
 	SourceChain ids.ID `serialize:"true" json:"sourceChain"`
 
 	// The inputs to this transaction
-	ImportedIns []*avax.TransferableInput `serialize:"true" json:"importedInputs"`
+	ImportedIns []*axc.TransferableInput `serialize:"true" json:"importedInputs"`
 }
 
 func (t *ImportTx) Init(vm *VM) error {
@@ -44,7 +44,7 @@ func (t *ImportTx) Init(vm *VM) error {
 }
 
 // InputUTXOs track which UTXOs this transaction is consuming.
-func (t *ImportTx) InputUTXOs() []*avax.UTXOID {
+func (t *ImportTx) InputUTXOs() []*axc.UTXOID {
 	utxos := t.BaseTx.InputUTXOs()
 	for _, in := range t.ImportedIns {
 		in.Symbol = true
@@ -94,14 +94,14 @@ func (t *ImportTx) SyntacticVerify(
 		return err
 	}
 
-	return avax.VerifyTx(
+	return axc.VerifyTx(
 		txFee,
 		txFeeAssetID,
-		[][]*avax.TransferableInput{
+		[][]*axc.TransferableInput{
 			t.Ins,
 			t.ImportedIns,
 		},
-		[][]*avax.TransferableOutput{t.Outs},
+		[][]*axc.TransferableOutput{t.Outs},
 		c,
 	)
 }
@@ -132,7 +132,7 @@ func (t *ImportTx) SemanticVerify(vm *VM, tx UnsignedTx, creds []verify.Verifiab
 
 	offset := t.BaseTx.NumCredentials()
 	for i, in := range t.ImportedIns {
-		utxo := avax.UTXO{}
+		utxo := axc.UTXO{}
 		if _, err := vm.codec.Unmarshal(allUTXOBytes[i], &utxo); err != nil {
 			return err
 		}

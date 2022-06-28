@@ -13,7 +13,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/snow"
 	"github.com/axiacoin/axia-network-v2/utils/crypto"
 	"github.com/axiacoin/axia-network-v2/utils/math"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/components/verify"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 )
@@ -34,7 +34,7 @@ type UnsignedExportTx struct {
 	DestinationChain ids.ID `serialize:"true" json:"destinationChain"`
 
 	// Outputs that are exported to the chain
-	ExportedOutputs []*avax.TransferableOutput `serialize:"true" json:"exportedOutputs"`
+	ExportedOutputs []*axc.TransferableOutput `serialize:"true" json:"exportedOutputs"`
 }
 
 // InitCtx sets the FxID fields in the inputs and outputs of this
@@ -74,7 +74,7 @@ func (tx *UnsignedExportTx) SyntacticVerify(ctx *snow.Context) error {
 			return errWrongLocktime
 		}
 	}
-	if !avax.IsSortedTransferableOutputs(tx.ExportedOutputs, Codec) {
+	if !axc.IsSortedTransferableOutputs(tx.ExportedOutputs, Codec) {
 		return errOutputsNotSorted
 	}
 
@@ -98,7 +98,7 @@ func (tx *UnsignedExportTx) Execute(
 		return nil, err
 	}
 
-	outs := make([]*avax.TransferableOutput, len(tx.Outs)+len(tx.ExportedOutputs))
+	outs := make([]*axc.TransferableOutput, len(tx.Outs)+len(tx.ExportedOutputs))
 	copy(outs, tx.Outs)
 	copy(outs[len(tx.Outs):], tx.ExportedOutputs)
 
@@ -127,12 +127,12 @@ func (tx *UnsignedExportTx) AtomicOperations() (ids.ID, *atomic.Requests, error)
 
 	elems := make([]*atomic.Element, len(tx.ExportedOutputs))
 	for i, out := range tx.ExportedOutputs {
-		utxo := &avax.UTXO{
-			UTXOID: avax.UTXOID{
+		utxo := &axc.UTXO{
+			UTXOID: axc.UTXOID{
 				TxID:        txID,
 				OutputIndex: uint32(len(tx.Outs) + i),
 			},
-			Asset: avax.Asset{ID: out.AssetID()},
+			Asset: axc.Asset{ID: out.AssetID()},
 			Out:   out.Out,
 		}
 
@@ -145,7 +145,7 @@ func (tx *UnsignedExportTx) AtomicOperations() (ids.ID, *atomic.Requests, error)
 			Key:   utxoID[:],
 			Value: utxoBytes,
 		}
-		if out, ok := utxo.Out.(avax.Addressable); ok {
+		if out, ok := utxo.Out.(axc.Addressable); ok {
 			elem.Traits = out.Addresses()
 		}
 
@@ -198,15 +198,15 @@ func (vm *VM) newExportTx(
 
 	// Create the transaction
 	utx := &UnsignedExportTx{
-		BaseTx: BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    vm.ctx.NetworkID,
 			BlockchainID: vm.ctx.ChainID,
 			Ins:          ins,
 			Outs:         outs, // Non-exported outputs
 		}},
 		DestinationChain: chainID,
-		ExportedOutputs: []*avax.TransferableOutput{{ // Exported to Swap-Chain
-			Asset: avax.Asset{ID: vm.ctx.AXCAssetID},
+		ExportedOutputs: []*axc.TransferableOutput{{ // Exported to Swap-Chain
+			Asset: axc.Asset{ID: vm.ctx.AXCAssetID},
 			Out: &secp256k1fx.TransferOutput{
 				Amt: amount,
 				OutputOwners: secp256k1fx.OutputOwners{

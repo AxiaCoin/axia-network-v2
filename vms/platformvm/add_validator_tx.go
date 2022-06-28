@@ -13,7 +13,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/snow"
 	"github.com/axiacoin/axia-network-v2/utils/constants"
 	"github.com/axiacoin/axia-network-v2/utils/crypto"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/components/verify"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/reward"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
@@ -42,7 +42,7 @@ type UnsignedAddValidatorTx struct {
 	// Describes the delegatee
 	Validator Validator `serialize:"true" json:"validator"`
 	// Where to send staked tokens when done validating
-	Stake []*avax.TransferableOutput `serialize:"true" json:"stake"`
+	Stake []*axc.TransferableOutput `serialize:"true" json:"stake"`
 	// Where to send staking rewards when done validating
 	RewardsOwner Owner `serialize:"true" json:"rewardsOwner"`
 	// Fee this validator charges delegators as a percentage, times 10,000
@@ -108,7 +108,7 @@ func (tx *UnsignedAddValidatorTx) SyntacticVerify(ctx *snow.Context) error {
 	}
 
 	switch {
-	case !avax.IsSortedTransferableOutputs(tx.Stake, Codec):
+	case !axc.IsSortedTransferableOutputs(tx.Stake, Codec):
 		return errOutputsNotSorted
 	case totalStakeWeight != tx.Validator.Wght:
 		return fmt.Errorf("validator weight %d is not equal to total stake weight %d", tx.Validator.Wght, totalStakeWeight)
@@ -171,7 +171,7 @@ func (tx *UnsignedAddValidatorTx) Execute(
 	currentStakers := parentState.CurrentStakerChainState()
 	pendingStakers := parentState.PendingStakerChainState()
 
-	outs := make([]*avax.TransferableOutput, len(tx.Outs)+len(tx.Stake))
+	outs := make([]*axc.TransferableOutput, len(tx.Outs)+len(tx.Stake))
 	copy(outs, tx.Outs)
 	copy(outs[len(tx.Outs):], tx.Stake)
 
@@ -276,7 +276,7 @@ func (vm *VM) newAddValidatorTx(
 	}
 	// Create the tx
 	utx := &UnsignedAddValidatorTx{
-		BaseTx: BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    vm.ctx.NetworkID,
 			BlockchainID: vm.ctx.ChainID,
 			Ins:          ins,

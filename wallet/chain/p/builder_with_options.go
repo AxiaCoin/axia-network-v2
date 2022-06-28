@@ -5,7 +5,7 @@ package p
 
 import (
 	"github.com/axiacoin/axia-network-v2/ids"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 	"github.com/axiacoin/axia-network-v2/wallet/subnet/primary/common"
@@ -128,7 +128,7 @@ func (b *builderWithOptions) NewImportTx(
 
 func (b *builderWithOptions) NewExportTx(
 	chainID ids.ID,
-	outputs []*avax.TransferableOutput,
+	outputs []*axc.TransferableOutput,
 	options ...common.Option,
 ) (*platformvm.UnsignedExportTx, error) {
 	return b.Builder.NewExportTx(

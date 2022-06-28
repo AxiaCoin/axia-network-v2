@@ -6,7 +6,7 @@ package avm
 import (
 	"github.com/axiacoin/axia-network-v2/api"
 	"github.com/axiacoin/axia-network-v2/pubsub"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 )
 
 var _ pubsub.Filterer = &filterer{}
@@ -23,7 +23,7 @@ func NewPubSubFilterer(tx *Tx) pubsub.Filterer {
 func (f *filterer) Filter(filters []pubsub.Filter) ([]bool, interface{}) {
 	resp := make([]bool, len(filters))
 	for _, utxo := range f.tx.UTXOs() {
-		addressable, ok := utxo.Out.(avax.Addressable)
+		addressable, ok := utxo.Out.(axc.Addressable)
 		if !ok {
 			continue
 		}

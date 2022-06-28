@@ -14,15 +14,15 @@ import (
 	"github.com/axiacoin/axia-network-v2/utils/formatting"
 	"github.com/axiacoin/axia-network-v2/utils/rpc"
 	"github.com/axiacoin/axia-network-v2/vms/avm"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm"
 	"github.com/axiacoin/axia-network-v2/wallet/chain/p"
 	"github.com/axiacoin/axia-network-v2/wallet/chain/x"
 )
 
 const (
-	MainnetAPIURI = "https://api.avax.network"
-	FujiAPIURI    = "https://api.avax-test.network"
+	MainnetAPIURI = "https://api.axc.network"
+	FujiAPIURI    = "https://api.axc-test.network"
 	LocalAPIURI   = "http://localhost:9650"
 
 	fetchLimit = 1024
@@ -155,7 +155,7 @@ func AddAllUTXOs(
 		}
 
 		for _, utxoBytes := range utxosBytes {
-			var utxo avax.UTXO
+			var utxo axc.UTXO
 			_, err := codec.Unmarshal(utxoBytes, &utxo)
 			if err != nil {
 				return err

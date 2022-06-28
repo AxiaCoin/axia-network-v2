@@ -10,7 +10,7 @@ import (
 
 	"github.com/axiacoin/axia-network-v2/api"
 	"github.com/axiacoin/axia-network-v2/ids"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 
 	"github.com/axiacoin/axia-network-v2/utils/formatting"
@@ -52,8 +52,8 @@ func (w *WalletService) issue(txBytes []byte) (ids.ID, error) {
 	return txID, nil
 }
 
-func (w *WalletService) update(utxos []*avax.UTXO) ([]*avax.UTXO, error) {
-	utxoMap := make(map[ids.ID]*avax.UTXO, len(utxos))
+func (w *WalletService) update(utxos []*axc.UTXO) ([]*axc.UTXO, error) {
+	utxoMap := make(map[ids.ID]*axc.UTXO, len(utxos))
 	for _, utxo := range utxos {
 		utxoMap[utxo.InputID()] = utxo
 	}
@@ -76,7 +76,7 @@ func (w *WalletService) update(utxos []*avax.UTXO) ([]*avax.UTXO, error) {
 		}
 	}
 
-	newUTXOs := make([]*avax.UTXO, len(utxoMap))
+	newUTXOs := make([]*axc.UTXO, len(utxoMap))
 	i := 0
 	for _, utxo := range utxoMap {
 		newUTXOs[i] = utxo
@@ -113,9 +113,9 @@ func (w *WalletService) SendMultiple(r *http.Request, args *SendMultipleArgs, re
 
 	// Validate the memo field
 	memoBytes := []byte(args.Memo)
-	if l := len(memoBytes); l > avax.MaxMemoSize {
+	if l := len(memoBytes); l > axc.MaxMemoSize {
 		return fmt.Errorf("max memo length is %d but provided memo field is length %d",
-			avax.MaxMemoSize,
+			axc.MaxMemoSize,
 			l)
 	} else if len(args.Outputs) == 0 {
 		return errNoOutputs
@@ -157,7 +157,7 @@ func (w *WalletService) SendMultiple(r *http.Request, args *SendMultipleArgs, re
 	// Asset ID --> amount of that asset being sent
 	amounts := make(map[ids.ID]uint64)
 	// Outputs of our tx
-	outs := []*avax.TransferableOutput{}
+	outs := []*axc.TransferableOutput{}
 	for _, output := range args.Outputs {
 		if output.Amount == 0 {
 			return errZeroAmount
@@ -184,8 +184,8 @@ func (w *WalletService) SendMultiple(r *http.Request, args *SendMultipleArgs, re
 		}
 
 		// Create the Output
-		outs = append(outs, &avax.TransferableOutput{
-			Asset: avax.Asset{ID: assetID},
+		outs = append(outs, &axc.TransferableOutput{
+			Asset: axc.Asset{ID: assetID},
 			Out: &secp256k1fx.TransferOutput{
 				Amt: uint64(output.Amount),
 				OutputOwners: secp256k1fx.OutputOwners{
@@ -222,8 +222,8 @@ func (w *WalletService) SendMultiple(r *http.Request, args *SendMultipleArgs, re
 		amountSpent := amountsSpent[assetID]
 
 		if amountSpent > amountWithFee {
-			outs = append(outs, &avax.TransferableOutput{
-				Asset: avax.Asset{ID: assetID},
+			outs = append(outs, &axc.TransferableOutput{
+				Asset: axc.Asset{ID: assetID},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: amountSpent - amountWithFee,
 					OutputOwners: secp256k1fx.OutputOwners{
@@ -235,9 +235,9 @@ func (w *WalletService) SendMultiple(r *http.Request, args *SendMultipleArgs, re
 			})
 		}
 	}
-	avax.SortTransferableOutputs(outs, w.vm.codec)
+	axc.SortTransferableOutputs(outs, w.vm.codec)
 
-	tx := Tx{UnsignedTx: &BaseTx{BaseTx: avax.BaseTx{
+	tx := Tx{UnsignedTx: &BaseTx{BaseTx: axc.BaseTx{
 		NetworkID:    w.vm.ctx.NetworkID,
 		BlockchainID: w.vm.ctx.ChainID,
 		Outs:         outs,

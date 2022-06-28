@@ -11,18 +11,18 @@ import (
 	"github.com/axiacoin/axia-network-v2/database"
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/utils/constants"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm"
 )
 
 var _ Backend = &backend{}
 
 type ChainUTXOs interface {
-	AddUTXO(ctx stdcontext.Context, destinationChainID ids.ID, utxo *avax.UTXO) error
+	AddUTXO(ctx stdcontext.Context, destinationChainID ids.ID, utxo *axc.UTXO) error
 	RemoveUTXO(ctx stdcontext.Context, sourceChainID, utxoID ids.ID) error
 
-	UTXOs(ctx stdcontext.Context, sourceChainID ids.ID) ([]*avax.UTXO, error)
-	GetUTXO(ctx stdcontext.Context, sourceChainID, utxoID ids.ID) (*avax.UTXO, error)
+	UTXOs(ctx stdcontext.Context, sourceChainID ids.ID) ([]*axc.UTXO, error)
+	GetUTXO(ctx stdcontext.Context, sourceChainID, utxoID ids.ID) (*axc.UTXO, error)
 }
 
 // Backend defines the full interface required to support a Core-chain wallet.
@@ -67,12 +67,12 @@ func (b *backend) AcceptTx(ctx stdcontext.Context, tx *platformvm.Tx) error {
 			err := b.AddUTXO(
 				ctx,
 				utx.DestinationChain,
-				&avax.UTXO{
-					UTXOID: avax.UTXOID{
+				&axc.UTXO{
+					UTXOID: axc.UTXOID{
 						TxID:        txID,
 						OutputIndex: uint32(len(utx.Outs) + i),
 					},
-					Asset: avax.Asset{ID: out.AssetID()},
+					Asset: axc.Asset{ID: out.AssetID()},
 					Out:   out.Out,
 				},
 			)
@@ -112,7 +112,7 @@ func (b *backend) AcceptTx(ctx stdcontext.Context, tx *platformvm.Tx) error {
 	return nil
 }
 
-func (b *backend) addUTXOs(ctx stdcontext.Context, destinationChainID ids.ID, utxos []*avax.UTXO) error {
+func (b *backend) addUTXOs(ctx stdcontext.Context, destinationChainID ids.ID, utxos []*axc.UTXO) error {
 	for _, utxo := range utxos {
 		if err := b.AddUTXO(ctx, destinationChainID, utxo); err != nil {
 			return err

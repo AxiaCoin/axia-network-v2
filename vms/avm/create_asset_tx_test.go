@@ -10,7 +10,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/codec"
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/components/verify"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 )
@@ -27,11 +27,11 @@ var (
 func validCreateAssetTx(t *testing.T) (*CreateAssetTx, codec.Manager, *snow.Context) {
 	_, c := setupCodec()
 	tx := &CreateAssetTx{
-		BaseTx: BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    networkID,
 			BlockchainID: chainID,
-			Outs: []*avax.TransferableOutput{{
-				Asset: avax.Asset{ID: assetID},
+			Outs: []*axc.TransferableOutput{{
+				Asset: axc.Asset{ID: assetID},
 				Out: &secp256k1fx.TransferOutput{
 					Amt: 12345,
 					OutputOwners: secp256k1fx.OutputOwners{
@@ -40,8 +40,8 @@ func validCreateAssetTx(t *testing.T) (*CreateAssetTx, codec.Manager, *snow.Cont
 					},
 				},
 			}},
-			Ins: []*avax.TransferableInput{{
-				UTXOID: avax.UTXOID{
+			Ins: []*axc.TransferableInput{{
+				UTXOID: axc.UTXOID{
 					TxID: ids.ID{
 						0xff, 0xfe, 0xfd, 0xfc, 0xfb, 0xfa, 0xf9, 0xf8,
 						0xf7, 0xf6, 0xf5, 0xf4, 0xf3, 0xf2, 0xf1, 0xf0,
@@ -50,7 +50,7 @@ func validCreateAssetTx(t *testing.T) (*CreateAssetTx, codec.Manager, *snow.Cont
 					},
 					OutputIndex: 1,
 				},
-				Asset: avax.Asset{ID: assetID},
+				Asset: axc.Asset{ID: assetID},
 				In: &secp256k1fx.TransferInput{
 					Amt: 54321,
 					Input: secp256k1fx.Input{
@@ -170,7 +170,7 @@ func TestCreateAssetTxSerialization(t *testing.T) {
 	}
 
 	tx := &Tx{UnsignedTx: &CreateAssetTx{
-		BaseTx: BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: BaseTx{BaseTx: axc.BaseTx{
 			NetworkID: 2,
 			BlockchainID: ids.ID{
 				0xff, 0xff, 0xff, 0xff, 0xee, 0xee, 0xee, 0xee,
@@ -179,8 +179,8 @@ func TestCreateAssetTxSerialization(t *testing.T) {
 				0x99, 0x99, 0x99, 0x99, 0x88, 0x88, 0x88, 0x88,
 			},
 			Memo: []byte{0x00, 0x01, 0x02, 0x03},
-			Outs: []*avax.TransferableOutput{{
-				Asset: avax.Asset{
+			Outs: []*axc.TransferableOutput{{
+				Asset: axc.Asset{
 					ID: ids.ID{
 						0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
 						0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
@@ -208,8 +208,8 @@ func TestCreateAssetTxSerialization(t *testing.T) {
 					},
 				},
 			}},
-			Ins: []*avax.TransferableInput{{
-				UTXOID: avax.UTXOID{
+			Ins: []*axc.TransferableInput{{
+				UTXOID: axc.UTXOID{
 					TxID: ids.ID{
 						0xf1, 0xe1, 0xd1, 0xc1, 0xb1, 0xa1, 0x91, 0x81,
 						0x71, 0x61, 0x51, 0x41, 0x31, 0x21, 0x11, 0x01,
@@ -218,7 +218,7 @@ func TestCreateAssetTxSerialization(t *testing.T) {
 					},
 					OutputIndex: 5,
 				},
-				Asset: avax.Asset{
+				Asset: axc.Asset{
 					ID: ids.ID{
 						0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
 						0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
@@ -278,7 +278,7 @@ func TestCreateAssetTxSerialization(t *testing.T) {
 
 func TestCreateAssetTxGetters(t *testing.T) {
 	tx := &CreateAssetTx{
-		BaseTx: BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    networkID,
 			BlockchainID: chainID,
 		}},
@@ -307,7 +307,7 @@ func TestCreateAssetTxSyntacticVerify(t *testing.T) {
 	_, c := setupCodec()
 
 	tx := &CreateAssetTx{
-		BaseTx: BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    networkID,
 			BlockchainID: chainID,
 		}},
@@ -341,7 +341,7 @@ func TestCreateAssetTxSyntacticVerifyNameTooShort(t *testing.T) {
 	_, c := setupCodec()
 
 	tx := &CreateAssetTx{
-		BaseTx: BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    networkID,
 			BlockchainID: chainID,
 		}},
@@ -364,7 +364,7 @@ func TestCreateAssetTxSyntacticVerifyNameTooLong(t *testing.T) {
 	_, c := setupCodec()
 
 	tx := &CreateAssetTx{
-		BaseTx: BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    networkID,
 			BlockchainID: chainID,
 		}},
@@ -389,7 +389,7 @@ func TestCreateAssetTxSyntacticVerifySymbolTooShort(t *testing.T) {
 	_, c := setupCodec()
 
 	tx := &CreateAssetTx{
-		BaseTx: BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    networkID,
 			BlockchainID: chainID,
 		}},
@@ -412,7 +412,7 @@ func TestCreateAssetTxSyntacticVerifySymbolTooLong(t *testing.T) {
 	_, c := setupCodec()
 
 	tx := &CreateAssetTx{
-		BaseTx: BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    networkID,
 			BlockchainID: chainID,
 		}},
@@ -435,7 +435,7 @@ func TestCreateAssetTxSyntacticVerifyNoFxs(t *testing.T) {
 	_, c := setupCodec()
 
 	tx := &CreateAssetTx{
-		BaseTx: BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    networkID,
 			BlockchainID: chainID,
 		}},
@@ -455,7 +455,7 @@ func TestCreateAssetTxSyntacticVerifyDenominationTooLong(t *testing.T) {
 	_, c := setupCodec()
 
 	tx := &CreateAssetTx{
-		BaseTx: BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    networkID,
 			BlockchainID: chainID,
 		}},
@@ -478,7 +478,7 @@ func TestCreateAssetTxSyntacticVerifyNameWithWhitespace(t *testing.T) {
 	_, c := setupCodec()
 
 	tx := &CreateAssetTx{
-		BaseTx: BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    networkID,
 			BlockchainID: chainID,
 		}},
@@ -501,7 +501,7 @@ func TestCreateAssetTxSyntacticVerifyNameWithInvalidCharacter(t *testing.T) {
 	_, c := setupCodec()
 
 	tx := &CreateAssetTx{
-		BaseTx: BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    networkID,
 			BlockchainID: chainID,
 		}},
@@ -524,7 +524,7 @@ func TestCreateAssetTxSyntacticVerifyNameWithUnicodeCharacter(t *testing.T) {
 	_, c := setupCodec()
 
 	tx := &CreateAssetTx{
-		BaseTx: BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    networkID,
 			BlockchainID: chainID,
 		}},
@@ -547,7 +547,7 @@ func TestCreateAssetTxSyntacticVerifySymbolWithInvalidCharacter(t *testing.T) {
 	_, c := setupCodec()
 
 	tx := &CreateAssetTx{
-		BaseTx: BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    networkID,
 			BlockchainID: chainID,
 		}},
@@ -570,7 +570,7 @@ func TestCreateAssetTxSyntacticVerifyInvalidBaseTx(t *testing.T) {
 	_, c := setupCodec()
 
 	tx := &CreateAssetTx{
-		BaseTx: BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    networkID + 1,
 			BlockchainID: chainID,
 		}},
@@ -593,7 +593,7 @@ func TestCreateAssetTxSyntacticVerifyInvalidInitialState(t *testing.T) {
 	_, c := setupCodec()
 
 	tx := &CreateAssetTx{
-		BaseTx: BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    networkID,
 			BlockchainID: chainID,
 		}},
@@ -616,7 +616,7 @@ func TestCreateAssetTxSyntacticVerifyUnsortedInitialStates(t *testing.T) {
 	_, c := setupCodec()
 
 	tx := &CreateAssetTx{
-		BaseTx: BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    networkID,
 			BlockchainID: chainID,
 		}},

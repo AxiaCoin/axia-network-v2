@@ -20,7 +20,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/utils/crypto"
 	"github.com/axiacoin/axia-network-v2/utils/math"
 	"github.com/axiacoin/axia-network-v2/version"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/reward"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/status"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
@@ -84,7 +84,7 @@ func TestUnsignedRewardValidatorTxExecuteOnCommit(t *testing.T) {
 	stakeOwners := toRemove.Stake[0].Out.(*secp256k1fx.TransferOutput).AddressesSet()
 
 	// Get old balances
-	oldBalance, err := avax.GetBalance(vm.internalState, stakeOwners)
+	oldBalance, err := axc.GetBalance(vm.internalState, stakeOwners)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,7 +94,7 @@ func TestUnsignedRewardValidatorTxExecuteOnCommit(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	onCommitBalance, err := avax.GetBalance(vm.internalState, stakeOwners)
+	onCommitBalance, err := axc.GetBalance(vm.internalState, stakeOwners)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -163,7 +163,7 @@ func TestUnsignedRewardValidatorTxExecuteOnAbort(t *testing.T) {
 	stakeOwners := toRemove.Stake[0].Out.(*secp256k1fx.TransferOutput).AddressesSet()
 
 	// Get old balances
-	oldBalance, err := avax.GetBalance(vm.internalState, stakeOwners)
+	oldBalance, err := axc.GetBalance(vm.internalState, stakeOwners)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -173,7 +173,7 @@ func TestUnsignedRewardValidatorTxExecuteOnAbort(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	onAbortBalance, err := avax.GetBalance(vm.internalState, stakeOwners)
+	onAbortBalance, err := axc.GetBalance(vm.internalState, stakeOwners)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -256,9 +256,9 @@ func TestRewardDelegatorTxExecuteOnCommit(t *testing.T) {
 
 	expectedReward := uint64(1000000)
 
-	oldVdrBalance, err := avax.GetBalance(vm.internalState, vdrDestSet)
+	oldVdrBalance, err := axc.GetBalance(vm.internalState, vdrDestSet)
 	assert.NoError(err)
-	oldDelBalance, err := avax.GetBalance(vm.internalState, delDestSet)
+	oldDelBalance, err := axc.GetBalance(vm.internalState, delDestSet)
 	assert.NoError(err)
 
 	onCommitState.Apply(vm.internalState)
@@ -267,13 +267,13 @@ func TestRewardDelegatorTxExecuteOnCommit(t *testing.T) {
 
 	// If tx is committed, delegator and delegatee should get reward
 	// and the delegator's reward should be greater because the delegatee's share is 25%
-	commitVdrBalance, err := avax.GetBalance(vm.internalState, vdrDestSet)
+	commitVdrBalance, err := axc.GetBalance(vm.internalState, vdrDestSet)
 	assert.NoError(err)
 	vdrReward, err := math.Sub64(commitVdrBalance, oldVdrBalance)
 	assert.NoError(err)
 	assert.NotZero(vdrReward, "expected delegatee balance to increase because of reward")
 
-	commitDelBalance, err := avax.GetBalance(vm.internalState, delDestSet)
+	commitDelBalance, err := axc.GetBalance(vm.internalState, delDestSet)
 	assert.NoError(err)
 	delReward, err := math.Sub64(commitDelBalance, oldDelBalance)
 	assert.NoError(err)
@@ -355,9 +355,9 @@ func TestRewardDelegatorTxExecuteOnAbort(t *testing.T) {
 
 	expectedReward := uint64(1000000)
 
-	oldVdrBalance, err := avax.GetBalance(vm.internalState, vdrDestSet)
+	oldVdrBalance, err := axc.GetBalance(vm.internalState, vdrDestSet)
 	assert.NoError(err)
-	oldDelBalance, err := avax.GetBalance(vm.internalState, delDestSet)
+	oldDelBalance, err := axc.GetBalance(vm.internalState, delDestSet)
 	assert.NoError(err)
 
 	onAbortState.Apply(vm.internalState)
@@ -365,13 +365,13 @@ func TestRewardDelegatorTxExecuteOnAbort(t *testing.T) {
 	assert.NoError(err)
 
 	// If tx is aborted, delegator and delegatee shouldn't get reward
-	newVdrBalance, err := avax.GetBalance(vm.internalState, vdrDestSet)
+	newVdrBalance, err := axc.GetBalance(vm.internalState, vdrDestSet)
 	assert.NoError(err)
 	vdrReward, err := math.Sub64(newVdrBalance, oldVdrBalance)
 	assert.NoError(err)
 	assert.Zero(vdrReward, "expected delegatee balance not to increase")
 
-	newDelBalance, err := avax.GetBalance(vm.internalState, delDestSet)
+	newDelBalance, err := axc.GetBalance(vm.internalState, delDestSet)
 	assert.NoError(err)
 	delReward, err := math.Sub64(newDelBalance, oldDelBalance)
 	assert.NoError(err)

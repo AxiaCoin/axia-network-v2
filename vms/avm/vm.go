@@ -31,7 +31,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/utils/timer"
 	"github.com/axiacoin/axia-network-v2/utils/timer/mockable"
 	"github.com/axiacoin/axia-network-v2/version"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/components/index"
 	"github.com/axiacoin/axia-network-v2/vms/components/keystore"
 	"github.com/axiacoin/axia-network-v2/vms/components/verify"
@@ -61,8 +61,8 @@ var (
 type VM struct {
 	Factory
 	metrics
-	avax.AddressManager
-	avax.AtomicUTXOManager
+	axc.AddressManager
+	axc.AtomicUTXOManager
 	ids.Aliaser
 
 	// Contains information of where this VM is executing
@@ -151,7 +151,7 @@ func (vm *VM) Initialize(
 	if err != nil {
 		return err
 	}
-	vm.AddressManager = avax.NewAddressManager(ctx)
+	vm.AddressManager = axc.NewAddressManager(ctx)
 	vm.Aliaser = ids.NewAliaser()
 
 	db := dbManager.Current().Database
@@ -191,7 +191,7 @@ func (vm *VM) Initialize(
 		return err
 	}
 
-	vm.AtomicUTXOManager = avax.NewAtomicUTXOManager(ctx.SharedMemory, vm.codec)
+	vm.AtomicUTXOManager = axc.NewAtomicUTXOManager(ctx.SharedMemory, vm.codec)
 
 	state, err := NewState(
 		StateConfig{
@@ -422,7 +422,7 @@ func (vm *VM) initGenesis(genesisBytes []byte) error {
 		return err
 	}
 
-	// secure this by defaulting to avaxAsset
+	// secure this by defaulting to axcAsset
 	vm.feeAssetID = vm.ctx.AXCAssetID
 
 	for index, genesisTx := range genesis.Txs {
@@ -532,7 +532,7 @@ func (vm *VM) issueTx(tx snowstorm.Tx) {
 	}
 }
 
-func (vm *VM) getUTXO(utxoID *avax.UTXOID) (*avax.UTXO, error) {
+func (vm *VM) getUTXO(utxoID *axc.UTXOID) (*axc.UTXO, error) {
 	inputID := utxoID.InputID()
 	utxo, err := vm.state.GetUTXO(inputID)
 	if err == nil {
@@ -610,7 +610,7 @@ func (vm *VM) verifyFxUsage(fxID int, assetID ids.ID) bool {
 	return fxIDs.Contains(uint(fxID))
 }
 
-func (vm *VM) verifyTransferOfUTXO(tx UnsignedTx, in *avax.TransferableInput, cred verify.Verifiable, utxo *avax.UTXO) error {
+func (vm *VM) verifyTransferOfUTXO(tx UnsignedTx, in *axc.TransferableInput, cred verify.Verifiable, utxo *axc.UTXO) error {
 	fxIndex, err := vm.getFx(cred)
 	if err != nil {
 		return err
@@ -630,7 +630,7 @@ func (vm *VM) verifyTransferOfUTXO(tx UnsignedTx, in *avax.TransferableInput, cr
 	return fx.VerifyTransfer(tx, in.In, cred, utxo.Out)
 }
 
-func (vm *VM) verifyTransfer(tx UnsignedTx, in *avax.TransferableInput, cred verify.Verifiable) error {
+func (vm *VM) verifyTransfer(tx UnsignedTx, in *axc.TransferableInput, cred verify.Verifiable) error {
 	utxo, err := vm.getUTXO(&in.UTXOID)
 	if err != nil {
 		return err
@@ -678,7 +678,7 @@ func (vm *VM) LoadUser(
 	password string,
 	addrsToUse ids.ShortSet,
 ) (
-	[]*avax.UTXO,
+	[]*axc.UTXO,
 	*secp256k1fx.Keychain,
 	error,
 ) {
@@ -695,7 +695,7 @@ func (vm *VM) LoadUser(
 		return nil, nil, err
 	}
 
-	utxos, err := avax.GetAllUTXOs(vm.state, kc.Addresses())
+	utxos, err := axc.GetAllUTXOs(vm.state, kc.Addresses())
 	if err != nil {
 		return nil, nil, fmt.Errorf("problem retrieving user's UTXOs: %w", err)
 	}
@@ -704,19 +704,19 @@ func (vm *VM) LoadUser(
 }
 
 func (vm *VM) Spend(
-	utxos []*avax.UTXO,
+	utxos []*axc.UTXO,
 	kc *secp256k1fx.Keychain,
 	amounts map[ids.ID]uint64,
 ) (
 	map[ids.ID]uint64,
-	[]*avax.TransferableInput,
+	[]*axc.TransferableInput,
 	[][]*crypto.PrivateKeySECP256K1R,
 	error,
 ) {
 	amountsSpent := make(map[ids.ID]uint64, len(amounts))
 	time := vm.clock.Unix()
 
-	ins := []*avax.TransferableInput{}
+	ins := []*axc.TransferableInput{}
 	keys := [][]*crypto.PrivateKeySECP256K1R{}
 	for _, utxo := range utxos {
 		assetID := utxo.AssetID()
@@ -733,7 +733,7 @@ func (vm *VM) Spend(
 			// this utxo can't be spent with the current keys right now
 			continue
 		}
-		input, ok := inputIntf.(avax.TransferableIn)
+		input, ok := inputIntf.(axc.TransferableIn)
 		if !ok {
 			// this input doesn't have an amount, so I don't care about it here
 			continue
@@ -746,9 +746,9 @@ func (vm *VM) Spend(
 		amountsSpent[assetID] = newAmountSpent
 
 		// add the new input to the array
-		ins = append(ins, &avax.TransferableInput{
+		ins = append(ins, &axc.TransferableInput{
 			UTXOID: utxo.UTXOID,
-			Asset:  avax.Asset{ID: assetID},
+			Asset:  axc.Asset{ID: assetID},
 			In:     input,
 		})
 		// add the required keys to the array
@@ -765,12 +765,12 @@ func (vm *VM) Spend(
 		}
 	}
 
-	avax.SortTransferableInputsWithSigners(ins, keys)
+	axc.SortTransferableInputsWithSigners(ins, keys)
 	return amountsSpent, ins, keys, nil
 }
 
 func (vm *VM) SpendNFT(
-	utxos []*avax.UTXO,
+	utxos []*axc.UTXO,
 	kc *secp256k1fx.Keychain,
 	assetID ids.ID,
 	groupID uint32,
@@ -816,7 +816,7 @@ func (vm *VM) SpendNFT(
 		// add the new operation to the array
 		ops = append(ops, &Operation{
 			Asset:   utxo.Asset,
-			UTXOIDs: []*avax.UTXOID{&utxo.UTXOID},
+			UTXOIDs: []*axc.UTXOID{&utxo.UTXOID},
 			Op: &nftfx.TransferOperation{
 				Input: secp256k1fx.Input{
 					SigIndices: indices,
@@ -844,18 +844,18 @@ func (vm *VM) SpendNFT(
 }
 
 func (vm *VM) SpendAll(
-	utxos []*avax.UTXO,
+	utxos []*axc.UTXO,
 	kc *secp256k1fx.Keychain,
 ) (
 	map[ids.ID]uint64,
-	[]*avax.TransferableInput,
+	[]*axc.TransferableInput,
 	[][]*crypto.PrivateKeySECP256K1R,
 	error,
 ) {
 	amountsSpent := make(map[ids.ID]uint64)
 	time := vm.clock.Unix()
 
-	ins := []*avax.TransferableInput{}
+	ins := []*axc.TransferableInput{}
 	keys := [][]*crypto.PrivateKeySECP256K1R{}
 	for _, utxo := range utxos {
 		assetID := utxo.AssetID()
@@ -866,7 +866,7 @@ func (vm *VM) SpendAll(
 			// this utxo can't be spent with the current keys right now
 			continue
 		}
-		input, ok := inputIntf.(avax.TransferableIn)
+		input, ok := inputIntf.(axc.TransferableIn)
 		if !ok {
 			// this input doesn't have an amount, so I don't care about it here
 			continue
@@ -879,21 +879,21 @@ func (vm *VM) SpendAll(
 		amountsSpent[assetID] = newAmountSpent
 
 		// add the new input to the array
-		ins = append(ins, &avax.TransferableInput{
+		ins = append(ins, &axc.TransferableInput{
 			UTXOID: utxo.UTXOID,
-			Asset:  avax.Asset{ID: assetID},
+			Asset:  axc.Asset{ID: assetID},
 			In:     input,
 		})
 		// add the required keys to the array
 		keys = append(keys, signers)
 	}
 
-	avax.SortTransferableInputsWithSigners(ins, keys)
+	axc.SortTransferableInputsWithSigners(ins, keys)
 	return amountsSpent, ins, keys, nil
 }
 
 func (vm *VM) Mint(
-	utxos []*avax.UTXO,
+	utxos []*axc.UTXO,
 	kc *secp256k1fx.Keychain,
 	amounts map[ids.ID]uint64,
 	to ids.ShortID,
@@ -935,7 +935,7 @@ func (vm *VM) Mint(
 		// add the operation to the array
 		ops = append(ops, &Operation{
 			Asset:   utxo.Asset,
-			UTXOIDs: []*avax.UTXOID{&utxo.UTXOID},
+			UTXOIDs: []*axc.UTXOID{&utxo.UTXOID},
 			Op: &secp256k1fx.MintOperation{
 				MintInput:  *in,
 				MintOutput: *out,
@@ -966,7 +966,7 @@ func (vm *VM) Mint(
 }
 
 func (vm *VM) MintNFT(
-	utxos []*avax.UTXO,
+	utxos []*axc.UTXO,
 	kc *secp256k1fx.Keychain,
 	assetID ids.ID,
 	payload []byte,
@@ -1008,8 +1008,8 @@ func (vm *VM) MintNFT(
 
 		// add the operation to the array
 		ops = append(ops, &Operation{
-			Asset: avax.Asset{ID: assetID},
-			UTXOIDs: []*avax.UTXOID{
+			Asset: axc.Asset{ID: assetID},
+			UTXOIDs: []*axc.UTXOID{
 				&utxo.UTXOID,
 			},
 			Op: &nftfx.MintOperation{

@@ -10,7 +10,7 @@ import (
 
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/utils/crypto"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/reward"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/status"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
@@ -75,8 +75,8 @@ func TestAddValidatorTxSyntacticVerify(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	tx.UnsignedTx.(*UnsignedAddValidatorTx).Stake = []*avax.TransferableOutput{{
-		Asset: avax.Asset{ID: avaxAssetID},
+	tx.UnsignedTx.(*UnsignedAddValidatorTx).Stake = []*axc.TransferableOutput{{
+		Asset: axc.Asset{ID: axcAssetID},
 		Out: &secp256k1fx.TransferOutput{
 			Amt: vm.MinValidatorStake,
 			OutputOwners: secp256k1fx.OutputOwners{

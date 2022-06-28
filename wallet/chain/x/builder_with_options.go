@@ -6,7 +6,7 @@ package x
 import (
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/vms/avm"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/components/verify"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 	"github.com/axiacoin/axia-network-v2/wallet/subnet/primary/common"
@@ -52,7 +52,7 @@ func (b *builderWithOptions) GetImportableBalance(
 }
 
 func (b *builderWithOptions) NewBaseTx(
-	outputs []*avax.TransferableOutput,
+	outputs []*axc.TransferableOutput,
 	options ...common.Option,
 ) (*avm.BaseTx, error) {
 	return b.Builder.NewBaseTx(
@@ -147,7 +147,7 @@ func (b *builderWithOptions) NewImportTx(
 
 func (b *builderWithOptions) NewExportTx(
 	chainID ids.ID,
-	outputs []*avax.TransferableOutput,
+	outputs []*axc.TransferableOutput,
 	options ...common.Option,
 ) (*avm.ExportTx, error) {
 	return b.Builder.NewExportTx(

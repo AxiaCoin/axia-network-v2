@@ -1,11 +1,11 @@
 - name: Setup gpg key
   apt_key:
-    url: https://downloads.avax.network/axia.gpg.key
+    url: https://downloads.axc.network/axia.gpg.key
     state: present
 
 - name: Setup axia repo
   apt_repository:
-    repo: deb https://downloads.avax.network/apt bionic main
+    repo: deb https://downloads.axc.network/apt bionic main
     state: present
 
 - name: Setup golang repo

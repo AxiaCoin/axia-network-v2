@@ -15,7 +15,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/utils/formatting"
 	"github.com/axiacoin/axia-network-v2/utils/wrappers"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/components/verify"
 	"github.com/axiacoin/axia-network-v2/vms/nftfx"
 	"github.com/axiacoin/axia-network-v2/vms/propertyfx"
@@ -27,9 +27,9 @@ import (
 var (
 	errUnknownAssetType = errors.New("unknown asset type")
 
-	_ avax.TransferableIn  = &secp256k1fx.TransferInput{}
+	_ axc.TransferableIn  = &secp256k1fx.TransferInput{}
 	_ verify.State         = &secp256k1fx.MintOutput{}
-	_ avax.TransferableOut = &secp256k1fx.TransferOutput{}
+	_ axc.TransferableOut = &secp256k1fx.TransferOutput{}
 	_ FxOperation          = &secp256k1fx.MintOperation{}
 	_ verify.Verifiable    = &secp256k1fx.Credential{}
 
@@ -91,7 +91,7 @@ func (ss *StaticService) BuildGenesis(_ *http.Request, args *BuildGenesisArgs, r
 		asset := GenesisAsset{
 			Alias: assetAlias,
 			CreateAssetTx: CreateAssetTx{
-				BaseTx: BaseTx{BaseTx: avax.BaseTx{
+				BaseTx: BaseTx{BaseTx: axc.BaseTx{
 					NetworkID:    uint32(args.NetworkID),
 					BlockchainID: ids.Empty,
 					Memo:         assetMemo,

@@ -13,7 +13,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/snow"
 	"github.com/axiacoin/axia-network-v2/utils/crypto"
 	"github.com/axiacoin/axia-network-v2/utils/math"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/components/verify"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 )
@@ -35,7 +35,7 @@ type UnsignedImportTx struct {
 	SourceChain ids.ID `serialize:"true" json:"sourceChain"`
 
 	// Inputs that consume UTXOs produced on the chain
-	ImportedInputs []*avax.TransferableInput `serialize:"true" json:"importedInputs"`
+	ImportedInputs []*axc.TransferableInput `serialize:"true" json:"importedInputs"`
 }
 
 // InitCtx sets the FxID fields in the inputs and outputs of this
@@ -84,7 +84,7 @@ func (tx *UnsignedImportTx) SyntacticVerify(ctx *snow.Context) error {
 			return fmt.Errorf("input failed verification: %w", err)
 		}
 	}
-	if !avax.IsSortedAndUniqueTransferableInputs(tx.ImportedInputs) {
+	if !axc.IsSortedAndUniqueTransferableInputs(tx.ImportedInputs) {
 		return errInputsNotSortedUnique
 	}
 
@@ -108,7 +108,7 @@ func (tx *UnsignedImportTx) Execute(
 		return nil, err
 	}
 
-	utxos := make([]*avax.UTXO, len(tx.Ins)+len(tx.ImportedInputs))
+	utxos := make([]*axc.UTXO, len(tx.Ins)+len(tx.ImportedInputs))
 	for index, input := range tx.Ins {
 		utxo, err := vs.GetUTXO(input.InputID())
 		if err != nil {
@@ -133,14 +133,14 @@ func (tx *UnsignedImportTx) Execute(
 		}
 
 		for i, utxoBytes := range allUTXOBytes {
-			utxo := &avax.UTXO{}
+			utxo := &axc.UTXO{}
 			if _, err := Codec.Unmarshal(utxoBytes, utxo); err != nil {
 				return nil, fmt.Errorf("failed to unmarshal UTXO: %w", err)
 			}
 			utxos[i+len(tx.Ins)] = utxo
 		}
 
-		ins := make([]*avax.TransferableInput, len(tx.Ins)+len(tx.ImportedInputs))
+		ins := make([]*axc.TransferableInput, len(tx.Ins)+len(tx.ImportedInputs))
 		copy(ins, tx.Ins)
 		copy(ins[len(tx.Ins):], tx.ImportedInputs)
 
@@ -210,7 +210,7 @@ func (vm *VM) newImportTx(
 		return nil, fmt.Errorf("problem retrieving atomic UTXOs: %w", err)
 	}
 
-	importedInputs := []*avax.TransferableInput{}
+	importedInputs := []*axc.TransferableInput{}
 	signers := [][]*crypto.PrivateKeySECP256K1R{}
 
 	importedAmount := uint64(0)
@@ -223,7 +223,7 @@ func (vm *VM) newImportTx(
 		if err != nil {
 			continue
 		}
-		input, ok := inputIntf.(avax.TransferableIn)
+		input, ok := inputIntf.(axc.TransferableIn)
 		if !ok {
 			continue
 		}
@@ -231,21 +231,21 @@ func (vm *VM) newImportTx(
 		if err != nil {
 			return nil, err
 		}
-		importedInputs = append(importedInputs, &avax.TransferableInput{
+		importedInputs = append(importedInputs, &axc.TransferableInput{
 			UTXOID: utxo.UTXOID,
 			Asset:  utxo.Asset,
 			In:     input,
 		})
 		signers = append(signers, utxoSigners)
 	}
-	avax.SortTransferableInputsWithSigners(importedInputs, signers)
+	axc.SortTransferableInputsWithSigners(importedInputs, signers)
 
 	if importedAmount == 0 {
 		return nil, errNoFunds // No imported UTXOs were spendable
 	}
 
-	ins := []*avax.TransferableInput{}
-	outs := []*avax.TransferableOutput{}
+	ins := []*axc.TransferableInput{}
+	outs := []*axc.TransferableOutput{}
 	if importedAmount < vm.TxFee { // imported amount goes toward paying tx fee
 		var baseSigners [][]*crypto.PrivateKeySECP256K1R
 		ins, outs, _, baseSigners, err = vm.stake(keys, 0, vm.TxFee-importedAmount, changeAddr)
@@ -254,8 +254,8 @@ func (vm *VM) newImportTx(
 		}
 		signers = append(baseSigners, signers...)
 	} else if importedAmount > vm.TxFee {
-		outs = append(outs, &avax.TransferableOutput{
-			Asset: avax.Asset{ID: vm.ctx.AXCAssetID},
+		outs = append(outs, &axc.TransferableOutput{
+			Asset: axc.Asset{ID: vm.ctx.AXCAssetID},
 			Out: &secp256k1fx.TransferOutput{
 				Amt: importedAmount - vm.TxFee,
 				OutputOwners: secp256k1fx.OutputOwners{
@@ -269,7 +269,7 @@ func (vm *VM) newImportTx(
 
 	// Create the transaction
 	utx := &UnsignedImportTx{
-		BaseTx: BaseTx{BaseTx: avax.BaseTx{
+		BaseTx: BaseTx{BaseTx: axc.BaseTx{
 			NetworkID:    vm.ctx.NetworkID,
 			BlockchainID: vm.ctx.ChainID,
 			Outs:         outs,

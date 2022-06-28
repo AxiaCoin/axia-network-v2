@@ -12,7 +12,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow"
 	"github.com/axiacoin/axia-network-v2/utils/constants"
-	"github.com/axiacoin/axia-network-v2/vms/components/avax"
+	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/components/verify"
 )
 
@@ -30,7 +30,7 @@ type ExportTx struct {
 	DestinationChain ids.ID `serialize:"true" json:"destinationChain"`
 
 	// The outputs this transaction is sending to the other chain
-	ExportedOuts []*avax.TransferableOutput `serialize:"true" json:"exportedOutputs"`
+	ExportedOuts []*axc.TransferableOutput `serialize:"true" json:"exportedOutputs"`
 }
 
 func (t *ExportTx) Init(vm *VM) error {
@@ -65,11 +65,11 @@ func (t *ExportTx) SyntacticVerify(
 		return err
 	}
 
-	return avax.VerifyTx(
+	return axc.VerifyTx(
 		txFee,
 		txFeeAssetID,
-		[][]*avax.TransferableInput{t.Ins},
-		[][]*avax.TransferableOutput{
+		[][]*axc.TransferableInput{t.Ins},
+		[][]*axc.TransferableOutput{
 			t.Outs,
 			t.ExportedOuts,
 		},
@@ -108,12 +108,12 @@ func (t *ExportTx) ExecuteWithSideEffects(vm *VM, batch database.Batch) error {
 
 	elems := make([]*atomic.Element, len(t.ExportedOuts))
 	for i, out := range t.ExportedOuts {
-		utxo := &avax.UTXO{
-			UTXOID: avax.UTXOID{
+		utxo := &axc.UTXO{
+			UTXOID: axc.UTXOID{
 				TxID:        txID,
 				OutputIndex: uint32(len(t.Outs) + i),
 			},
-			Asset: avax.Asset{ID: out.AssetID()},
+			Asset: axc.Asset{ID: out.AssetID()},
 			Out:   out.Out,
 		}
 
@@ -127,7 +127,7 @@ func (t *ExportTx) ExecuteWithSideEffects(vm *VM, batch database.Batch) error {
 			Key:   inputID[:],
 			Value: utxoBytes,
 		}
-		if out, ok := utxo.Out.(avax.Addressable); ok {
+		if out, ok := utxo.Out.(axc.Addressable); ok {
 			elem.Traits = out.Addresses()
 		}
 
