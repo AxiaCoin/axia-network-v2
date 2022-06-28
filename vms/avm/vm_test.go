@@ -78,12 +78,12 @@ func (sn *snLookup) SubnetID(chainID ids.ID) (ids.ID, error) {
 
 func NewContext(tb testing.TB) *snow.Context {
 	genesisBytes := BuildGenesisTest(tb)
-	tx := GetAVAXTxFromGenesisTest(genesisBytes, tb)
+	tx := GetAXCTxFromGenesisTest(genesisBytes, tb)
 
 	ctx := snow.DefaultContextTest()
 	ctx.NetworkID = networkID
 	ctx.ChainID = chainID
-	ctx.AVAXAssetID = tx.ID()
+	ctx.AXCAssetID = tx.ID()
 	ctx.SwapChainID = ids.Empty.Prefix(0)
 	aliaser := ctx.BCLookup.(ids.Aliaser)
 
@@ -142,8 +142,8 @@ func GetCreateTxFromGenesisTest(tb testing.TB, genesisBytes []byte, assetName st
 	return tx
 }
 
-func GetAVAXTxFromGenesisTest(genesisBytes []byte, tb testing.TB) *Tx {
-	return GetCreateTxFromGenesisTest(tb, genesisBytes, "AVAX")
+func GetAXCTxFromGenesisTest(genesisBytes []byte, tb testing.TB) *Tx {
+	return GetCreateTxFromGenesisTest(tb, genesisBytes, "AXC")
 }
 
 // BuildGenesisTest is the common Genesis builder for most tests
@@ -156,7 +156,7 @@ func BuildGenesisTest(tb testing.TB) []byte {
 		Encoding: formatting.Hex,
 		GenesisData: map[string]AssetDefinition{
 			"asset1": {
-				Name:   "AVAX",
+				Name:   "AXC",
 				Symbol: "SYMB",
 				InitialState: map[string][]interface{}{
 					"fixedCap": {
@@ -320,7 +320,7 @@ func GenesisVMWithArgs(tb testing.TB, additionalFxs []*common.Fx, args *BuildGen
 }
 
 func NewTx(t *testing.T, genesisBytes []byte, vm *VM) *Tx {
-	return NewTxWithAsset(t, genesisBytes, vm, "AVAX")
+	return NewTxWithAsset(t, genesisBytes, vm, "AXC")
 }
 
 func NewTxWithAsset(t *testing.T, genesisBytes []byte, vm *VM, assetName string) *Tx {
@@ -355,7 +355,7 @@ func setupIssueTx(t testing.TB) (chan common.Message, *VM, *snow.Context, []*Tx)
 	genesisBytes, issuer, vm, _ := GenesisVM(t)
 	ctx := vm.ctx
 
-	avaxTx := GetAVAXTxFromGenesisTest(genesisBytes, t)
+	avaxTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 	key := keys[0]
 	firstTx := &Tx{UnsignedTx: &BaseTx{BaseTx: avax.BaseTx{
 		NetworkID:    networkID,

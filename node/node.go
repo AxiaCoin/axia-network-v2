@@ -615,7 +615,7 @@ func (n *Node) initChainManager(avaxAssetID ids.ID) error {
 		Server:                                  n.APIServer,
 		Keystore:                                n.keystore,
 		AtomicMemory:                            &n.sharedMemory,
-		AVAXAssetID:                             avaxAssetID,
+		AXCAssetID:                             avaxAssetID,
 		SwapChainID:                                swapChainID,
 		CriticalChains:                          criticalChains,
 		TimeoutManager:                          timeoutManager,

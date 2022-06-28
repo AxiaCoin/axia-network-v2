@@ -36,7 +36,7 @@ func ExampleWallet() {
 
 	// Pull out useful constants to use when issuing transactions.
 	swapChainID := xWallet.BlockchainID()
-	avaxAssetID := xWallet.AVAXAssetID()
+	avaxAssetID := xWallet.AXCAssetID()
 	owner := &secp256k1fx.OutputOwners{
 		Threshold: 1,
 		Addrs: []ids.ShortID{

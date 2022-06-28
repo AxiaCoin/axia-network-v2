@@ -91,7 +91,7 @@ func (t *ExportTx) SemanticVerify(vm *VM, tx UnsignedTx, creds []verify.Verifiab
 			return err
 		}
 		assetID := out.AssetID()
-		if assetID != vm.ctx.AVAXAssetID && t.DestinationChain == constants.PlatformChainID {
+		if assetID != vm.ctx.AXCAssetID && t.DestinationChain == constants.PlatformChainID {
 			return errWrongAssetID
 		}
 		if !vm.verifyFxUsage(fxIndex, assetID) {

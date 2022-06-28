@@ -109,7 +109,7 @@ func (tx *UnsignedExportTx) Execute(
 	}
 
 	// Verify the flowcheck
-	if err := vm.semanticVerifySpend(vs, tx, tx.Ins, outs, stx.Creds, vm.TxFee, vm.ctx.AVAXAssetID); err != nil {
+	if err := vm.semanticVerifySpend(vs, tx, tx.Ins, outs, stx.Creds, vm.TxFee, vm.ctx.AXCAssetID); err != nil {
 		return nil, fmt.Errorf("failed semanticVerifySpend: %w", err)
 	}
 
@@ -117,7 +117,7 @@ func (tx *UnsignedExportTx) Execute(
 	consumeInputs(vs, tx.Ins)
 	// Produce the UTXOS
 	txID := tx.ID()
-	produceOutputs(vs, txID, vm.ctx.AVAXAssetID, tx.Outs)
+	produceOutputs(vs, txID, vm.ctx.AXCAssetID, tx.Outs)
 	return nil, nil
 }
 
@@ -206,7 +206,7 @@ func (vm *VM) newExportTx(
 		}},
 		DestinationChain: chainID,
 		ExportedOutputs: []*avax.TransferableOutput{{ // Exported to Swap-Chain
-			Asset: avax.Asset{ID: vm.ctx.AVAXAssetID},
+			Asset: avax.Asset{ID: vm.ctx.AXCAssetID},
 			Out: &secp256k1fx.TransferOutput{
 				Amt: amount,
 				OutputOwners: secp256k1fx.OutputOwners{

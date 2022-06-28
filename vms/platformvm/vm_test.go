@@ -65,7 +65,7 @@ var (
 		SupplyCap:          720 * units.MegaAvax,
 	}
 
-	// AVAX asset ID in tests
+	// AXC asset ID in tests
 	avaxAssetID = ids.ID{'y', 'e', 'e', 't'}
 
 	defaultTxFee = uint64(100)
@@ -79,7 +79,7 @@ var (
 	// time that genesis validators stop validating
 	defaultValidateEndTime = defaultValidateStartTime.Add(10 * defaultMinStakingDuration)
 
-	// each key controls an address that has [defaultBalance] AVAX at genesis
+	// each key controls an address that has [defaultBalance] AXC at genesis
 	keys []*crypto.PrivateKeySECP256K1R
 
 	defaultMinValidatorStake = 5 * units.MilliAvax
@@ -144,7 +144,7 @@ func defaultContext() *snow.Context {
 	ctx := snow.DefaultContextTest()
 	ctx.NetworkID = testNetworkID
 	ctx.SwapChainID = swapChainID
-	ctx.AVAXAssetID = avaxAssetID
+	ctx.AXCAssetID = avaxAssetID
 	aliaser := ids.NewAliaser()
 
 	errs := wrappers.Errs{}
@@ -1654,7 +1654,7 @@ func TestOptimisticAtomicImport(t *testing.T) {
 				TxID:        ids.Empty.Prefix(1),
 				OutputIndex: 1,
 			},
-			Asset: avax.Asset{ID: vm.ctx.AVAXAssetID},
+			Asset: avax.Asset{ID: vm.ctx.AXCAssetID},
 			In: &secp256k1fx.TransferInput{
 				Amt: 50000,
 			},
@@ -2544,7 +2544,7 @@ func TestRejectedStateRegressionInvalidValidatorTimestamp(t *testing.T) {
 			TxID: ids.GenerateTestID(),
 		},
 		Asset: avax.Asset{
-			ID: vm.ctx.AVAXAssetID,
+			ID: vm.ctx.AXCAssetID,
 		},
 		Out: &secp256k1fx.TransferOutput{
 			Amt:          vm.TxFee,
@@ -2816,7 +2816,7 @@ func TestRejectedStateRegressionInvalidValidatorReward(t *testing.T) {
 			TxID: ids.GenerateTestID(),
 		},
 		Asset: avax.Asset{
-			ID: vm.ctx.AVAXAssetID,
+			ID: vm.ctx.AXCAssetID,
 		},
 		Out: &secp256k1fx.TransferOutput{
 			Amt:          vm.TxFee,

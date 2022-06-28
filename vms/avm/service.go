@@ -90,7 +90,7 @@ type GetAddressTxsArgs struct {
 	Cursor json.Uint64 `json:"cursor"`
 	// PageSize num of items per page
 	PageSize json.Uint64 `json:"pageSize"`
-	// AssetID defaulted to AVAX if omitted or left blank
+	// AssetID defaulted to AXC if omitted or left blank
 	AssetID string `json:"assetID"`
 }
 
@@ -1433,12 +1433,12 @@ type ImportArgs struct {
 	// Chain the funds are coming from
 	SourceChain string `json:"sourceChain"`
 
-	// Address receiving the imported AVAX
+	// Address receiving the imported AXC
 	To string `json:"to"`
 }
 
 // Import imports an asset to this chain from the P/AX-Chain.
-// The AVAX must have already been exported from the P/AX-Chain.
+// The AXC must have already been exported from the P/AX-Chain.
 // Returns the ID of the newly created atomic transaction
 func (service *Service) Import(_ *http.Request, args *ImportArgs, reply *api.JSONTxID) error {
 	service.vm.ctx.Log.Debug("AVM: Import called with username: %s", args.Username)
@@ -1543,10 +1543,10 @@ func (service *Service) Import(_ *http.Request, args *ImportArgs, reply *api.JSO
 type ExportArgs struct {
 	// User, password, from addrs, change addr
 	api.JSONSpendHeader
-	// Amount of nAVAX to send
+	// Amount of nAXC to send
 	Amount json.Uint64 `json:"amount"`
 
-	// ID of the address that will receive the AVAX. This address includes the
+	// ID of the address that will receive the AXC. This address includes the
 	// chainID, which is used to determine what the destination chain is.
 	To string `json:"to"`
 
@@ -1554,7 +1554,7 @@ type ExportArgs struct {
 }
 
 // Export sends an asset from this chain to the P/AX-Chain.
-// After this tx is accepted, the AVAX must be imported to the P/AX-chain with an importTx.
+// After this tx is accepted, the AXC must be imported to the P/AX-chain with an importTx.
 // Returns the ID of the newly created atomic transaction
 func (service *Service) Export(_ *http.Request, args *ExportArgs, reply *api.JSONTxIDChangeAddr) error {
 	service.vm.ctx.Log.Debug("AVM: Export called with username: %s", args.Username)

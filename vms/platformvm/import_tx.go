@@ -144,7 +144,7 @@ func (tx *UnsignedImportTx) Execute(
 		copy(ins, tx.Ins)
 		copy(ins[len(tx.Ins):], tx.ImportedInputs)
 
-		if err := vm.semanticVerifySpendUTXOs(tx, utxos, ins, tx.Outs, stx.Creds, vm.TxFee, vm.ctx.AVAXAssetID); err != nil {
+		if err := vm.semanticVerifySpendUTXOs(tx, utxos, ins, tx.Outs, stx.Creds, vm.TxFee, vm.ctx.AXCAssetID); err != nil {
 			return nil, err
 		}
 	}
@@ -153,7 +153,7 @@ func (tx *UnsignedImportTx) Execute(
 	consumeInputs(vs, tx.Ins)
 	// Produce the UTXOS
 	txID := tx.ID()
-	produceOutputs(vs, txID, vm.ctx.AVAXAssetID, tx.Outs)
+	produceOutputs(vs, txID, vm.ctx.AXCAssetID, tx.Outs)
 	return nil, nil
 }
 
@@ -216,7 +216,7 @@ func (vm *VM) newImportTx(
 	importedAmount := uint64(0)
 	now := vm.clock.Unix()
 	for _, utxo := range atomicUTXOs {
-		if utxo.AssetID() != vm.ctx.AVAXAssetID {
+		if utxo.AssetID() != vm.ctx.AXCAssetID {
 			continue
 		}
 		inputIntf, utxoSigners, err := kc.Spend(utxo.Out, now)
@@ -255,7 +255,7 @@ func (vm *VM) newImportTx(
 		signers = append(baseSigners, signers...)
 	} else if importedAmount > vm.TxFee {
 		outs = append(outs, &avax.TransferableOutput{
-			Asset: avax.Asset{ID: vm.ctx.AVAXAssetID},
+			Asset: avax.Asset{ID: vm.ctx.AXCAssetID},
 			Out: &secp256k1fx.TransferOutput{
 				Amt: importedAmount - vm.TxFee,
 				OutputOwners: secp256k1fx.OutputOwners{

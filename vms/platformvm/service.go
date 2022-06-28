@@ -185,7 +185,7 @@ type GetBalanceRequest struct {
 }
 
 type GetBalanceResponse struct {
-	// Balance, in nAVAX, of the address
+	// Balance, in nAXC, of the address
 	Balance            json.Uint64    `json:"balance"`
 	Unlocked           json.Uint64    `json:"unlocked"`
 	LockedStakeable    json.Uint64    `json:"lockedStakeable"`
@@ -623,7 +623,7 @@ func (service *Service) GetStakingAssetID(_ *http.Request, args *GetStakingAsset
 			args.SubnetID)
 	}
 
-	response.AssetID = service.vm.ctx.AVAXAssetID
+	response.AssetID = service.vm.ctx.AXCAssetID
 	return nil
 }
 
@@ -913,7 +913,7 @@ type GetCurrentSupplyReply struct {
 	Supply json.Uint64 `json:"supply"`
 }
 
-// GetCurrentSupply returns an upper bound on the supply of AVAX in the system
+// GetCurrentSupply returns an upper bound on the supply of AXC in the system
 func (service *Service) GetCurrentSupply(_ *http.Request, _ *struct{}, reply *GetCurrentSupplyReply) error {
 	service.vm.ctx.Log.Debug("Platform: GetCurrentSupply called")
 
@@ -1364,23 +1364,23 @@ func (service *Service) CreateSubnet(_ *http.Request, args *CreateSubnetArgs, re
 	return errs.Err
 }
 
-// ExportAVAXArgs are the arguments to ExportAVAX
-type ExportAVAXArgs struct {
+// ExportAXCArgs are the arguments to ExportAXC
+type ExportAXCArgs struct {
 	// User, password, from addrs, change addr
 	api.JSONSpendHeader
 
-	// Amount of AVAX to send
+	// Amount of AXC to send
 	Amount json.Uint64 `json:"amount"`
 
-	// ID of the address that will receive the AVAX. This address includes the
+	// ID of the address that will receive the AXC. This address includes the
 	// chainID, which is used to determine what the destination chain is.
 	To string `json:"to"`
 }
 
-// ExportAVAX exports AVAX from the Core-Chain to the Swap-Chain
+// ExportAXC exports AXC from the Core-Chain to the Swap-Chain
 // It must be imported on the Swap-Chain to complete the transfer
-func (service *Service) ExportAVAX(_ *http.Request, args *ExportAVAXArgs, response *api.JSONTxIDChangeAddr) error {
-	service.vm.ctx.Log.Debug("Platform: ExportAVAX called")
+func (service *Service) ExportAXC(_ *http.Request, args *ExportAXCArgs, response *api.JSONTxIDChangeAddr) error {
+	service.vm.ctx.Log.Debug("Platform: ExportAXC called")
 
 	if args.Amount == 0 {
 		return errNoAmount
@@ -1446,8 +1446,8 @@ func (service *Service) ExportAVAX(_ *http.Request, args *ExportAVAXArgs, respon
 	return errs.Err
 }
 
-// ImportAVAXArgs are the arguments to ImportAVAX
-type ImportAVAXArgs struct {
+// ImportAXCArgs are the arguments to ImportAXC
+type ImportAXCArgs struct {
 	// User, password, from addrs, change addr
 	api.JSONSpendHeader
 
@@ -1458,10 +1458,10 @@ type ImportAVAXArgs struct {
 	To string `json:"to"`
 }
 
-// ImportAVAX issues a transaction to import AVAX from the Swap-chain. The AVAX
+// ImportAXC issues a transaction to import AXC from the Swap-chain. The AXC
 // must have already been exported from the Swap-Chain.
-func (service *Service) ImportAVAX(_ *http.Request, args *ImportAVAXArgs, response *api.JSONTxIDChangeAddr) error {
-	service.vm.ctx.Log.Debug("Platform: ImportAVAX called")
+func (service *Service) ImportAXC(_ *http.Request, args *ImportAXCArgs, response *api.JSONTxIDChangeAddr) error {
+	service.vm.ctx.Log.Debug("Platform: ImportAXC called")
 
 	// Parse the sourceCHain
 	chainID, err := service.vm.ctx.BCLookup.Lookup(args.SourceChain)
@@ -2079,8 +2079,8 @@ func (service *Service) getStakeHelper(tx *Tx, addrs ids.ShortSet) (uint64, []av
 	)
 	// Go through all of the staked outputs
 	for _, stake := range outs {
-		// This output isn't AVAX. Ignore.
-		if stake.AssetID() != service.vm.ctx.AVAXAssetID {
+		// This output isn't AXC. Ignore.
+		if stake.AssetID() != service.vm.ctx.AXCAssetID {
 			continue
 		}
 		out := stake.Out
@@ -2116,11 +2116,11 @@ func (service *Service) getStakeHelper(tx *Tx, addrs ids.ShortSet) (uint64, []av
 	return totalAmountStaked, stakedOuts, nil
 }
 
-// GetStake returns the amount of nAVAX that [args.Addresses] have cumulatively
+// GetStake returns the amount of nAXC that [args.Addresses] have cumulatively
 // staked on the Primary Network.
 //
 // This method assumes that each stake output has only owner
-// This method assumes only AVAX can be staked
+// This method assumes only AXC can be staked
 // This method only concerns itself with the Primary Network, not subnets
 // TODO: Improve the performance of this method by maintaining this data
 // in a data structure rather than re-calculating it by iterating over stakers
@@ -2193,11 +2193,11 @@ func (service *Service) GetStake(_ *http.Request, args *GetStakeArgs, response *
 type GetMinStakeReply struct {
 	//  The minimum amount of tokens one must bond to be a validator
 	MinValidatorStake json.Uint64 `json:"minValidatorStake"`
-	// Minimum stake, in nAVAX, that can be delegated on the primary network
+	// Minimum stake, in nAXC, that can be delegated on the primary network
 	MinDelegatorStake json.Uint64 `json:"minDelegatorStake"`
 }
 
-// GetMinStake returns the minimum staking amount in nAVAX.
+// GetMinStake returns the minimum staking amount in nAXC.
 func (service *Service) GetMinStake(_ *http.Request, _ *struct{}, reply *GetMinStakeReply) error {
 	reply.MinValidatorStake = json.Uint64(service.vm.MinValidatorStake)
 	reply.MinDelegatorStake = json.Uint64(service.vm.MinDelegatorStake)
@@ -2232,7 +2232,7 @@ type GetMaxStakeAmountReply struct {
 	Amount json.Uint64 `json:"amount"`
 }
 
-// GetMaxStakeAmount returns the maximum amount of nAVAX staking to the named
+// GetMaxStakeAmount returns the maximum amount of nAXC staking to the named
 // node during the time period.
 func (service *Service) GetMaxStakeAmount(_ *http.Request, args *GetMaxStakeAmountArgs, reply *GetMaxStakeAmountReply) error {
 	nodeID, err := ids.ShortFromPrefixedString(args.NodeID, constants.NodeIDPrefix)

@@ -763,7 +763,7 @@ func TestBaseTxSemanticVerify(t *testing.T) {
 		ctx.Lock.Unlock()
 	}()
 
-	genesisTx := GetAVAXTxFromGenesisTest(genesisBytes, t)
+	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 
 	tx := &Tx{UnsignedTx: &BaseTx{BaseTx: avax.BaseTx{
 		NetworkID:    networkID,
@@ -822,7 +822,7 @@ func TestBaseTxSemanticVerifyUnknownFx(t *testing.T) {
 		ctx.Lock.Unlock()
 	}()
 
-	genesisTx := GetAVAXTxFromGenesisTest(genesisBytes, t)
+	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 
 	tx := &Tx{
 		UnsignedTx: &BaseTx{BaseTx: avax.BaseTx{
@@ -874,7 +874,7 @@ func TestBaseTxSemanticVerifyWrongAssetID(t *testing.T) {
 		ctx.Lock.Unlock()
 	}()
 
-	genesisTx := GetAVAXTxFromGenesisTest(genesisBytes, t)
+	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 
 	tx := &Tx{UnsignedTx: &BaseTx{BaseTx: avax.BaseTx{
 		NetworkID:    networkID,
@@ -965,7 +965,7 @@ func TestBaseTxSemanticVerifyUnauthorizedFx(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	genesisTx := GetAVAXTxFromGenesisTest(genesisBytes, t)
+	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 
 	tx := &Tx{UnsignedTx: &BaseTx{BaseTx: avax.BaseTx{
 		NetworkID:    networkID,
@@ -1007,7 +1007,7 @@ func TestBaseTxSemanticVerifyInvalidSignature(t *testing.T) {
 		ctx.Lock.Unlock()
 	}()
 
-	genesisTx := GetAVAXTxFromGenesisTest(genesisBytes, t)
+	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 
 	tx := &Tx{
 		UnsignedTx: &BaseTx{BaseTx: avax.BaseTx{
@@ -1063,7 +1063,7 @@ func TestBaseTxSemanticVerifyMissingUTXO(t *testing.T) {
 		ctx.Lock.Unlock()
 	}()
 
-	genesisTx := GetAVAXTxFromGenesisTest(genesisBytes, t)
+	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 
 	tx := &Tx{UnsignedTx: &BaseTx{BaseTx: avax.BaseTx{
 		NetworkID:    networkID,
@@ -1112,7 +1112,7 @@ func TestBaseTxSemanticVerifyInvalidUTXO(t *testing.T) {
 		ctx.Lock.Unlock()
 	}()
 
-	genesisTx := GetAVAXTxFromGenesisTest(genesisBytes, t)
+	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 
 	tx := &Tx{UnsignedTx: &BaseTx{BaseTx: avax.BaseTx{
 		NetworkID:    networkID,
@@ -1155,7 +1155,7 @@ func TestBaseTxSemanticVerifyPendingInvalidUTXO(t *testing.T) {
 	genesisBytes, issuer, vm, _ := GenesisVM(t)
 	ctx := vm.ctx
 
-	genesisTx := GetAVAXTxFromGenesisTest(genesisBytes, t)
+	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 
 	pendingTx := &Tx{UnsignedTx: &BaseTx{BaseTx: avax.BaseTx{
 		NetworkID:    networkID,
@@ -1250,7 +1250,7 @@ func TestBaseTxSemanticVerifyPendingWrongAssetID(t *testing.T) {
 	genesisBytes, issuer, vm, _ := GenesisVM(t)
 	ctx := vm.ctx
 
-	genesisTx := GetAVAXTxFromGenesisTest(genesisBytes, t)
+	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 
 	pendingTx := &Tx{UnsignedTx: &BaseTx{BaseTx: avax.BaseTx{
 		NetworkID:    networkID,
@@ -1391,7 +1391,7 @@ func TestBaseTxSemanticVerifyPendingUnauthorizedFx(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	genesisTx := GetAVAXTxFromGenesisTest(genesisBytes, t)
+	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 
 	pendingTx := &Tx{UnsignedTx: &BaseTx{BaseTx: avax.BaseTx{
 		NetworkID:    networkID,
@@ -1536,7 +1536,7 @@ func TestBaseTxSemanticVerifyPendingInvalidSignature(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	genesisTx := GetAVAXTxFromGenesisTest(genesisBytes, t)
+	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 
 	pendingTx := &Tx{UnsignedTx: &BaseTx{BaseTx: avax.BaseTx{
 		NetworkID:    networkID,
@@ -1709,7 +1709,7 @@ func TestBaseTxSemanticVerifyInvalidFxOutput(t *testing.T) {
 		ctx.Lock.Unlock()
 	}()
 
-	genesisTx := GetAVAXTxFromGenesisTest(genesisBytes, t)
+	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 
 	tx := &Tx{UnsignedTx: &BaseTx{BaseTx: avax.BaseTx{
 		NetworkID:    networkID,

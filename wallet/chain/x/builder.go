@@ -192,7 +192,7 @@ func (b *builder) NewBaseTx(
 	options ...common.Option,
 ) (*avm.BaseTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.backend.AVAXAssetID(): b.backend.BaseTxFee(),
+		b.backend.AXCAssetID(): b.backend.BaseTxFee(),
 	}
 	for _, out := range outputs {
 		assetID := out.AssetID()
@@ -228,7 +228,7 @@ func (b *builder) NewCreateAssetTx(
 	options ...common.Option,
 ) (*avm.CreateAssetTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.backend.AVAXAssetID(): b.backend.CreateAssetTxFee(),
+		b.backend.AXCAssetID(): b.backend.CreateAssetTxFee(),
 	}
 	ops := common.NewOptions(options)
 	inputs, outputs, err := b.spend(toBurn, ops)
@@ -268,7 +268,7 @@ func (b *builder) NewOperationTx(
 	options ...common.Option,
 ) (*avm.OperationTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.backend.AVAXAssetID(): b.backend.CreateAssetTxFee(),
+		b.backend.AXCAssetID(): b.backend.CreateAssetTxFee(),
 	}
 	ops := common.NewOptions(options)
 	inputs, outputs, err := b.spend(toBurn, ops)
@@ -354,7 +354,7 @@ func (b *builder) NewImportTx(
 	var (
 		addrs           = ops.Addresses(b.addrs)
 		minIssuanceTime = ops.MinIssuanceTime()
-		avaxAssetID     = b.backend.AVAXAssetID()
+		avaxAssetID     = b.backend.AXCAssetID()
 		txFee           = b.backend.BaseTxFee()
 
 		importedInputs  = make([]*avax.TransferableInput, 0, len(utxos))
@@ -404,14 +404,14 @@ func (b *builder) NewImportTx(
 	var (
 		inputs       []*avax.TransferableInput
 		outputs      = make([]*avax.TransferableOutput, 0, len(importedAmounts))
-		importedAVAX = importedAmounts[avaxAssetID]
+		importedAXC = importedAmounts[avaxAssetID]
 	)
-	if importedAVAX > txFee {
+	if importedAXC > txFee {
 		importedAmounts[avaxAssetID] -= txFee
 	} else {
-		if importedAVAX < txFee { // imported amount goes toward paying tx fee
+		if importedAXC < txFee { // imported amount goes toward paying tx fee
 			toBurn := map[ids.ID]uint64{
-				avaxAssetID: txFee - importedAVAX,
+				avaxAssetID: txFee - importedAXC,
 			}
 			var err error
 			inputs, outputs, err = b.spend(toBurn, ops)
@@ -452,7 +452,7 @@ func (b *builder) NewExportTx(
 	options ...common.Option,
 ) (*avm.ExportTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.backend.AVAXAssetID(): b.backend.BaseTxFee(),
+		b.backend.AXCAssetID(): b.backend.BaseTxFee(),
 	}
 	for _, out := range outputs {
 		assetID := out.AssetID()

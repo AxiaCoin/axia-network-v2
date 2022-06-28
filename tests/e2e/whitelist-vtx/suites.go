@@ -103,7 +103,7 @@ var _ = e2e.DescribeSwapChain("[WhitelistTx]", func() {
 			balances, err := ewoqWallet.X().Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
 
-			avaxAssetID := wallet.X().AVAXAssetID()
+			avaxAssetID := wallet.X().AXCAssetID()
 			ewoqPrevBalX := balances[avaxAssetID]
 			tests.Outf("{{green}}ewoq wallet balance:{{/}} %d\n", ewoqPrevBalX)
 
@@ -244,7 +244,7 @@ var _ = e2e.DescribeSwapChain("[WhitelistTx]", func() {
 			balances, err := ewoqWallet.X().Builder().GetFTBalance()
 			gomega.Expect(err).Should(gomega.BeNil())
 
-			avaxAssetID := wallet.X().AVAXAssetID()
+			avaxAssetID := wallet.X().AXCAssetID()
 			ewoqPrevBalX := balances[avaxAssetID]
 			tests.Outf("{{green}}ewoq wallet balance:{{/}} %d\n", ewoqPrevBalX)
 

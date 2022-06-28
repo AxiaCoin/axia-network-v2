@@ -17,7 +17,7 @@ type Validator interface {
 	ID() ids.ShortID
 
 	// Weight that can be used for weighted sampling. If this validator is
-	// validating the primary network, returns the amount of AVAX staked.
+	// validating the primary network, returns the amount of AXC staked.
 	Weight() uint64
 }
 

@@ -486,7 +486,7 @@ func TestVMGenesis(t *testing.T) {
 	}
 }
 
-func TestAVAXAssetID(t *testing.T) {
+func TestAXCAssetID(t *testing.T) {
 	tests := []struct {
 		networkID  uint32
 		expectedID string
@@ -516,7 +516,7 @@ func TestAVAXAssetID(t *testing.T) {
 			assert.Equal(
 				test.expectedID,
 				avaxAssetID.String(),
-				"AVAX assetID with networkID %d mismatch",
+				"AXC assetID with networkID %d mismatch",
 				test.networkID,
 			)
 		})

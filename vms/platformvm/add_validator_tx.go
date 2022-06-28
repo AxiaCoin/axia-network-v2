@@ -220,7 +220,7 @@ func (tx *UnsignedAddValidatorTx) Execute(
 		}
 
 		// Verify the flowcheck
-		if err := vm.semanticVerifySpend(parentState, tx, tx.Ins, outs, stx.Creds, vm.AddStakerTxFee, vm.ctx.AVAXAssetID); err != nil {
+		if err := vm.semanticVerifySpend(parentState, tx, tx.Ins, outs, stx.Creds, vm.AddStakerTxFee, vm.ctx.AXCAssetID); err != nil {
 			return nil, nil, fmt.Errorf("failed semanticVerifySpend: %w", err)
 		}
 
@@ -241,14 +241,14 @@ func (tx *UnsignedAddValidatorTx) Execute(
 	consumeInputs(onCommitState, tx.Ins)
 	// Produce the UTXOS
 	txID := tx.ID()
-	produceOutputs(onCommitState, txID, vm.ctx.AVAXAssetID, tx.Outs)
+	produceOutputs(onCommitState, txID, vm.ctx.AXCAssetID, tx.Outs)
 
 	// Set up the state if this tx is aborted
 	onAbortState := newVersionedState(parentState, currentStakers, pendingStakers)
 	// Consume the UTXOS
 	consumeInputs(onAbortState, tx.Ins)
 	// Produce the UTXOS
-	produceOutputs(onAbortState, txID, vm.ctx.AVAXAssetID, outs)
+	produceOutputs(onAbortState, txID, vm.ctx.AXCAssetID, outs)
 
 	return onCommitState, onAbortState, nil
 }

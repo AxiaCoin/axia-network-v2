@@ -163,7 +163,7 @@ func (vm *VMServer) Initialize(_ context.Context, req *vmpb.InitializeRequest) (
 		NodeID:    nodeID,
 
 		SwapChainID:    swapChainID,
-		AVAXAssetID: avaxAssetID,
+		AXCAssetID: avaxAssetID,
 
 		Log:          logging.NoLog{},
 		Keystore:     keystoreClient,

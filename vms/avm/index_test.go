@@ -38,7 +38,7 @@ func TestIndexTransaction_Ordered(t *testing.T) {
 	issuer := make(chan common.Message, 1)
 	baseDBManager := manager.NewMemDB(version.DefaultVersion1_0_0)
 	ctx := NewContext(t)
-	genesisTx := GetAVAXTxFromGenesisTest(genesisBytes, t)
+	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 	avaxID := genesisTx.ID()
 	vm := setupTestVM(t, ctx, baseDBManager, genesisBytes, issuer, indexEnabledAvmConfig)
 	defer func() {
@@ -132,7 +132,7 @@ func TestIndexTransaction_MultipleTransactions(t *testing.T) {
 	issuer := make(chan common.Message, 1)
 	baseDBManager := manager.NewMemDB(version.DefaultVersion1_0_0)
 	ctx := NewContext(t)
-	genesisTx := GetAVAXTxFromGenesisTest(genesisBytes, t)
+	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 
 	avaxID := genesisTx.ID()
 	vm := setupTestVM(t, ctx, baseDBManager, genesisBytes, issuer, indexEnabledAvmConfig)
@@ -225,7 +225,7 @@ func TestIndexTransaction_MultipleAddresses(t *testing.T) {
 	issuer := make(chan common.Message, 1)
 	baseDBManager := manager.NewMemDB(version.DefaultVersion1_0_0)
 	ctx := NewContext(t)
-	genesisTx := GetAVAXTxFromGenesisTest(genesisBytes, t)
+	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 
 	avaxID := genesisTx.ID()
 	vm := setupTestVM(t, ctx, baseDBManager, genesisBytes, issuer, indexEnabledAvmConfig)
@@ -292,7 +292,7 @@ func TestIndexTransaction_UnorderedWrites(t *testing.T) {
 	issuer := make(chan common.Message, 1)
 	baseDBManager := manager.NewMemDB(version.DefaultVersion1_0_0)
 	ctx := NewContext(t)
-	genesisTx := GetAVAXTxFromGenesisTest(genesisBytes, t)
+	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 	avaxID := genesisTx.ID()
 	vm := setupTestVM(t, ctx, baseDBManager, genesisBytes, issuer, indexEnabledAvmConfig)
 	defer func() {

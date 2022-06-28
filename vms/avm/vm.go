@@ -423,7 +423,7 @@ func (vm *VM) initGenesis(genesisBytes []byte) error {
 	}
 
 	// secure this by defaulting to avaxAsset
-	vm.feeAssetID = vm.ctx.AVAXAssetID
+	vm.feeAssetID = vm.ctx.AXCAssetID
 
 	for index, genesisTx := range genesis.Txs {
 		if len(genesisTx.Outs) != 0 {

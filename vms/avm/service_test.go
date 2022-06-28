@@ -45,7 +45,7 @@ var testCases = []struct {
 	name      string
 	avaxAsset bool
 }{
-	{"genesis asset is AVAX", true},
+	{"genesis asset is AXC", true},
 	{"genesis asset is TEST", false},
 }
 
@@ -54,14 +54,14 @@ var testCases = []struct {
 // 2) the VM
 // 3) The service that wraps the VM
 // 4) atomic memory to use in tests
-func setup(t *testing.T, isAVAXAsset bool) ([]byte, *VM, *Service, *atomic.Memory, *Tx) {
+func setup(t *testing.T, isAXCAsset bool) ([]byte, *VM, *Service, *atomic.Memory, *Tx) {
 	var genesisBytes []byte
 	var vm *VM
 	var m *atomic.Memory
 	var genesisTx *Tx
-	if isAVAXAsset {
+	if isAXCAsset {
 		genesisBytes, _, vm, m = GenesisVM(t)
-		genesisTx = GetAVAXTxFromGenesisTest(genesisBytes, t)
+		genesisTx = GetAXCTxFromGenesisTest(genesisBytes, t)
 	} else {
 		genesisBytes, _, vm, m = setupTxFeeAssets(t)
 		genesisTx = GetCreateTxFromGenesisTest(t, genesisBytes, feeAssetName)
@@ -76,11 +76,11 @@ func setup(t *testing.T, isAVAXAsset bool) ([]byte, *VM, *Service, *atomic.Memor
 // 3) The service that wraps the VM
 // 4) Issuer channel
 // 5) atomic memory to use in tests
-func setupWithIssuer(t *testing.T, isAVAXAsset bool) ([]byte, *VM, *Service, chan common.Message) {
+func setupWithIssuer(t *testing.T, isAXCAsset bool) ([]byte, *VM, *Service, chan common.Message) {
 	var genesisBytes []byte
 	var vm *VM
 	var issuer chan common.Message
-	if isAVAXAsset {
+	if isAXCAsset {
 		genesisBytes, issuer, vm, _ = GenesisVM(t)
 	} else {
 		genesisBytes, issuer, vm, _ = setupTxFeeAssets(t)
@@ -94,8 +94,8 @@ func setupWithIssuer(t *testing.T, isAVAXAsset bool) ([]byte, *VM, *Service, cha
 // 2) the VM
 // 3) The service that wraps the VM
 // 4) atomic memory to use in tests
-func setupWithKeys(t *testing.T, isAVAXAsset bool) ([]byte, *VM, *Service, *atomic.Memory, *Tx) {
-	genesisBytes, vm, s, m, tx := setup(t, isAVAXAsset)
+func setupWithKeys(t *testing.T, isAXCAsset bool) ([]byte, *VM, *Service, *atomic.Memory, *Tx) {
+	genesisBytes, vm, s, m, tx := setup(t, isAXCAsset)
 
 	// Import the initially funded private keys
 	user, err := keystore.NewUserFromKeystore(s.vm.ctx.Keystore, username, password)
@@ -150,7 +150,7 @@ func verifyTxFeeDeducted(t *testing.T, s *Service, fromAddrs []ids.ShortID, numT
 	fromAddrsStartBalance := startBalance * uint64(len(fromAddrs))
 
 	// Key: Address
-	// Value: AVAX balance
+	// Value: AXC balance
 	balances := map[ids.ShortID]uint64{}
 
 	for _, addr := range addrs { // get balances for all addresses
@@ -1510,7 +1510,7 @@ func TestServiceGetTxJSON_OperationTxWithPropertyFxMintOpMultiple(t *testing.T) 
 }
 
 func newAvaxBaseTxWithOutputs(t *testing.T, genesisBytes []byte, vm *VM) *Tx {
-	avaxTx := GetAVAXTxFromGenesisTest(genesisBytes, t)
+	avaxTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 	key := keys[0]
 	tx := buildBaseTx(avaxTx, vm, key)
 	if err := tx.SignSECP256K1Fx(vm.codec, [][]*crypto.PrivateKeySECP256K1R{{key}}); err != nil {
@@ -1520,7 +1520,7 @@ func newAvaxBaseTxWithOutputs(t *testing.T, genesisBytes []byte, vm *VM) *Tx {
 }
 
 func newAvaxExportTxWithOutputs(t *testing.T, genesisBytes []byte, vm *VM) *Tx {
-	avaxTx := GetAVAXTxFromGenesisTest(genesisBytes, t)
+	avaxTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 	key := keys[0]
 	tx := buildExportTx(avaxTx, vm, key)
 	if err := tx.SignSECP256K1Fx(vm.codec, [][]*crypto.PrivateKeySECP256K1R{{key}}); err != nil {
@@ -1794,7 +1794,7 @@ func TestServiceGetUTXOs(t *testing.T) {
 			UTXOID: avax.UTXOID{
 				TxID: ids.GenerateTestID(),
 			},
-			Asset: avax.Asset{ID: vm.ctx.AVAXAssetID},
+			Asset: avax.Asset{ID: vm.ctx.AXCAssetID},
 			Out: &secp256k1fx.TransferOutput{
 				Amt: 1,
 				OutputOwners: secp256k1fx.OutputOwners{
@@ -1816,7 +1816,7 @@ func TestServiceGetUTXOs(t *testing.T) {
 			UTXOID: avax.UTXOID{
 				TxID: ids.GenerateTestID(),
 			},
-			Asset: avax.Asset{ID: vm.ctx.AVAXAssetID},
+			Asset: avax.Asset{ID: vm.ctx.AXCAssetID},
 			Out: &secp256k1fx.TransferOutput{
 				Amt: 1,
 				OutputOwners: secp256k1fx.OutputOwners{
@@ -2060,7 +2060,7 @@ func TestGetAssetDescription(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if reply.Name != "AVAX" {
+	if reply.Name != "AXC" {
 		t.Fatalf("Wrong name returned from GetAssetDescription %s", reply.Name)
 	}
 	if reply.Symbol != "SYMB" {
@@ -2734,7 +2734,7 @@ func TestImport(t *testing.T) {
 			}
 			reply := &api.JSONTxID{}
 			if err := s.Import(nil, args, reply); err != nil {
-				t.Fatalf("Failed to import AVAX due to %s", err)
+				t.Fatalf("Failed to import AXC due to %s", err)
 			}
 		})
 	}

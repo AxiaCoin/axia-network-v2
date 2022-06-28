@@ -26,7 +26,7 @@ type LockedAmount struct {
 
 type Allocation struct {
 	ETHAddr        ids.ShortID    `json:"ethAddr"`
-	AVAXAddr       ids.ShortID    `json:"avaxAddr"`
+	AXCAddr       ids.ShortID    `json:"avaxAddr"`
 	InitialAmount  uint64         `json:"initialAmount"`
 	UnlockSchedule []LockedAmount `json:"unlockSchedule"`
 }
@@ -40,9 +40,9 @@ func (a Allocation) Unparse(networkID uint32) (UnparsedAllocation, error) {
 	avaxAddr, err := formatting.FormatAddress(
 		"X",
 		constants.GetHRP(networkID),
-		a.AVAXAddr.Bytes(),
+		a.AXCAddr.Bytes(),
 	)
-	ua.AVAXAddr = avaxAddr
+	ua.AXCAddr = avaxAddr
 	return ua, err
 }
 

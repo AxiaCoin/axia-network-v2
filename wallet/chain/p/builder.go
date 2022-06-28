@@ -190,7 +190,7 @@ func (b *builder) NewBaseTx(
 	options ...common.Option,
 ) (*platformvm.UnsignedCreateSubnetTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.backend.AVAXAssetID(): b.backend.CreateSubnetTxFee(),
+		b.backend.AXCAssetID(): b.backend.CreateSubnetTxFee(),
 	}
 	for _, out := range outputs {
 		assetID := out.AssetID()
@@ -230,7 +230,7 @@ func (b *builder) NewAddValidatorTx(
 ) (*platformvm.UnsignedAddValidatorTx, error) {
 	toBurn := map[ids.ID]uint64{}
 	toStake := map[ids.ID]uint64{
-		b.backend.AVAXAssetID(): validator.Wght,
+		b.backend.AXCAssetID(): validator.Wght,
 	}
 	ops := common.NewOptions(options)
 	inputs, baseOutputs, stakeOutputs, err := b.spend(toBurn, toStake, ops)
@@ -259,7 +259,7 @@ func (b *builder) NewAddSubnetValidatorTx(
 	options ...common.Option,
 ) (*platformvm.UnsignedAddSubnetValidatorTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.backend.AVAXAssetID(): b.backend.CreateSubnetTxFee(),
+		b.backend.AXCAssetID(): b.backend.CreateSubnetTxFee(),
 	}
 	toStake := map[ids.ID]uint64{}
 	ops := common.NewOptions(options)
@@ -293,7 +293,7 @@ func (b *builder) NewAddDelegatorTx(
 ) (*platformvm.UnsignedAddDelegatorTx, error) {
 	toBurn := map[ids.ID]uint64{}
 	toStake := map[ids.ID]uint64{
-		b.backend.AVAXAssetID(): validator.Wght,
+		b.backend.AXCAssetID(): validator.Wght,
 	}
 	ops := common.NewOptions(options)
 	inputs, baseOutputs, stakeOutputs, err := b.spend(toBurn, toStake, ops)
@@ -325,7 +325,7 @@ func (b *builder) NewCreateChainTx(
 	options ...common.Option,
 ) (*platformvm.UnsignedCreateChainTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.backend.AVAXAssetID(): b.backend.CreateSubnetTxFee(),
+		b.backend.AXCAssetID(): b.backend.CreateSubnetTxFee(),
 	}
 	toStake := map[ids.ID]uint64{}
 	ops := common.NewOptions(options)
@@ -362,7 +362,7 @@ func (b *builder) NewCreateSubnetTx(
 	options ...common.Option,
 ) (*platformvm.UnsignedCreateSubnetTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.backend.AVAXAssetID(): b.backend.CreateSubnetTxFee(),
+		b.backend.AXCAssetID(): b.backend.CreateSubnetTxFee(),
 	}
 	toStake := map[ids.ID]uint64{}
 	ops := common.NewOptions(options)
@@ -398,7 +398,7 @@ func (b *builder) NewImportTx(
 	var (
 		addrs           = ops.Addresses(b.addrs)
 		minIssuanceTime = ops.MinIssuanceTime()
-		avaxAssetID     = b.backend.AVAXAssetID()
+		avaxAssetID     = b.backend.AXCAssetID()
 		txFee           = b.backend.BaseTxFee()
 
 		importedInputs = make([]*avax.TransferableInput, 0, len(utxos))
@@ -407,7 +407,7 @@ func (b *builder) NewImportTx(
 	// Iterate over the unlocked UTXOs
 	for _, utxo := range utxos {
 		if utxo.AssetID() != avaxAssetID {
-			// Currently - only AVAX is allowed to be imported to the Core-chain
+			// Currently - only AXC is allowed to be imported to the Core-chain
 			continue
 		}
 
@@ -490,7 +490,7 @@ func (b *builder) NewExportTx(
 	options ...common.Option,
 ) (*platformvm.UnsignedExportTx, error) {
 	toBurn := map[ids.ID]uint64{
-		b.backend.AVAXAssetID(): b.backend.BaseTxFee(),
+		b.backend.AXCAssetID(): b.backend.BaseTxFee(),
 	}
 	for _, out := range outputs {
 		assetID := out.AssetID()

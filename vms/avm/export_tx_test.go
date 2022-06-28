@@ -806,7 +806,7 @@ func TestExportTxSemanticVerify(t *testing.T) {
 		ctx.Lock.Unlock()
 	}()
 
-	genesisTx := GetAVAXTxFromGenesisTest(genesisBytes, t)
+	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 	avaxID := genesisTx.ID()
 	rawTx := &Tx{UnsignedTx: &ExportTx{
 		BaseTx: BaseTx{BaseTx: avax.BaseTx{
@@ -866,7 +866,7 @@ func TestExportTxSemanticVerifyUnknownCredFx(t *testing.T) {
 		ctx.Lock.Unlock()
 	}()
 
-	genesisTx := GetAVAXTxFromGenesisTest(genesisBytes, t)
+	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 	avaxID := genesisTx.ID()
 	rawTx := &Tx{UnsignedTx: &ExportTx{
 		BaseTx: BaseTx{BaseTx: avax.BaseTx{
@@ -926,7 +926,7 @@ func TestExportTxSemanticVerifyMissingUTXO(t *testing.T) {
 		ctx.Lock.Unlock()
 	}()
 
-	genesisTx := GetAVAXTxFromGenesisTest(genesisBytes, t)
+	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 	avaxID := genesisTx.ID()
 	rawTx := &Tx{UnsignedTx: &ExportTx{
 		BaseTx: BaseTx{BaseTx: avax.BaseTx{
@@ -987,7 +987,7 @@ func TestExportTxSemanticVerifyInvalidAssetID(t *testing.T) {
 		ctx.Lock.Unlock()
 	}()
 
-	genesisTx := GetAVAXTxFromGenesisTest(genesisBytes, t)
+	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 	avaxID := genesisTx.ID()
 	assetID := avaxID
 	// so the inputs below are sorted
@@ -1002,7 +1002,7 @@ func TestExportTxSemanticVerifyInvalidAssetID(t *testing.T) {
 						TxID:        avaxID,
 						OutputIndex: 0,
 					},
-					Asset: avax.Asset{ID: vm.ctx.AVAXAssetID},
+					Asset: avax.Asset{ID: vm.ctx.AXCAssetID},
 					In: &secp256k1fx.TransferInput{
 						Amt:   startBalance,
 						Input: secp256k1fx.Input{SigIndices: []uint32{0}},
@@ -1084,7 +1084,7 @@ func TestExportTxSemanticVerifyInvalidFx(t *testing.T) {
 	}
 	ctx.Keystore = userKeystore.NewBlockchainKeyStore(ctx.ChainID)
 
-	genesisTx := GetAVAXTxFromGenesisTest(genesisBytes, t)
+	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 
 	avaxID := genesisTx.ID()
 
@@ -1192,7 +1192,7 @@ func TestExportTxSemanticVerifyInvalidTransfer(t *testing.T) {
 		ctx.Lock.Unlock()
 	}()
 
-	genesisTx := GetAVAXTxFromGenesisTest(genesisBytes, t)
+	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 	avaxID := genesisTx.ID()
 	rawTx := &Tx{UnsignedTx: &ExportTx{
 		BaseTx: BaseTx{BaseTx: avax.BaseTx{
@@ -1258,7 +1258,7 @@ func TestIssueExportTx(t *testing.T) {
 	ctx := NewContext(t)
 	ctx.SharedMemory = m.NewSharedMemory(chainID)
 
-	genesisTx := GetAVAXTxFromGenesisTest(genesisBytes, t)
+	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 
 	avaxID := genesisTx.ID()
 
@@ -1387,7 +1387,7 @@ func TestClearForceAcceptedExportTx(t *testing.T) {
 	ctx := NewContext(t)
 	ctx.SharedMemory = m.NewSharedMemory(chainID)
 
-	genesisTx := GetAVAXTxFromGenesisTest(genesisBytes, t)
+	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 
 	avaxID := genesisTx.ID()
 	platformID := ids.Empty.Prefix(0)

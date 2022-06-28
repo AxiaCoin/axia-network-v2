@@ -296,7 +296,7 @@ func TestIssueImportTx(t *testing.T) {
 	ctx.SharedMemory = m.NewSharedMemory(chainID)
 	peerSharedMemory := m.NewSharedMemory(platformChainID)
 
-	genesisTx := GetAVAXTxFromGenesisTest(genesisBytes, t)
+	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 
 	avaxID := genesisTx.ID()
 	platformID := ids.Empty.Prefix(0)
@@ -511,7 +511,7 @@ func TestForceAcceptImportTx(t *testing.T) {
 
 	key := keys[0]
 
-	genesisTx := GetAVAXTxFromGenesisTest(genesisBytes, t)
+	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 
 	utxoID := avax.UTXOID{
 		TxID: ids.ID{

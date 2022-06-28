@@ -88,7 +88,7 @@ func (tx *UnsignedCreateSubnetTx) Execute(
 	// Verify the flowcheck
 	timestamp := vs.GetTimestamp()
 	createSubnetTxFee := vm.getCreateSubnetTxFee(timestamp)
-	if err := vm.semanticVerifySpend(vs, tx, tx.Ins, tx.Outs, stx.Creds, createSubnetTxFee, vm.ctx.AVAXAssetID); err != nil {
+	if err := vm.semanticVerifySpend(vs, tx, tx.Ins, tx.Outs, stx.Creds, createSubnetTxFee, vm.ctx.AXCAssetID); err != nil {
 		return nil, err
 	}
 
@@ -96,7 +96,7 @@ func (tx *UnsignedCreateSubnetTx) Execute(
 	consumeInputs(vs, tx.Ins)
 	// Produce the UTXOS
 	txID := tx.ID()
-	produceOutputs(vs, txID, vm.ctx.AVAXAssetID, tx.Outs)
+	produceOutputs(vs, txID, vm.ctx.AXCAssetID, tx.Outs)
 	// Attempt to the new chain to the database
 	vs.AddSubnet(stx)
 
