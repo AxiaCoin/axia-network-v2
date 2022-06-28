@@ -170,7 +170,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 ### Miscellaneous
 
 - Added the ability to load new VM plugins dynamically.
-- Implemented Swap-chain + Core-chain wallet that can be used to build and sign transactions. Without providing a full node private keys.
+- Implemented Swap-chain + Core-chain axiawallet that can be used to build and sign transactions. Without providing a full node private keys.
 - Integrated e2e testing to the repo to avoid maintaining multiple synced repos.
 - Fixed `proposervm` height indexing check to correctly mark the indexer as repaired.
 - Introduced message throttling overrides to be used in future improvements to reliably send messages.

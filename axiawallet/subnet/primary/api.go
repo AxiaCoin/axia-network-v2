@@ -16,8 +16,8 @@ import (
 	"github.com/axiacoin/axia-network-v2/vms/avm"
 	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm"
-	"github.com/axiacoin/axia-network-v2/wallet/chain/p"
-	"github.com/axiacoin/axia-network-v2/wallet/chain/x"
+	"github.com/axiacoin/axia-network-v2/axiawallet/chain/p"
+	"github.com/axiacoin/axia-network-v2/axiawallet/chain/x"
 )
 
 const (
