@@ -35,17 +35,17 @@ if version_lt "$(go_version)" "$go_version_minimum"; then
 fi
 
 # Axia root folder
-AVALANCHE_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )"; cd .. && pwd )
+AXIA_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )"; cd .. && pwd )
 # Load the versions
-source "$AVALANCHE_PATH"/scripts/versions.sh
+source "$AXIA_PATH"/scripts/versions.sh
 # Load the constants
-source "$AVALANCHE_PATH"/scripts/constants.sh
+source "$AXIA_PATH"/scripts/constants.sh
 
 # Build with rocksdb allowed only if the environment variable ROCKSDBALLOWED is set
 if [ -z ${ROCKSDBALLOWED+x} ]; then
     echo "Building Axia..."
-    go build -ldflags "-X github.com/axiacoin/axia-network-v2/version.GitCommit=$git_commit $static_ld_flags" -o "$axia_path" "$AVALANCHE_PATH/main/"*.go
+    go build -ldflags "-X github.com/axiacoin/axia-network-v2/version.GitCommit=$git_commit $static_ld_flags" -o "$axia_path" "$AXIA_PATH/main/"*.go
 else
     echo "Building Axia with rocksdb enabled..."
-    go build -tags rocksdballowed -ldflags "-X github.com/axiacoin/axia-network-v2/version.GitCommit=$git_commit $static_ld_flags" -o "$axia_path" "$AVALANCHE_PATH/main/"*.go
+    go build -tags rocksdballowed -ldflags "-X github.com/axiacoin/axia-network-v2/version.GitCommit=$git_commit $static_ld_flags" -o "$axia_path" "$AXIA_PATH/main/"*.go
 fi

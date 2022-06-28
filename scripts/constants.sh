@@ -5,14 +5,14 @@
 # Use the versions.sh to specify versions
 #
 
-AVALANCHE_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )"; cd .. && pwd ) # Directory above this script
+AXIA_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )"; cd .. && pwd ) # Directory above this script
 
 # Set the PATHS
 GOPATH="$(go env GOPATH)"
 coreth_path="$GOPATH/pkg/mod/github.com/ava-labs/coreth@$coreth_version"
 
 # Where Axia binary goes
-build_dir="$AVALANCHE_PATH/build"
+build_dir="$AXIA_PATH/build"
 axia_path="$build_dir/axia"
 plugin_dir="$build_dir/plugins"
 evm_path="$plugin_dir/evm"
@@ -26,7 +26,7 @@ axia_dockerhub_repo=${DOCKER_REPO:-"axia"}
 # TODO: fix "fatal: No names found, cannot describe anything" in github CI
 current_branch=$(git symbolic-ref -q --short HEAD || git describe --tags --exact-match || true)
 
-git_commit=${AVALANCHEGO_COMMIT:-$( git rev-list -1 HEAD )}
+git_commit=${AXIAGO_COMMIT:-$( git rev-list -1 HEAD )}
 
 # Static compilation
 static_ld_flags=''
