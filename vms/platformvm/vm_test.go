@@ -96,7 +96,7 @@ var (
 	testSubnet1ControlKeys []*crypto.PrivateKeySECP256K1R
 
 	swapChainID = ids.Empty.Prefix(0)
-	cChainID = ids.Empty.Prefix(1)
+	axChainID = ids.Empty.Prefix(1)
 )
 
 var (
@@ -153,8 +153,8 @@ func defaultContext() *snow.Context {
 		aliaser.Alias(constants.PlatformChainID, constants.PlatformChainID.String()),
 		aliaser.Alias(swapChainID, "X"),
 		aliaser.Alias(swapChainID, swapChainID.String()),
-		aliaser.Alias(cChainID, "C"),
-		aliaser.Alias(cChainID, cChainID.String()),
+		aliaser.Alias(axChainID, "C"),
+		aliaser.Alias(axChainID, axChainID.String()),
 	)
 	if errs.Errored() {
 		panic(errs.Err)
@@ -165,7 +165,7 @@ func defaultContext() *snow.Context {
 		chainsToSubnet: map[ids.ID]ids.ID{
 			constants.PlatformChainID: constants.PrimaryNetworkID,
 			swapChainID:                  constants.PrimaryNetworkID,
-			cChainID:                  constants.PrimaryNetworkID,
+			axChainID:                  constants.PrimaryNetworkID,
 		},
 	}
 	return ctx

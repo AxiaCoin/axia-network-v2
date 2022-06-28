@@ -557,14 +557,14 @@ func (n *Node) initChainManager(avaxAssetID ids.ID) error {
 	if err != nil {
 		return err
 	}
-	cChainID := createEVMTx.ID()
+	axChainID := createEVMTx.ID()
 
 	// If any of these chains die, the node shuts down
 	criticalChains := ids.Set{}
 	criticalChains.Add(
 		constants.PlatformChainID,
 		swapChainID,
-		cChainID,
+		axChainID,
 	)
 
 	// Manages network timeouts

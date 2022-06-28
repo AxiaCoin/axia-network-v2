@@ -20,7 +20,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 - Introduced time based windowing of accepted Core-chain block heights to ensure that local networks update the proposer list timely in the `proposervm`.
 - Improved selection of decision transactions from the mempool.
 
-### RPCChainVM
+### RPAXChainVM
 
 - Increased `buf` version to `v1.3.1`.
 - Migrated all proto definitions to a dedicated `/proto` folder.
@@ -163,7 +163,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 
 ### Coreth
 
-- Increased `FeeHistory` maximum historical limit to improve MetaMask UI on the C-Chain.
+- Increased `FeeHistory` maximum historical limit to improve MetaMask UI on the AX-Chain.
 - Enabled chain state metrics.
 - Migrated go-ethereum v1.10.16 changes.
 
@@ -215,7 +215,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 
 This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axia-network-v2/releases/tag/v1.7.0). It is optional, but encouraged.
 
-**The first startup of the C-Chain will take a few minutes longer due to an index update.**
+**The first startup of the AX-Chain will take a few minutes longer due to an index update.**
 
 ### Consensus
 
@@ -228,7 +228,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 
 ### Coreth
 
-- Added an index mapping height to the list of accepted atomic operations at that height in a trie. Generating this index will cause the node to take a few minutes longer to startup the C-Chain for the first restart.
+- Added an index mapping height to the list of accepted atomic operations at that height in a trie. Generating this index will cause the node to take a few minutes longer to startup the AX-Chain for the first restart.
 - Updated Geth dependency to `v1.10.15`.
 - Updated `networkID` to match `chainID`.
 
@@ -240,7 +240,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 - Added support for multiple address balance lookups in the `platformvm`.
 - Refactored `platformvm` and `avm` keystore users to reuse similar code.
 
-### RPCChainVM
+### RPAXChainVM
 
 - Returned a `500 InternalServerError` if an unexpected gRPC error occurs during the handling of an HTTP request to a plugin.
 - Updated gRPC server's max message size to enable responses larger than 4MiB from the plugin's handling of an HTTP request.
@@ -275,7 +275,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 
 ### Coreth
 
-- Added an index mapping height to the list of accepted atomic transactions at that height. Generating this index will cause the node to take approximately 2 minutes longer to startup the C-Chain for the first restart.
+- Added an index mapping height to the list of accepted atomic transactions at that height. Generating this index will cause the node to take approximately 2 minutes longer to startup the AX-Chain for the first restart.
 - Fixed bug in base fee estimation API that impacted custom defined networks.
 - Decreased minimum transaction re-gossiping interval from 1s to 500ms.
 - Removed websocket handler from the static vm APIs.
@@ -341,7 +341,7 @@ This update is backwards compatible with [v1.7.0](https://github.com/axiacoin/ax
 
 ## [v1.7.0](https://github.com/axiacoin/axia-network-v2/releases/tag/v1.7.0)
 
-This upgrade adds support for issuing multiple atomic transactions into a single block and directly transferring assets between the Core-chain and the C-chain.
+This upgrade adds support for issuing multiple atomic transactions into a single block and directly transferring assets between the Core-chain and the AX-chain.
 
 The changes in the upgrade go into effect at 1 PM EST, December 2nd 2021 on Mainnet. One should upgrade their node before the changes go into effect, otherwise they may experience loss of uptime.
 
@@ -355,7 +355,7 @@ The changes in the upgrade go into effect at 1 PM EST, December 2nd 2021 on Main
 ### PlatformVM
 
 - Enabled `AtomicTx`s to be issued into `StandardBlock`s and deprecated `AtomicBlock`s.
-- Added the ability to export/import AVAX to/from the C-chain.
+- Added the ability to export/import AVAX to/from the AX-chain.
 
 ### Coreth
 
@@ -367,7 +367,7 @@ The changes in the upgrade go into effect at 1 PM EST, December 2nd 2021 on Main
 
 - Removed storage of undecided blocks.
 
-### RPCChainVM
+### RPAXChainVM
 
 - Added support for metrics to be reported by plugin VMs.
 
@@ -430,7 +430,7 @@ This version is backwards compatible to [v1.6.0](https://github.com/axiacoin/axi
 - Added method `GetContainerByID` to client implementation.
 - Client methods now return `[]byte` rather than `string` representations of a container.
 
-### C-Chain
+### AX-Chain
 
 - Updated Geth dependency to 1.10.11.
 - Added a new admin API for updating the log level and measuring performance.
