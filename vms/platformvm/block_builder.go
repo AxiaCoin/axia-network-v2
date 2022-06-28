@@ -208,8 +208,8 @@ func (m *blockBuilder) BuildBlock() (snowman.Block, error) {
 	// If the chain timestamp is too far in the past to issue this transaction
 	// but according to local time, it's ready to be issued, then attempt to
 	// advance the timestamp, so it can be issued.
-	maxChainStartTime := preferredState.GetTimestamp().Add(maxFutureStartTime)
-	if startTime.After(maxChainStartTime) {
+	maswapChainStartTime := preferredState.GetTimestamp().Add(maxFutureStartTime)
+	if startTime.After(maswapChainStartTime) {
 		m.AddProposalTx(tx)
 
 		advanceTimeTx, err := m.vm.newAdvanceTimeTx(m.vm.clock.Time())

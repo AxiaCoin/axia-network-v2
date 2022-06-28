@@ -30,12 +30,12 @@ func ExampleWallet() {
 	}
 	fmt.Printf("synced wallet in %s\n", time.Since(walletSyncStartTime))
 
-	// Get the Core-chain and the X-chain wallets
+	// Get the Core-chain and the Swap-chain wallets
 	pWallet := wallet.P()
 	xWallet := wallet.X()
 
 	// Pull out useful constants to use when issuing transactions.
-	xChainID := xWallet.BlockchainID()
+	swapChainID := xWallet.BlockchainID()
 	avaxAssetID := xWallet.AVAXAssetID()
 	owner := &secp256k1fx.OutputOwners{
 		Threshold: 1,
@@ -66,9 +66,9 @@ func ExampleWallet() {
 	}
 	fmt.Printf("issued X->P export %s in %s\n", exportTxID, time.Since(exportStartTime))
 
-	// Import the 100 schmeckles from the X-chain into the Core-chain.
+	// Import the 100 schmeckles from the Swap-chain into the Core-chain.
 	importStartTime := time.Now()
-	importTxID, err := pWallet.IssueImportTx(xChainID, owner)
+	importTxID, err := pWallet.IssueImportTx(swapChainID, owner)
 	if err != nil {
 		fmt.Printf("failed to issue X->P import transaction with: %s\n", err)
 		return

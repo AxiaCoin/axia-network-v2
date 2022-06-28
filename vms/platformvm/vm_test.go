@@ -95,7 +95,7 @@ var (
 	testSubnet1            *UnsignedCreateSubnetTx
 	testSubnet1ControlKeys []*crypto.PrivateKeySECP256K1R
 
-	xChainID = ids.Empty.Prefix(0)
+	swapChainID = ids.Empty.Prefix(0)
 	cChainID = ids.Empty.Prefix(1)
 )
 
@@ -143,7 +143,7 @@ func (sn *snLookup) SubnetID(chainID ids.ID) (ids.ID, error) {
 func defaultContext() *snow.Context {
 	ctx := snow.DefaultContextTest()
 	ctx.NetworkID = testNetworkID
-	ctx.XChainID = xChainID
+	ctx.SwapChainID = swapChainID
 	ctx.AVAXAssetID = avaxAssetID
 	aliaser := ids.NewAliaser()
 
@@ -151,8 +151,8 @@ func defaultContext() *snow.Context {
 	errs.Add(
 		aliaser.Alias(constants.PlatformChainID, "P"),
 		aliaser.Alias(constants.PlatformChainID, constants.PlatformChainID.String()),
-		aliaser.Alias(xChainID, "X"),
-		aliaser.Alias(xChainID, xChainID.String()),
+		aliaser.Alias(swapChainID, "X"),
+		aliaser.Alias(swapChainID, swapChainID.String()),
 		aliaser.Alias(cChainID, "C"),
 		aliaser.Alias(cChainID, cChainID.String()),
 	)
@@ -164,7 +164,7 @@ func defaultContext() *snow.Context {
 	ctx.SNLookup = &snLookup{
 		chainsToSubnet: map[ids.ID]ids.ID{
 			constants.PlatformChainID: constants.PrimaryNetworkID,
-			xChainID:                  constants.PrimaryNetworkID,
+			swapChainID:                  constants.PrimaryNetworkID,
 			cChainID:                  constants.PrimaryNetworkID,
 		},
 	}
@@ -1564,10 +1564,10 @@ func TestAtomicImport(t *testing.T) {
 	}
 	vm.ctx.SharedMemory = m.NewSharedMemory(vm.ctx.ChainID)
 	vm.AtomicUTXOManager = avax.NewAtomicUTXOManager(vm.ctx.SharedMemory, Codec)
-	peerSharedMemory := m.NewSharedMemory(vm.ctx.XChainID)
+	peerSharedMemory := m.NewSharedMemory(vm.ctx.SwapChainID)
 
 	if _, err := vm.newImportTx(
-		vm.ctx.XChainID,
+		vm.ctx.SwapChainID,
 		recipientKey.PublicKey().Address(),
 		[]*crypto.PrivateKeySECP256K1R{keys[0]},
 		ids.ShortEmpty, // change addr
@@ -1604,7 +1604,7 @@ func TestAtomicImport(t *testing.T) {
 	}
 
 	tx, err := vm.newImportTx(
-		vm.ctx.XChainID,
+		vm.ctx.SwapChainID,
 		recipientKey.PublicKey().Address(),
 		[]*crypto.PrivateKeySECP256K1R{recipientKey},
 		ids.ShortEmpty, // change addr
@@ -1627,7 +1627,7 @@ func TestAtomicImport(t *testing.T) {
 		t.Fatalf("status should be Committed but is %s", txStatus)
 	}
 	inputID = utxoID.InputID()
-	if _, err := vm.ctx.SharedMemory.Get(vm.ctx.XChainID, [][]byte{inputID[:]}); err == nil {
+	if _, err := vm.ctx.SharedMemory.Get(vm.ctx.SwapChainID, [][]byte{inputID[:]}); err == nil {
 		t.Fatalf("shouldn't have been able to read the utxo")
 	}
 }
@@ -1648,7 +1648,7 @@ func TestOptimisticAtomicImport(t *testing.T) {
 			NetworkID:    vm.ctx.NetworkID,
 			BlockchainID: vm.ctx.ChainID,
 		}},
-		SourceChain: vm.ctx.XChainID,
+		SourceChain: vm.ctx.SwapChainID,
 		ImportedInputs: []*avax.TransferableInput{{
 			UTXOID: avax.UTXOID{
 				TxID:        ids.Empty.Prefix(1),
@@ -2558,7 +2558,7 @@ func TestRejectedStateRegressionInvalidValidatorTimestamp(t *testing.T) {
 			NetworkID:    vm.ctx.NetworkID,
 			BlockchainID: vm.ctx.ChainID,
 		}},
-		SourceChain: vm.ctx.XChainID,
+		SourceChain: vm.ctx.SwapChainID,
 		ImportedInputs: []*avax.TransferableInput{
 			{
 				UTXOID: utxo.UTXOID,
@@ -2600,7 +2600,7 @@ func TestRejectedStateRegressionInvalidValidatorTimestamp(t *testing.T) {
 
 	vm.ctx.SharedMemory = m.NewSharedMemory(vm.ctx.ChainID)
 	vm.AtomicUTXOManager = avax.NewAtomicUTXOManager(vm.ctx.SharedMemory, Codec)
-	peerSharedMemory := m.NewSharedMemory(vm.ctx.XChainID)
+	peerSharedMemory := m.NewSharedMemory(vm.ctx.SwapChainID)
 
 	utxoBytes, err := Codec.Marshal(CodecVersion, utxo)
 	assert.NoError(err)
@@ -2830,7 +2830,7 @@ func TestRejectedStateRegressionInvalidValidatorReward(t *testing.T) {
 			NetworkID:    vm.ctx.NetworkID,
 			BlockchainID: vm.ctx.ChainID,
 		}},
-		SourceChain: vm.ctx.XChainID,
+		SourceChain: vm.ctx.SwapChainID,
 		ImportedInputs: []*avax.TransferableInput{
 			{
 				UTXOID: utxo.UTXOID,
@@ -2872,7 +2872,7 @@ func TestRejectedStateRegressionInvalidValidatorReward(t *testing.T) {
 
 	vm.ctx.SharedMemory = m.NewSharedMemory(vm.ctx.ChainID)
 	vm.AtomicUTXOManager = avax.NewAtomicUTXOManager(vm.ctx.SharedMemory, Codec)
-	peerSharedMemory := m.NewSharedMemory(vm.ctx.XChainID)
+	peerSharedMemory := m.NewSharedMemory(vm.ctx.SwapChainID)
 
 	utxoBytes, err := Codec.Marshal(CodecVersion, utxo)
 	assert.NoError(err)

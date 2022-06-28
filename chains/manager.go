@@ -150,7 +150,7 @@ type ManagerConfig struct {
 	Keystore                    keystore.Keystore
 	AtomicMemory                *atomic.Memory
 	AVAXAssetID                 ids.ID
-	XChainID                    ids.ID
+	SwapChainID                    ids.ID
 	CriticalChains              ids.Set         // Chains that can't exit gracefully
 	WhitelistedSubnets          ids.Set         // Subnets to validate
 	TimeoutManager              timeout.Manager // Manages request timeouts when sending messages to other validators
@@ -359,7 +359,7 @@ func (m *manager) buildChain(chainParams ChainParameters, sb Subnet) (*chain, er
 			ChainID:   chainParams.ID,
 			NodeID:    m.NodeID,
 
-			XChainID:    m.XChainID,
+			SwapChainID:    m.SwapChainID,
 			AVAXAssetID: m.AVAXAssetID,
 
 			Log:          chainLog,
@@ -584,7 +584,7 @@ func (m *manager) createAvalancheChain(
 			VM:                  vm,
 			DB:                  vertexDB,
 			Log:                 ctx.Log,
-			XChainMigrationTime: version.GetXChainMigrationTime(ctx.NetworkID),
+			SwapChainMigrationTime: version.GetSwapChainMigrationTime(ctx.NetworkID),
 		},
 	)
 	if err := vm.Initialize(

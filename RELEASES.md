@@ -88,13 +88,13 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 
 ### Miscellaneous
 
-- Fixed incorrect `BlockchainID` usage in the X-chain `ImportTx` builder.
+- Fixed incorrect `BlockchainID` usage in the Swap-chain `ImportTx` builder.
 - Fixed incorrect `OutputOwners` in the Core-chain `ImportTx` builder.
 - Improved FD limit error logging and warnings.
 - Rounded bootstrapping ETAs to the nearest second.
 - Added gossip config support to the subnet configs.
 - Optimized various queue removals for improved memory freeing.
-- Added a basic X-chain E2E usage test to the new testing framework.
+- Added a basic Swap-chain E2E usage test to the new testing framework.
 
 ## [v1.7.7](https://github.com/axiacoin/axia-network-v2/releases/tag/v1.7.7)
 
@@ -170,7 +170,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 ### Miscellaneous
 
 - Added the ability to load new VM plugins dynamically.
-- Implemented X-chain + Core-chain wallet that can be used to build and sign transactions. Without providing a full node private keys.
+- Implemented Swap-chain + Core-chain wallet that can be used to build and sign transactions. Without providing a full node private keys.
 - Integrated e2e testing to the repo to avoid maintaining multiple synced repos.
 - Fixed `proposervm` height indexing check to correctly mark the indexer as repaired.
 - Introduced message throttling overrides to be used in future improvements to reliably send messages.
@@ -223,7 +223,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 - Updated bootstrapping logs to no longer reset counters after a node restart.
 - Added bootstrapping ETAs for fetching Snowman blocks and executing operations.
 - Renamed the `MultiPut` message to the `Ancestors` message to match other message naming conventions.
-- Introduced Whitelist conflicts into the Snowstorm specification that will be used in future X-chain improvements.
+- Introduced Whitelist conflicts into the Snowstorm specification that will be used in future Swap-chain improvements.
 - Refactored the separation between the Bootstrapping engine and the Consensus engine to support Fast-Sync.
 
 ### Coreth
@@ -271,7 +271,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 
 ### Consensus
 
-- Introduced a notion of vertex conflicts that will be used in future X-chain improvements.
+- Introduced a notion of vertex conflicts that will be used in future Swap-chain improvements.
 
 ### Coreth
 
