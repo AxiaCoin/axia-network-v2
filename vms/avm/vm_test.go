@@ -91,7 +91,7 @@ func NewContext(tb testing.TB) *snow.Context {
 	errs.Add(
 		aliaser.Alias(chainID, "Swap"),
 		aliaser.Alias(chainID, chainID.String()),
-		aliaser.Alias(platformChainID, "P"),
+		aliaser.Alias(platformChainID, "Core"),
 		aliaser.Alias(platformChainID, platformChainID.String()),
 	)
 	if errs.Errored() {

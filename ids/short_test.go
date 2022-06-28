@@ -12,7 +12,7 @@ func TestShortString(t *testing.T) {
 	id := ShortID{1}
 
 	xPrefixedID := id.PrefixedString("Swap-")
-	pPrefixedID := id.PrefixedString("P-")
+	pPrefixedID := id.PrefixedString("Core-")
 
 	newID, err := ShortFromPrefixedString(xPrefixedID, "Swap-")
 	if err != nil {
