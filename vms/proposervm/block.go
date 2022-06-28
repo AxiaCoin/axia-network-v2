@@ -24,12 +24,12 @@ var (
 	errUnexpectedBlockType      = errors.New("unexpected proposer block type")
 	errInnerParentMismatch      = errors.New("inner parentID didn't match expected parent")
 	errTimeNotMonotonic         = errors.New("time must monotonically increase")
-	errPChainHeightNotMonotonic = errors.New("non monotonically increasing P-chain height")
-	errPChainHeightNotReached   = errors.New("block P-chain height larger than current P-chain height")
+	errCoreChainHeightNotMonotonic = errors.New("non monotonically increasing Core-chain height")
+	errCoreChainHeightNotReached   = errors.New("block Core-chain height larger than current Core-chain height")
 	errTimeTooAdvanced          = errors.New("time is too far advanced")
 	errProposerWindowNotStarted = errors.New("proposer window hasn't started")
 	errProposersNotActivated    = errors.New("proposers haven't been activated yet")
-	errPChainHeightTooLow       = errors.New("block P-chain height is too low")
+	errCoreChainHeightTooLow       = errors.New("block Core-chain height is too low")
 )
 
 type Block interface {
@@ -43,7 +43,7 @@ type Block interface {
 
 	buildChild() (Block, error)
 
-	pChainHeight() (uint64, error)
+	coreChainHeight() (uint64, error)
 }
 
 type PostForkBlock interface {
@@ -68,22 +68,22 @@ func (p *postForkCommonComponents) Height() uint64 {
 
 // Verify returns nil if:
 // 1) [p]'s inner block is not an oracle block
-// 2) [child]'s P-Chain height >= [parentPChainHeight]
+// 2) [child]'s Core-Chain height >= [parentCoreChainHeight]
 // 3) [p]'s inner block is the parent of [c]'s inner block
 // 4) [child]'s timestamp isn't before [p]'s timestamp
 // 5) [child]'s timestamp is within the skew bound
-// 6) [childPChainHeight] <= the current P-Chain height
+// 6) [childCoreChainHeight] <= the current Core-Chain height
 // 7) [child]'s timestamp is within its proposer's window
 // 8) [child] has a valid signature from its proposer
 // 9) [child]'s inner block is valid
-func (p *postForkCommonComponents) Verify(parentTimestamp time.Time, parentPChainHeight uint64, child *postForkBlock) error {
+func (p *postForkCommonComponents) Verify(parentTimestamp time.Time, parentCoreChainHeight uint64, child *postForkBlock) error {
 	if err := verifyIsNotOracleBlock(p.innerBlk); err != nil {
 		return err
 	}
 
-	childPChainHeight := child.PChainHeight()
-	if childPChainHeight < parentPChainHeight {
-		return errPChainHeightNotMonotonic
+	childCoreChainHeight := child.CoreChainHeight()
+	if childCoreChainHeight < parentCoreChainHeight {
+		return errCoreChainHeightNotMonotonic
 	}
 
 	expectedInnerParentID := p.innerBlk.ID()
@@ -102,23 +102,23 @@ func (p *postForkCommonComponents) Verify(parentTimestamp time.Time, parentPChai
 		return errTimeTooAdvanced
 	}
 
-	// If the node is currently bootstrapping - we don't assume that the P-chain
+	// If the node is currently bootstrapping - we don't assume that the Core-chain
 	// has been synced up to this point yet.
 	if p.vm.bootstrapped {
 		childID := child.ID()
-		currentPChainHeight, err := p.vm.ctx.ValidatorState.GetCurrentHeight()
+		currentCoreChainHeight, err := p.vm.ctx.ValidatorState.GetCurrentHeight()
 		if err != nil {
-			p.vm.ctx.Log.Error("failed to get current P-Chain height while processing %s: %s",
+			p.vm.ctx.Log.Error("failed to get current Core-Chain height while processing %s: %s",
 				childID, err)
 			return err
 		}
-		if childPChainHeight > currentPChainHeight {
-			return errPChainHeightNotReached
+		if childCoreChainHeight > currentCoreChainHeight {
+			return errCoreChainHeightNotReached
 		}
 
 		childHeight := child.Height()
 		proposerID := child.Proposer()
-		minDelay, err := p.vm.Windower.Delay(childHeight, parentPChainHeight, proposerID)
+		minDelay, err := p.vm.Windower.Delay(childHeight, parentCoreChainHeight, proposerID)
 		if err != nil {
 			return err
 		}
@@ -145,7 +145,7 @@ func (p *postForkCommonComponents) Verify(parentTimestamp time.Time, parentPChai
 func (p *postForkCommonComponents) buildChild(
 	parentID ids.ID,
 	parentTimestamp time.Time,
-	parentPChainHeight uint64,
+	parentCoreChainHeight uint64,
 ) (Block, error) {
 	// Child's timestamp is the later of now and this block's timestamp
 	newTimestamp := p.vm.Time().Truncate(time.Second)
@@ -153,9 +153,9 @@ func (p *postForkCommonComponents) buildChild(
 		newTimestamp = parentTimestamp
 	}
 
-	// The child's P-Chain height is proposed as the optimal P-Chain height that
-	// is at least the parent's P-Chain height
-	pChainHeight, err := p.vm.optimalPChainHeight(parentPChainHeight)
+	// The child's Core-Chain height is proposed as the optimal Core-Chain height that
+	// is at least the parent's Core-Chain height
+	coreChainHeight, err := p.vm.optimalCoreChainHeight(parentCoreChainHeight)
 	if err != nil {
 		return nil, err
 	}
@@ -164,7 +164,7 @@ func (p *postForkCommonComponents) buildChild(
 	if delay < proposer.MaxDelay {
 		parentHeight := p.innerBlk.Height()
 		proposerID := p.vm.ctx.NodeID
-		minDelay, err := p.vm.Windower.Delay(parentHeight+1, parentPChainHeight, proposerID)
+		minDelay, err := p.vm.Windower.Delay(parentHeight+1, parentCoreChainHeight, proposerID)
 		if err != nil {
 			return nil, err
 		}
@@ -196,7 +196,7 @@ func (p *postForkCommonComponents) buildChild(
 		statelessChild, err = block.BuildUnsigned(
 			parentID,
 			newTimestamp,
-			pChainHeight,
+			coreChainHeight,
 			innerBlock.Bytes(),
 		)
 		if err != nil {
@@ -206,7 +206,7 @@ func (p *postForkCommonComponents) buildChild(
 		statelessChild, err = block.Build(
 			parentID,
 			newTimestamp,
-			pChainHeight,
+			coreChainHeight,
 			p.vm.ctx.StakingCertLeaf,
 			innerBlock.Bytes(),
 			p.vm.ctx.ChainID,

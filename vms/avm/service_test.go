@@ -1971,7 +1971,7 @@ func TestServiceGetUTXOs(t *testing.T) {
 			},
 		},
 		{
-			label: "get all P-chain UTXOs",
+			label: "get all Core-chain UTXOs",
 			count: numUTXOs,
 			args: &api.GetUTXOsArgs{
 				Addresses: []string{
@@ -1992,7 +1992,7 @@ func TestServiceGetUTXOs(t *testing.T) {
 			},
 		},
 		{
-			label: "get all P-chain UTXOs",
+			label: "get all Core-chain UTXOs",
 			count: numUTXOs,
 			args: &api.GetUTXOsArgs{
 				Addresses: []string{
