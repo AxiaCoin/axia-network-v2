@@ -212,7 +212,7 @@ type client struct {
 // NewClient returns a Client for interacting with the P Chain endpoint
 func NewClient(uri string) Client {
 	return &client{
-		requester: rpc.NewEndpointRequester(uri, "/ext/P", "platform"),
+		requester: rpc.NewEndpointRequester(uri, "/ext/Core", "platform"),
 	}
 }
 
