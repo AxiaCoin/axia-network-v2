@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="resources/AxiaLogoRed.png?raw=true">
+  <img src="https://axia.global/images/logotype/axia-logo.svg?raw=true">
 </div>
 
 ---
