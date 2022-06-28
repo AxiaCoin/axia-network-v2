@@ -252,7 +252,7 @@ This version is backwards compatible to [v1.7.0](https://github.com/axiacoin/axi
 - Added `--stake-supply-cap` which defaults to `720,000,000,000,000,000` nAXC.
 - Renamed `--bootstrap-multiput-max-containers-sent` to `--bootstrap-ancestors-max-containers-sent`.
 - Renamed `--bootstrap-multiput-max-containers-received` to `--bootstrap-ancestors-max-containers-received`.
-- Enforced that `--staking-enabled=false` can not be specified on public networks (`Fuji` and `Mainnet`).
+- Enforced that `--staking-enabled=false` can not be specified on public networks (`Test` and `Mainnet`).
 
 ### Metrics
 
