@@ -10,10 +10,10 @@ if ! [[ "$0" =~ scripts/tests.e2e.sh ]]; then
   exit 255
 fi
 
-AXIAGO_PATH=$1
-if [[ -z "${AXIAGO_PATH}" ]]; then
-  echo "Missing AXIAGO_PATH argument!"
-  echo "Usage: ${0} [AXIAGO_PATH]" >> /dev/stderr
+AXIA_PATH=$1
+if [[ -z "${AXIA_PATH}" ]]; then
+  echo "Missing AXIA_PATH argument!"
+  echo "Usage: ${0} [AXIA_PATH]" >> /dev/stderr
   exit 255
 fi
 
@@ -74,14 +74,14 @@ PID=${!}
 # --ginkgo.skip "\[Local\]"
 #
 # set "--enable-whitelist-vtx-tests" to explicitly enable/disable whitelist vtx tests
-echo "running e2e tests against the local cluster with ${AXIAGO_PATH}"
+echo "running e2e tests against the local cluster with ${AXIA_PATH}"
 ./tests/e2e/e2e.test \
 --ginkgo.v \
 --ginkgo.skip "\[Local\]" \
 --log-level debug \
 --network-runner-grpc-endpoint="0.0.0.0:12342" \
 --axia-log-level=INFO \
---axia-path=${AXIAGO_PATH} \
+--axia-path=${AXIA_PATH} \
 --enable-whitelist-vtx-tests=${ENABLE_WHITELIST_VTX_TESTS} || EXIT_CODE=$?
 
 kill ${PID}

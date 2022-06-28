@@ -26,7 +26,7 @@ axia_dockerhub_repo=${DOCKER_REPO:-"axia"}
 # TODO: fix "fatal: No names found, cannot describe anything" in github CI
 current_branch=$(git symbolic-ref -q --short HEAD || git describe --tags --exact-match || true)
 
-git_commit=${AXIAGO_COMMIT:-$( git rev-list -1 HEAD )}
+git_commit=${AXIA_COMMIT:-$( git rev-list -1 HEAD )}
 
 # Static compilation
 static_ld_flags=''
