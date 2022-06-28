@@ -15,7 +15,7 @@ import (
 )
 
 // PrivateKey-vmRQiZeXEXYMyJhEiqdC2z5JhuDbxL8ix9UVvjgMu2Er1NepE => P-local1g65uqn6t77p656w64023nh8nd9updzmxyymev2
-// PrivateKey-ewoqjP7PxY4yr3iLTpLisriqt94hdyDFNgchSxGGztUrTXtNN => X-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u
+// PrivateKey-ewoqjP7PxY4yr3iLTpLisriqt94hdyDFNgchSxGGztUrTXtNN => Swap-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u
 // 56289e99c94b6912bfc12adc093c9b51124f0dc54ac7a766b2bc5ccf558d8027 => 0x8db97C7cEcE249c2b98bDC0226Cc4C2A57BF52FC
 
 const (
@@ -35,7 +35,7 @@ var (
 		"allocations": [
 			{
 				"ethAddr": "0xb3d82b1367d362de99ab59a658165aff520cbd4d",
-				"axcAddr": "X-local1g65uqn6t77p656w64023nh8nd9updzmxyymev2",
+				"axcAddr": "Swap-local1g65uqn6t77p656w64023nh8nd9updzmxyymev2",
 				"initialAmount": 0,
 				"unlockSchedule": [
 					{
@@ -46,7 +46,7 @@ var (
 			},
 			{
 				"ethAddr": "0xb3d82b1367d362de99ab59a658165aff520cbd4d",
-				"axcAddr": "X-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u",
+				"axcAddr": "Swap-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u",
 				"initialAmount": 300000000000000000,
 				"unlockSchedule": [
 					{
@@ -60,7 +60,7 @@ var (
 			},
 			{
 				"ethAddr": "0xb3d82b1367d362de99ab59a658165aff520cbd4d",
-				"axcAddr": "X-local1ur873jhz9qnaqv5qthk5sn3e8nj3e0kmggalnu",
+				"axcAddr": "Swap-local1ur873jhz9qnaqv5qthk5sn3e8nj3e0kmggalnu",
 				"initialAmount": 10000000000000000,
 				"unlockSchedule": [
 					{
@@ -74,32 +74,32 @@ var (
 		"initialStakeDuration": 31536000,
 		"initialStakeDurationOffset": 5400,
 		"initialStakedFunds": [
-			"X-local1g65uqn6t77p656w64023nh8nd9updzmxyymev2"
+			"Swap-local1g65uqn6t77p656w64023nh8nd9updzmxyymev2"
 		],
 		"initialStakers": [
 			{
 				"nodeID": "NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg",
-				"rewardAddress": "X-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u",
+				"rewardAddress": "Swap-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u",
 				"delegationFee": 1000000
 			},
 			{
 				"nodeID": "NodeID-MFrZFVCXPv5iCn6M9K6XduxGTYp891xXZ",
-				"rewardAddress": "X-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u",
+				"rewardAddress": "Swap-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u",
 				"delegationFee": 500000
 			},
 			{
 				"nodeID": "NodeID-NFBbbJ4qCmNaCzeW7sxErhvWqvEQMnYcN",
-				"rewardAddress": "X-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u",
+				"rewardAddress": "Swap-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u",
 				"delegationFee": 250000
 			},
 			{
 				"nodeID": "NodeID-GWPcbFJZFfZreETSoWjPimr846mXEKCtu",
-				"rewardAddress": "X-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u",
+				"rewardAddress": "Swap-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u",
 				"delegationFee": 125000
 			},
 			{
 				"nodeID": "NodeID-P7oB2McjBGgW2NXXWVYjV8JEDFoW9xDE5",
-				"rewardAddress": "X-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u",
+				"rewardAddress": "Swap-local18jma8ppw3nhx5r4ap8clazz0dps7rv5u00z96u",
 				"delegationFee": 62500
 			}
 		],

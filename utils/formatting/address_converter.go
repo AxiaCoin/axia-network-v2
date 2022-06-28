@@ -4,7 +4,7 @@
 package formatting
 
 // ConvertAddresses converts a list of addresses with arbitrary chains and HRPs
-// (e.g. X-local1....) to a list of addresses with the provided format
+// (e.g. Swap-local1....) to a list of addresses with the provided format
 // (e.g. P-custom1...).
 func ConvertAddresses(destChain string, toHRP string, addresses []string) ([]string, error) {
 	convertedAddrs := make([]string, len(addresses))
