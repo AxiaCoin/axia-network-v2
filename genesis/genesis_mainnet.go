@@ -6,6 +6,7 @@ package genesis
 import (
 	"time"
 
+	"github.com/axiacoin/axia-network-v2/utils/uint128"
 	"github.com/axiacoin/axia-network-v2/utils/units"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/reward"
 )
@@ -175775,7 +175776,7 @@ var (
 		TxFeeConfig: TxFeeConfig{
 			TxFee:                 units.MilliAxc,
 			CreateAssetTxFee:      10 * units.MilliAxc,
-			CreateAllychainTxFee:     1 * units.Axc,
+			CreateAllychainTxFee:  1 * units.Axc,
 			CreateBlockchainTxFee: 1 * units.Axc,
 		},
 		StakingConfig: StakingConfig{
@@ -175790,7 +175791,7 @@ var (
 				MaxConsumptionRate: .12 * reward.PercentDenominator,
 				MinConsumptionRate: .10 * reward.PercentDenominator,
 				MintingPeriod:      365 * 24 * time.Hour,
-				SupplyCap:          720 * units.MegaAxc,
+				SupplyCap:          uint128.Zero.Add64(720 * units.MegaAxc),
 			},
 		},
 	}

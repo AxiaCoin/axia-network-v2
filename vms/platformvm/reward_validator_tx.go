@@ -127,10 +127,8 @@ func (tx *UnsignedRewardValidatorTx) Execute(
 
 	// If the reward is aborted, then the current supply should be decreased.
 	currentSupply := onAbortState.GetCurrentSupply()
-	newSupply, err := math.Sub64(currentSupply, stakerReward)
-	if err != nil {
-		return nil, nil, err
-	}
+	newSupply := currentSupply.Sub64(stakerReward)
+
 	onAbortState.SetCurrentSupply(newSupply)
 
 	var (

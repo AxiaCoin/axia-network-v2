@@ -42,6 +42,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/utils/profiler"
 	"github.com/axiacoin/axia-network-v2/utils/storage"
 	"github.com/axiacoin/axia-network-v2/utils/timer"
+	"github.com/axiacoin/axia-network-v2/utils/uint128"
 	"github.com/axiacoin/axia-network-v2/vms"
 )
 
@@ -659,7 +660,8 @@ func getStakingConfig(v *viper.Viper, networkID uint32) (node.StakingConfig, err
 		config.RewardConfig.MaxConsumptionRate = v.GetUint64(StakeMaxConsumptionRateKey)
 		config.RewardConfig.MinConsumptionRate = v.GetUint64(StakeMinConsumptionRateKey)
 		config.RewardConfig.MintingPeriod = v.GetDuration(StakeMintingPeriodKey)
-		config.RewardConfig.SupplyCap = v.GetUint64(StakeSupplyCapKey)
+		// config.RewardConfig.SupplyCap = v.GetUint64(StakeSupplyCapKey)
+		config.RewardConfig.SupplyCap, _ = uint128.FromString(v.GetString(StakeSupplyCapKey))
 		config.MinDelegationFee = v.GetUint32(MinDelegatorFeeKey)
 		switch {
 		case config.UptimeRequirement < 0 || config.UptimeRequirement > 1:

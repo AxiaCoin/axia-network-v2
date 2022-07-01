@@ -6,6 +6,8 @@ package reward
 import (
 	"math/big"
 	"time"
+
+	"github.com/axiacoin/axia-network-v2/utils/uint128"
 )
 
 // PercentDenominator is the denominator used to calculate percentages
@@ -30,5 +32,5 @@ type Config struct {
 
 	// SupplyCap is the target value that the reward calculation should be
 	// asymptotic to.
-	SupplyCap uint64 `json:"supplyCap"`
+	SupplyCap uint128.Uint128 `json:"supplyCap"`
 }

@@ -42,29 +42,29 @@ const (
 )
 
 var (
-	errMissingDecisionBlock       = errors.New("should have a decision block within the past two blocks")
-	errNoFunds                    = errors.New("no spendable funds were found")
-	errNoAllychainID                 = errors.New("argument 'allychainID' not provided")
-	errNoRewardAddress            = errors.New("argument 'rewardAddress' not provided")
-	errInvalidDelegationRate      = errors.New("argument 'delegationFeeRate' must be between 0 and 100, inclusive")
-	errNoAddresses                = errors.New("no addresses provided")
-	errNoKeys                     = errors.New("user has no keys or funds")
-	errNoPrimaryValidators        = errors.New("no default allychain validators")
-	errNoValidators               = errors.New("no allychain validators")
-	errCorruptedReason            = errors.New("tx validity corrupted")
-	errStartTimeTooSoon           = fmt.Errorf("start time must be at least %s in the future", minAddStakerDelay)
-	errStartTimeTooLate           = errors.New("start time is too far in the future")
-	errTotalOverflow              = errors.New("overflow while calculating total balance")
-	errUnlockedOverflow           = errors.New("overflow while calculating unlocked balance")
-	errLockedOverflow             = errors.New("overflow while calculating locked balance")
-	errNotStakeableOverflow       = errors.New("overflow while calculating locked not stakeable balance")
-	errLockedNotStakeableOverflow = errors.New("overflow while calculating locked not stakeable balance")
-	errUnlockedStakeableOverflow  = errors.New("overflow while calculating unlocked stakeable balance")
-	errNamedAllychainCantBePrimary   = errors.New("allychain validator attempts to validate primary network")
-	errNoAmount                   = errors.New("argument 'amount' must be > 0")
-	errMissingName                = errors.New("argument 'name' not given")
-	errMissingVMID                = errors.New("argument 'vmID' not given")
-	errMissingBlockchainID        = errors.New("argument 'blockchainID' not given")
+	errMissingDecisionBlock        = errors.New("should have a decision block within the past two blocks")
+	errNoFunds                     = errors.New("no spendable funds were found")
+	errNoAllychainID               = errors.New("argument 'allychainID' not provided")
+	errNoRewardAddress             = errors.New("argument 'rewardAddress' not provided")
+	errInvalidDelegationRate       = errors.New("argument 'delegationFeeRate' must be between 0 and 100, inclusive")
+	errNoAddresses                 = errors.New("no addresses provided")
+	errNoKeys                      = errors.New("user has no keys or funds")
+	errNoPrimaryValidators         = errors.New("no default allychain validators")
+	errNoValidators                = errors.New("no allychain validators")
+	errCorruptedReason             = errors.New("tx validity corrupted")
+	errStartTimeTooSoon            = fmt.Errorf("start time must be at least %s in the future", minAddStakerDelay)
+	errStartTimeTooLate            = errors.New("start time is too far in the future")
+	errTotalOverflow               = errors.New("overflow while calculating total balance")
+	errUnlockedOverflow            = errors.New("overflow while calculating unlocked balance")
+	errLockedOverflow              = errors.New("overflow while calculating locked balance")
+	errNotStakeableOverflow        = errors.New("overflow while calculating locked not stakeable balance")
+	errLockedNotStakeableOverflow  = errors.New("overflow while calculating locked not stakeable balance")
+	errUnlockedStakeableOverflow   = errors.New("overflow while calculating unlocked stakeable balance")
+	errNamedAllychainCantBePrimary = errors.New("allychain validator attempts to validate primary network")
+	errNoAmount                    = errors.New("argument 'amount' must be > 0")
+	errMissingName                 = errors.New("argument 'name' not given")
+	errMissingVMID                 = errors.New("argument 'vmID' not given")
+	errMissingBlockchainID         = errors.New("argument 'blockchainID' not given")
 )
 
 // Service defines the API calls that can be made to the platform chain
@@ -186,10 +186,10 @@ type GetBalanceRequest struct {
 
 type GetBalanceResponse struct {
 	// Balance, in nAXC, of the address
-	Balance            json.Uint64    `json:"balance"`
-	Unlocked           json.Uint64    `json:"unlocked"`
-	LockedStakeable    json.Uint64    `json:"lockedStakeable"`
-	LockedNotStakeable json.Uint64    `json:"lockedNotStakeable"`
+	Balance            json.Uint64   `json:"balance"`
+	Unlocked           json.Uint64   `json:"unlocked"`
+	LockedStakeable    json.Uint64   `json:"lockedStakeable"`
+	LockedNotStakeable json.Uint64   `json:"lockedNotStakeable"`
 	UTXOIDs            []*axc.UTXOID `json:"utxoIDs"`
 }
 
@@ -910,14 +910,14 @@ func (service *Service) GetPendingValidators(_ *http.Request, args *GetPendingVa
 
 // GetCurrentSupplyReply are the results from calling GetCurrentSupply
 type GetCurrentSupplyReply struct {
-	Supply json.Uint64 `json:"supply"`
+	Supply json.Uint128 `json:"supply"`
 }
 
 // GetCurrentSupply returns an upper bound on the supply of AXC in the system
 func (service *Service) GetCurrentSupply(_ *http.Request, _ *struct{}, reply *GetCurrentSupplyReply) error {
 	service.vm.ctx.Log.Debug("Platform: GetCurrentSupply called")
 
-	reply.Supply = json.Uint64(service.vm.internalState.GetCurrentSupply())
+	reply.Supply = json.Uint128(service.vm.internalState.GetCurrentSupply())
 	return nil
 }
 
@@ -1272,7 +1272,7 @@ func (service *Service) AddAllychainValidator(_ *http.Request, args *AddAllychai
 		uint64(args.StartTime), // Start time
 		uint64(args.EndTime),   // End time
 		nodeID,                 // Node ID
-		allychainID,               // Allychain ID
+		allychainID,            // Allychain ID
 		keys.Keys,              // Keys
 		changeAddr,             // Change address
 	)
@@ -1874,10 +1874,10 @@ func (service *Service) GetBlockchains(_ *http.Request, args *struct{}, response
 				return errWrongTxType
 			}
 			response.Blockchains = append(response.Blockchains, APIBlockchain{
-				ID:       chain.ID(),
-				Name:     chain.ChainName,
+				ID:          chain.ID(),
+				Name:        chain.ChainName,
 				AllychainID: allychainID,
-				VMID:     chain.VMID,
+				VMID:        chain.VMID,
 			})
 		}
 	}
@@ -1892,10 +1892,10 @@ func (service *Service) GetBlockchains(_ *http.Request, args *struct{}, response
 			return errWrongTxType
 		}
 		response.Blockchains = append(response.Blockchains, APIBlockchain{
-			ID:       chain.ID(),
-			Name:     chain.ChainName,
+			ID:          chain.ID(),
+			Name:        chain.ChainName,
 			AllychainID: constants.PrimaryNetworkID,
-			VMID:     chain.VMID,
+			VMID:        chain.VMID,
 		})
 	}
 
@@ -2221,10 +2221,10 @@ func (service *Service) GetTotalStake(_ *http.Request, _ *struct{}, reply *GetTo
 
 // GetMaxStakeAmountArgs is the request for calling GetMaxStakeAmount.
 type GetMaxStakeAmountArgs struct {
-	AllychainID  ids.ID      `json:"allychainID"`
-	NodeID    string      `json:"nodeID"`
-	StartTime json.Uint64 `json:"startTime"`
-	EndTime   json.Uint64 `json:"endTime"`
+	AllychainID ids.ID      `json:"allychainID"`
+	NodeID      string      `json:"nodeID"`
+	StartTime   json.Uint64 `json:"startTime"`
+	EndTime     json.Uint64 `json:"endTime"`
 }
 
 // GetMaxStakeAmountReply is the response from calling GetMaxStakeAmount.
@@ -2307,7 +2307,7 @@ func (service *Service) GetTimestamp(_ *http.Request, args *struct{}, reply *Get
 
 // GetValidatorsAtArgs is the response from GetValidatorsAt
 type GetValidatorsAtArgs struct {
-	Height   json.Uint64 `json:"height"`
+	Height      json.Uint64 `json:"height"`
 	AllychainID ids.ID      `json:"allychainID"`
 }
 

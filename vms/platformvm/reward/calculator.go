@@ -6,19 +6,21 @@ package reward
 import (
 	"math/big"
 	"time"
+
+	"github.com/axiacoin/axia-network-v2/utils/uint128"
 )
 
 var _ Calculator = &calculator{}
 
 type Calculator interface {
-	Calculate(stakedDuration time.Duration, stakedAmount, currentSupply uint64) uint64
+	Calculate(stakedDuration time.Duration, stakedAmount uint64, currentSupply uint128.Uint128) uint64
 }
 
 type calculator struct {
 	maxSubMinConsumptionRate *big.Int
 	minConsumptionRate       *big.Int
 	mintingPeriod            *big.Int
-	supplyCap                uint64
+	supplyCap                uint128.Uint128
 }
 
 func NewCalculator(c Config) Calculator {
@@ -37,17 +39,17 @@ func NewCalculator(c Config) Calculator {
 // PortionOfStakingDuration = StakingDuration / MaximumStakingDuration
 // MintingRate = MinMintingRate + MaxSubMinMintingRate * PortionOfStakingDuration
 // Reward = RemainingSupply * PortionOfExistingSupply * MintingRate * PortionOfStakingDuration
-func (c *calculator) Calculate(stakedDuration time.Duration, stakedAmount, currentSupply uint64) uint64 {
+func (c *calculator) Calculate(stakedDuration time.Duration, stakedAmount uint64, currentSupply uint128.Uint128) uint64 {
 	bigStakedDuration := new(big.Int).SetUint64(uint64(stakedDuration))
 	bigStakedAmount := new(big.Int).SetUint64(stakedAmount)
-	bigCurrentSupply := new(big.Int).SetUint64(currentSupply)
+	bigCurrentSupply, _ := new(big.Int).SetString(currentSupply.String(), 10)
 
 	adjustedConsumptionRateNumerator := new(big.Int).Mul(c.maxSubMinConsumptionRate, bigStakedDuration)
 	adjustedMinConsumptionRateNumerator := new(big.Int).Mul(c.minConsumptionRate, c.mintingPeriod)
 	adjustedConsumptionRateNumerator.Add(adjustedConsumptionRateNumerator, adjustedMinConsumptionRateNumerator)
 	adjustedConsumptionRateDenominator := new(big.Int).Mul(c.mintingPeriod, consumptionRateDenominator)
 
-	reward := new(big.Int).SetUint64(c.supplyCap - currentSupply)
+	reward, _ := new(big.Int).SetString(c.supplyCap.Sub(currentSupply).String(), 10)
 	reward.Mul(reward, adjustedConsumptionRateNumerator)
 	reward.Mul(reward, bigStakedAmount)
 	reward.Mul(reward, bigStakedDuration)

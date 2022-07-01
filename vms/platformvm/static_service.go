@@ -14,6 +14,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/utils/constants"
 	"github.com/axiacoin/axia-network-v2/utils/formatting"
 	"github.com/axiacoin/axia-network-v2/utils/json"
+	"github.com/axiacoin/axia-network-v2/utils/uint128"
 	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 
@@ -110,7 +111,7 @@ type APIChain struct {
 	VMID        ids.ID   `json:"vmID"`
 	FxIDs       []ids.ID `json:"fxIDs"`
 	Name        string   `json:"name"`
-	AllychainID    ids.ID   `json:"allychainID"`
+	AllychainID ids.ID   `json:"allychainID"`
 }
 
 // BuildGenesisArgs are the arguments used to create
@@ -121,13 +122,13 @@ type APIChain struct {
 // [Chains] are the chains that exist at genesis.
 // [Time] is the Platform Chain's time at network genesis.
 type BuildGenesisArgs struct {
-	AxcAssetID   ids.ID                `json:"axcAssetID"`
+	AxcAssetID    ids.ID                `json:"axcAssetID"`
 	NetworkID     json.Uint32           `json:"networkID"`
 	UTXOs         []APIUTXO             `json:"utxos"`
 	Validators    []APIPrimaryValidator `json:"validators"`
 	Chains        []APIChain            `json:"chains"`
 	Time          json.Uint64           `json:"time"`
-	InitialSupply json.Uint64           `json:"initialSupply"`
+	InitialSupply json.Uint128          `json:"initialSupply"`
 	Message       string                `json:"message"`
 	Encoding      formatting.Encoding   `json:"encoding"`
 }
@@ -141,17 +142,17 @@ type BuildGenesisReply struct {
 // GenesisUTXO adds messages to UTXOs
 type GenesisUTXO struct {
 	axc.UTXO `serialize:"true"`
-	Message   []byte `serialize:"true" json:"message"`
+	Message  []byte `serialize:"true" json:"message"`
 }
 
 // Genesis represents a genesis state of the platform chain
 type Genesis struct {
-	UTXOs         []*GenesisUTXO `serialize:"true"`
-	Validators    []*Tx          `serialize:"true"`
-	Chains        []*Tx          `serialize:"true"`
-	Timestamp     uint64         `serialize:"true"`
-	InitialSupply uint64         `serialize:"true"`
-	Message       string         `serialize:"true"`
+	UTXOs         []*GenesisUTXO  `serialize:"true"`
+	Validators    []*Tx           `serialize:"true"`
+	Chains        []*Tx           `serialize:"true"`
+	Timestamp     uint64          `serialize:"true"`
+	InitialSupply uint128.Uint128 `serialize:"true"`
+	Message       string          `serialize:"true"`
 }
 
 func (g *Genesis) Initialize() error {
@@ -322,12 +323,12 @@ func (ss *StaticService) BuildGenesis(_ *http.Request, args *BuildGenesisArgs, r
 				NetworkID:    uint32(args.NetworkID),
 				BlockchainID: ids.Empty,
 			}},
-			AllychainID:    chain.AllychainID,
-			ChainName:   chain.Name,
-			VMID:        chain.VMID,
-			FxIDs:       chain.FxIDs,
-			GenesisData: genesisBytes,
-			AllychainAuth:  &secp256k1fx.Input{},
+			AllychainID:   chain.AllychainID,
+			ChainName:     chain.Name,
+			VMID:          chain.VMID,
+			FxIDs:         chain.FxIDs,
+			GenesisData:   genesisBytes,
+			AllychainAuth: &secp256k1fx.Input{},
 		}}
 		if err := tx.Sign(GenesisCodec, nil); err != nil {
 			return err
@@ -347,7 +348,7 @@ func (ss *StaticService) BuildGenesis(_ *http.Request, args *BuildGenesisArgs, r
 		Validators:    validatorTxs,
 		Chains:        chains,
 		Timestamp:     uint64(args.Time),
-		InitialSupply: uint64(args.InitialSupply),
+		InitialSupply: uint128.Uint128{Lo: args.InitialSupply.Lo, Hi: args.InitialSupply.Hi},
 		Message:       args.Message,
 	}
 

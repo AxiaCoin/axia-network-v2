@@ -17,6 +17,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/utils/constants"
 	"github.com/axiacoin/axia-network-v2/utils/formatting"
 	"github.com/axiacoin/axia-network-v2/utils/json"
+	"github.com/axiacoin/axia-network-v2/utils/uint128"
 	"github.com/axiacoin/axia-network-v2/utils/wrappers"
 	"github.com/axiacoin/axia-network-v2/vms/avm"
 	"github.com/axiacoin/axia-network-v2/vms/nftfx"
@@ -36,7 +37,7 @@ var (
 	errNoSupply               = errors.New("initial supply must be > 0")
 	errNoStakeDuration        = errors.New("initial stake duration must be > 0")
 	errNoStakers              = errors.New("initial stakers must be > 0")
-	errNoAXChainGenesis        = errors.New("AX-Chain genesis cannot be empty")
+	errNoAXChainGenesis       = errors.New("AX-Chain genesis cannot be empty")
 	errNoTxs                  = errors.New("genesis creates no transactions")
 )
 
@@ -118,7 +119,7 @@ func validateConfig(networkID uint32, config *Config) error {
 	switch {
 	case err != nil:
 		return fmt.Errorf("unable to calculate initial supply: %w", err)
-	case initialSupply == 0:
+	case initialSupply.Equals(uint128.Zero):
 		return errNoSupply
 	}
 
@@ -327,10 +328,10 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 
 	// Specify the initial state of the Platform Chain
 	platformvmArgs := platformvm.BuildGenesisArgs{
-		AxcAssetID:   axcAssetID,
+		AxcAssetID:    axcAssetID,
 		NetworkID:     json.Uint32(config.NetworkID),
 		Time:          json.Uint64(config.StartTime),
-		InitialSupply: json.Uint64(initialSupply),
+		InitialSupply: json.Uint128(initialSupply),
 		Message:       config.Message,
 		Encoding:      defaultEncoding,
 	}
@@ -423,7 +424,7 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 	platformvmArgs.Chains = []platformvm.APIChain{
 		{
 			GenesisData: avmReply.Bytes,
-			AllychainID:    constants.PrimaryNetworkID,
+			AllychainID: constants.PrimaryNetworkID,
 			VMID:        constants.AVMID,
 			FxIDs: []ids.ID{
 				secp256k1fx.ID,
@@ -434,7 +435,7 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 		},
 		{
 			GenesisData: genesisStr,
-			AllychainID:    constants.PrimaryNetworkID,
+			AllychainID: constants.PrimaryNetworkID,
 			VMID:        constants.EVMID,
 			Name:        "AX-Chain",
 		},

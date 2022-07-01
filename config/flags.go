@@ -24,19 +24,19 @@ import (
 
 // Results of parsing the CLI
 var (
-	defaultNetworkName     = constants.MainnetName
-	homeDir                = os.ExpandEnv("$HOME")
-	prefixedAppName        = fmt.Sprintf(".%s", constants.AppName)
-	defaultDataDir         = filepath.Join(homeDir, prefixedAppName)
-	defaultDBDir           = filepath.Join(defaultDataDir, "db")
-	defaultProfileDir      = filepath.Join(defaultDataDir, "profiles")
-	defaultStakingPath     = filepath.Join(defaultDataDir, "staking")
-	defaultStakingKeyPath  = filepath.Join(defaultStakingPath, "staker.key")
-	defaultStakingCertPath = filepath.Join(defaultStakingPath, "staker.crt")
-	defaultConfigDir       = filepath.Join(defaultDataDir, "configs")
-	defaultChainConfigDir  = filepath.Join(defaultConfigDir, "chains")
-	defaultVMConfigDir     = filepath.Join(defaultConfigDir, "vms")
-	defaultVMAliasFilePath = filepath.Join(defaultVMConfigDir, "aliases.json")
+	defaultNetworkName        = constants.MainnetName
+	homeDir                   = os.ExpandEnv("$HOME")
+	prefixedAppName           = fmt.Sprintf(".%s", constants.AppName)
+	defaultDataDir            = filepath.Join(homeDir, prefixedAppName)
+	defaultDBDir              = filepath.Join(defaultDataDir, "db")
+	defaultProfileDir         = filepath.Join(defaultDataDir, "profiles")
+	defaultStakingPath        = filepath.Join(defaultDataDir, "staking")
+	defaultStakingKeyPath     = filepath.Join(defaultStakingPath, "staker.key")
+	defaultStakingCertPath    = filepath.Join(defaultStakingPath, "staker.crt")
+	defaultConfigDir          = filepath.Join(defaultDataDir, "configs")
+	defaultChainConfigDir     = filepath.Join(defaultConfigDir, "chains")
+	defaultVMConfigDir        = filepath.Join(defaultConfigDir, "vms")
+	defaultVMAliasFilePath    = filepath.Join(defaultVMConfigDir, "aliases.json")
 	defaultAllychainConfigDir = filepath.Join(defaultConfigDir, "allychains")
 
 	// Places to look for the build directory
@@ -253,7 +253,8 @@ func addNodeFlags(fs *flag.FlagSet) {
 	fs.Uint64(StakeMaxConsumptionRateKey, genesis.LocalParams.RewardConfig.MaxConsumptionRate, "Maximum consumption rate of the remaining tokens to mint in the staking function")
 	fs.Uint64(StakeMinConsumptionRateKey, genesis.LocalParams.RewardConfig.MinConsumptionRate, "Minimum consumption rate of the remaining tokens to mint in the staking function")
 	fs.Duration(StakeMintingPeriodKey, genesis.LocalParams.RewardConfig.MintingPeriod, "Consumption period of the staking function")
-	fs.Uint64(StakeSupplyCapKey, genesis.LocalParams.RewardConfig.SupplyCap, "Supply cap of the staking function")
+	fs.String(StakeSupplyCapKey, genesis.LocalParams.RewardConfig.SupplyCap.String(), "Supply cap of the staking function")
+
 	// Allychains
 	fs.String(WhitelistedAllychainsKey, "", "Whitelist of allychains to validate")
 

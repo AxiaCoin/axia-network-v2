@@ -21,6 +21,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/snow/uptime"
 	"github.com/axiacoin/axia-network-v2/utils/constants"
 	"github.com/axiacoin/axia-network-v2/utils/hashing"
+	"github.com/axiacoin/axia-network-v2/utils/uint128"
 	"github.com/axiacoin/axia-network-v2/utils/wrappers"
 	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/status"
@@ -29,20 +30,20 @@ import (
 )
 
 var (
-	validatorsPrefix      = []byte("validators")
-	currentPrefix         = []byte("current")
-	pendingPrefix         = []byte("pending")
-	validatorPrefix       = []byte("validator")
-	delegatorPrefix       = []byte("delegator")
+	validatorsPrefix         = []byte("validators")
+	currentPrefix            = []byte("current")
+	pendingPrefix            = []byte("pending")
+	validatorPrefix          = []byte("validator")
+	delegatorPrefix          = []byte("delegator")
 	allychainValidatorPrefix = []byte("allychainValidator")
-	validatorDiffsPrefix  = []byte("validatorDiffs")
-	blockPrefix           = []byte("block")
-	txPrefix              = []byte("tx")
-	rewardUTXOsPrefix     = []byte("rewardUTXOs")
-	utxoPrefix            = []byte("utxo")
+	validatorDiffsPrefix     = []byte("validatorDiffs")
+	blockPrefix              = []byte("block")
+	txPrefix                 = []byte("tx")
+	rewardUTXOsPrefix        = []byte("rewardUTXOs")
+	utxoPrefix               = []byte("utxo")
 	allychainPrefix          = []byte("allychain")
-	chainPrefix           = []byte("chain")
-	singletonPrefix       = []byte("singleton")
+	chainPrefix              = []byte("chain")
+	singletonPrefix          = []byte("singleton")
 
 	timestampKey     = []byte("timestamp")
 	currentSupplyKey = []byte("current supply")
@@ -165,19 +166,19 @@ type internalStateImpl struct {
 	uptimes               map[ids.ShortID]*currentValidatorState // nodeID -> uptimes
 	updatedUptimes        map[ids.ShortID]struct{}               // nodeID -> nil
 
-	validatorsDB                 database.Database
-	currentValidatorsDB          database.Database
-	currentValidatorBaseDB       database.Database
-	currentValidatorList         linkeddb.LinkedDB
-	currentDelegatorBaseDB       database.Database
-	currentDelegatorList         linkeddb.LinkedDB
+	validatorsDB                    database.Database
+	currentValidatorsDB             database.Database
+	currentValidatorBaseDB          database.Database
+	currentValidatorList            linkeddb.LinkedDB
+	currentDelegatorBaseDB          database.Database
+	currentDelegatorList            linkeddb.LinkedDB
 	currentAllychainValidatorBaseDB database.Database
 	currentAllychainValidatorList   linkeddb.LinkedDB
-	pendingValidatorsDB          database.Database
-	pendingValidatorBaseDB       database.Database
-	pendingValidatorList         linkeddb.LinkedDB
-	pendingDelegatorBaseDB       database.Database
-	pendingDelegatorList         linkeddb.LinkedDB
+	pendingValidatorsDB             database.Database
+	pendingValidatorBaseDB          database.Database
+	pendingValidatorList            linkeddb.LinkedDB
+	pendingDelegatorBaseDB          database.Database
+	pendingDelegatorList            linkeddb.LinkedDB
 	pendingAllychainValidatorBaseDB database.Database
 	pendingAllychainValidatorList   linkeddb.LinkedDB
 
@@ -193,7 +194,7 @@ type internalStateImpl struct {
 	txDB     database.Database
 
 	addedRewardUTXOs map[ids.ID][]*axc.UTXO // map of txID -> []*UTXO
-	rewardUTXOsCache cache.Cacher            // cache of txID -> []*UTXO
+	rewardUTXOsCache cache.Cacher           // cache of txID -> []*UTXO
 	rewardUTXODB     database.Database
 
 	modifiedUTXOs map[ids.ID]*axc.UTXO // map of modified UTXOID -> *UTXO if the UTXO is nil, it has been removed
@@ -211,7 +212,7 @@ type internalStateImpl struct {
 	chainDB      database.Database
 
 	originalTimestamp, timestamp         time.Time
-	originalCurrentSupply, currentSupply uint64
+	originalCurrentSupply, currentSupply uint128.Uint128
 	originalLastAccepted, lastAccepted   ids.ID
 	singletonDB                          database.Database
 }
@@ -222,7 +223,7 @@ type ValidatorWeightDiff struct {
 }
 
 type heightWithAllychain struct {
-	Height   uint64 `serialize:"true"`
+	Height      uint64 `serialize:"true"`
 	AllychainID ids.ID `serialize:"true"`
 }
 
@@ -264,22 +265,22 @@ func newInternalStateDatabases(vm *VM, db database.Database) *internalStateImpl 
 		uptimes:        make(map[ids.ShortID]*currentValidatorState),
 		updatedUptimes: make(map[ids.ShortID]struct{}),
 
-		validatorsDB:                 validatorsDB,
-		currentValidatorsDB:          currentValidatorsDB,
-		currentValidatorBaseDB:       currentValidatorBaseDB,
-		currentValidatorList:         linkeddb.NewDefault(currentValidatorBaseDB),
-		currentDelegatorBaseDB:       currentDelegatorBaseDB,
-		currentDelegatorList:         linkeddb.NewDefault(currentDelegatorBaseDB),
+		validatorsDB:                    validatorsDB,
+		currentValidatorsDB:             currentValidatorsDB,
+		currentValidatorBaseDB:          currentValidatorBaseDB,
+		currentValidatorList:            linkeddb.NewDefault(currentValidatorBaseDB),
+		currentDelegatorBaseDB:          currentDelegatorBaseDB,
+		currentDelegatorList:            linkeddb.NewDefault(currentDelegatorBaseDB),
 		currentAllychainValidatorBaseDB: currentAllychainValidatorBaseDB,
 		currentAllychainValidatorList:   linkeddb.NewDefault(currentAllychainValidatorBaseDB),
-		pendingValidatorsDB:          pendingValidatorsDB,
-		pendingValidatorBaseDB:       pendingValidatorBaseDB,
-		pendingValidatorList:         linkeddb.NewDefault(pendingValidatorBaseDB),
-		pendingDelegatorBaseDB:       pendingDelegatorBaseDB,
-		pendingDelegatorList:         linkeddb.NewDefault(pendingDelegatorBaseDB),
+		pendingValidatorsDB:             pendingValidatorsDB,
+		pendingValidatorBaseDB:          pendingValidatorBaseDB,
+		pendingValidatorList:            linkeddb.NewDefault(pendingValidatorBaseDB),
+		pendingDelegatorBaseDB:          pendingDelegatorBaseDB,
+		pendingDelegatorList:            linkeddb.NewDefault(pendingDelegatorBaseDB),
 		pendingAllychainValidatorBaseDB: pendingAllychainValidatorBaseDB,
 		pendingAllychainValidatorList:   linkeddb.NewDefault(pendingAllychainValidatorBaseDB),
-		validatorDiffsDB:             validatorDiffsDB,
+		validatorDiffsDB:                validatorDiffsDB,
 
 		addedBlocks: make(map[ids.ID]Block),
 		blockDB:     prefixdb.New(blockPrefix, baseDB),
@@ -442,8 +443,10 @@ func NewMeteredInternalState(vm *VM, db database.Database, genesis []byte, metri
 func (st *internalStateImpl) GetTimestamp() time.Time          { return st.timestamp }
 func (st *internalStateImpl) SetTimestamp(timestamp time.Time) { st.timestamp = timestamp }
 
-func (st *internalStateImpl) GetCurrentSupply() uint64              { return st.currentSupply }
-func (st *internalStateImpl) SetCurrentSupply(currentSupply uint64) { st.currentSupply = currentSupply }
+func (st *internalStateImpl) GetCurrentSupply() uint128.Uint128 { return st.currentSupply }
+func (st *internalStateImpl) SetCurrentSupply(currentSupply uint128.Uint128) {
+	st.currentSupply = currentSupply
+}
 
 func (st *internalStateImpl) GetLastAccepted() ids.ID             { return st.lastAccepted }
 func (st *internalStateImpl) SetLastAccepted(lastAccepted ids.ID) { st.lastAccepted = lastAccepted }
@@ -745,7 +748,7 @@ func (st *internalStateImpl) DeletePendingStaker(tx *Tx) {
 
 func (st *internalStateImpl) GetValidatorWeightDiffs(height uint64, allychainID ids.ID) (map[ids.ShortID]*ValidatorWeightDiff, error) {
 	prefixStruct := heightWithAllychain{
-		Height:   height,
+		Height:      height,
 		AllychainID: allychainID,
 	}
 	prefixBytes, err := GenesisCodec.Marshal(CodecVersion, prefixStruct)
@@ -870,8 +873,8 @@ func (st *internalStateImpl) writeCurrentStakers() error {
 
 		var (
 			allychainID ids.ID
-			nodeID   ids.ShortID
-			weight   uint64
+			nodeID      ids.ShortID
+			weight      uint64
 		)
 		switch tx := currentStaker.addStakerTx.UnsignedTx.(type) {
 		case *UnsignedAddValidatorTx:
@@ -940,10 +943,10 @@ func (st *internalStateImpl) writeCurrentStakers() error {
 
 	for _, tx := range st.deletedCurrentStakers {
 		var (
-			db       database.KeyValueDeleter
+			db          database.KeyValueDeleter
 			allychainID ids.ID
-			nodeID   ids.ShortID
-			weight   uint64
+			nodeID      ids.ShortID
+			weight      uint64
 		)
 		switch tx := tx.UnsignedTx.(type) {
 		case *UnsignedAddValidatorTx:
@@ -1003,7 +1006,7 @@ func (st *internalStateImpl) writeCurrentStakers() error {
 
 	for allychainID, nodeUpdates := range weightDiffs {
 		prefixStruct := heightWithAllychain{
-			Height:   st.currentHeight,
+			Height:      st.currentHeight,
 			AllychainID: allychainID,
 		}
 		prefixBytes, err := GenesisCodec.Marshal(CodecVersion, prefixStruct)
@@ -1236,7 +1239,7 @@ func (st *internalStateImpl) writeSingletons() error {
 		st.originalTimestamp = st.timestamp
 	}
 	if st.originalCurrentSupply != st.currentSupply {
-		if err := database.PutUInt64(st.singletonDB, currentSupplyKey, st.currentSupply); err != nil {
+		if err := database.PutUInt128(st.singletonDB, currentSupplyKey, st.currentSupply); err != nil {
 			return err
 		}
 		st.originalCurrentSupply = st.currentSupply
@@ -1268,7 +1271,7 @@ func (st *internalStateImpl) loadSingletons() error {
 	st.originalTimestamp = timestamp
 	st.timestamp = timestamp
 
-	currentSupply, err := database.GetUInt64(st.singletonDB, currentSupplyKey)
+	currentSupply, err := database.GetUInt128(st.singletonDB, currentSupplyKey)
 	if err != nil {
 		return err
 	}
@@ -1475,7 +1478,7 @@ func (st *internalStateImpl) loadPendingValidators() error {
 		} else {
 			ps.validatorExtrasByNodeID[addDelegatorTx.Validator.NodeID] = &validatorImpl{
 				delegators: []*UnsignedAddDelegatorTx{addDelegatorTx},
-				allychains:    make(map[ids.ID]*UnsignedAddAllychainValidatorTx),
+				allychains: make(map[ids.ID]*UnsignedAddAllychainValidatorTx),
 			}
 		}
 	}
@@ -1565,10 +1568,7 @@ func (st *internalStateImpl) init(genesisBytes []byte) error {
 			stakeAmount,
 			currentSupply,
 		)
-		newCurrentSupply, err := safemath.Add64(currentSupply, r)
-		if err != nil {
-			return err
-		}
+		newCurrentSupply := currentSupply.Add64(r)
 
 		st.AddCurrentStaker(vdrTx, r)
 		st.AddTx(vdrTx, status.Committed)

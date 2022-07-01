@@ -13,6 +13,7 @@ import (
 	axc "github.com/axiacoin/axia-network-v2/vms/components/axc"
 	status "github.com/axiacoin/axia-network-v2/vms/platformvm/status"
 	gomock "github.com/golang/mock/gomock"
+	"github.com/axiacoin/axia-network-v2/utils/uint128"
 )
 
 // MockInternalState is a mock of InternalState interface.
@@ -270,10 +271,10 @@ func (mr *MockInternalStateMockRecorder) GetChains(allychainID interface{}) *gom
 }
 
 // GetCurrentSupply mocks base method.
-func (m *MockInternalState) GetCurrentSupply() uint64 {
+func (m *MockInternalState) GetCurrentSupply() uint128.Uint128 {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetCurrentSupply")
-	ret0, _ := ret[0].(uint64)
+	ret0, _ := ret[0].(uint128.Uint128)
 	return ret0
 }
 
@@ -445,7 +446,7 @@ func (mr *MockInternalStateMockRecorder) SetCurrentStakerChainState(arg0 interfa
 }
 
 // SetCurrentSupply mocks base method.
-func (m *MockInternalState) SetCurrentSupply(arg0 uint64) {
+func (m *MockInternalState) SetCurrentSupply(arg0 uint128.Uint128) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "SetCurrentSupply", arg0)
 }

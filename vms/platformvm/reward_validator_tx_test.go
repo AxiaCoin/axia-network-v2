@@ -378,7 +378,7 @@ func TestRewardDelegatorTxExecuteOnAbort(t *testing.T) {
 	assert.Zero(delReward, "expected delegator balance not to increase")
 
 	newSupply := vm.internalState.GetCurrentSupply()
-	assert.Equal(initialSupply-expectedReward, newSupply, "should have removed un-rewarded tokens from the potential supply")
+	assert.Equal(initialSupply.Sub64(expectedReward), newSupply, "should have removed un-rewarded tokens from the potential supply")
 }
 
 func TestUptimeDisallowedWithRestart(t *testing.T) {

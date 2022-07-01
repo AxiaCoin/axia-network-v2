@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/axiacoin/axia-network-v2/ids"
+	"github.com/axiacoin/axia-network-v2/utils/uint128"
 )
 
 var errWrongSize = errors.New("value has unexpected size")
@@ -33,6 +34,35 @@ func GetID(db KeyValueReader, key []byte) (ids.ID, error) {
 
 func ParseID(b []byte) (ids.ID, error) {
 	return ids.ToID(b)
+}
+
+func PutUInt128(db KeyValueWriter, key []byte, val uint128.Uint128) error {
+	b := PackUInt128(val)
+	return db.Put(key, b)
+}
+
+func GetUInt128(db KeyValueReader, key []byte) (uint128.Uint128, error) {
+	b, err := db.Get(key)
+	if err != nil {
+		return uint128.Zero, err
+	}
+	return ParseUInt128(b)
+}
+
+func PackUInt128(val uint128.Uint128) []byte {
+	Lo := make([]byte, 8)
+	Hi := make([]byte, 8)
+	binary.LittleEndian.PutUint64(Lo, val.Lo)
+	binary.LittleEndian.PutUint64(Hi, val.Hi)
+	finalBytes := append(Lo, Hi...)
+	return finalBytes
+}
+
+func ParseUInt128(b []byte) (uint128.Uint128, error) {
+	if len(b) != 16 {
+		return uint128.Zero, errWrongSize
+	}
+	return uint128.FromBytes(b), nil
 }
 
 func PutUInt64(db KeyValueWriter, key []byte, val uint64) error {

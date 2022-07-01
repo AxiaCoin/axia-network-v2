@@ -41,6 +41,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/utils/json"
 	"github.com/axiacoin/axia-network-v2/utils/logging"
 	"github.com/axiacoin/axia-network-v2/utils/timer"
+	"github.com/axiacoin/axia-network-v2/utils/uint128"
 	"github.com/axiacoin/axia-network-v2/utils/units"
 	"github.com/axiacoin/axia-network-v2/utils/wrappers"
 	"github.com/axiacoin/axia-network-v2/version"
@@ -62,7 +63,7 @@ var (
 		MaxConsumptionRate: .12 * reward.PercentDenominator,
 		MinConsumptionRate: .10 * reward.PercentDenominator,
 		MintingPeriod:      365 * 24 * time.Hour,
-		SupplyCap:          720 * units.MegaAxc,
+		SupplyCap:          uint128.Zero.Add64(720 * units.MegaAxc),
 	}
 
 	// AXC asset ID in tests
@@ -96,7 +97,7 @@ var (
 	testAllychain1ControlKeys []*crypto.PrivateKeySECP256K1R
 
 	swapChainID = ids.Empty.Prefix(0)
-	axChainID = ids.Empty.Prefix(1)
+	axChainID   = ids.Empty.Prefix(1)
 )
 
 var (
@@ -164,8 +165,8 @@ func defaultContext() *snow.Context {
 	ctx.SNLookup = &snLookup{
 		chainsToAllychain: map[ids.ID]ids.ID{
 			constants.PlatformChainID: constants.PrimaryNetworkID,
-			swapChainID:                  constants.PrimaryNetworkID,
-			axChainID:                  constants.PrimaryNetworkID,
+			swapChainID:               constants.PrimaryNetworkID,
+			axChainID:                 constants.PrimaryNetworkID,
 		},
 	}
 	return ctx
@@ -217,12 +218,12 @@ func defaultGenesis() (*BuildGenesisArgs, []byte) {
 	buildGenesisArgs := BuildGenesisArgs{
 		Encoding:      formatting.Hex,
 		NetworkID:     json.Uint32(testNetworkID),
-		AxcAssetID:   axcAssetID,
+		AxcAssetID:    axcAssetID,
 		UTXOs:         genesisUTXOs,
 		Validators:    genesisValidators,
 		Chains:        nil,
 		Time:          json.Uint64(defaultGenesisTime.Unix()),
-		InitialSupply: json.Uint64(360 * units.MegaAxc),
+		InitialSupply: json.Uint128(uint128.Zero.Add64(360 * units.MegaAxc)),
 	}
 
 	buildGenesisResponse := BuildGenesisReply{}
@@ -291,12 +292,12 @@ func BuildGenesisTestWithArgs(t *testing.T, args *BuildGenesisArgs) (*BuildGenes
 
 	buildGenesisArgs := BuildGenesisArgs{
 		NetworkID:     json.Uint32(testNetworkID),
-		AxcAssetID:   axcAssetID,
+		AxcAssetID:    axcAssetID,
 		UTXOs:         genesisUTXOs,
 		Validators:    genesisValidators,
 		Chains:        nil,
 		Time:          json.Uint64(defaultGenesisTime.Unix()),
-		InitialSupply: json.Uint64(360 * units.MegaAxc),
+		InitialSupply: json.Uint128(uint128.Zero.Add64(360 * units.MegaAxc)),
 		Encoding:      formatting.CB58,
 	}
 
@@ -324,7 +325,7 @@ func defaultVM() (*VM, database.Database, *common.SenderTest) {
 		UptimeLockedCalculator: uptime.NewLockedCalculator(),
 		Validators:             validators.NewManager(),
 		TxFee:                  defaultTxFee,
-		CreateAllychainTxFee:      100 * defaultTxFee,
+		CreateAllychainTxFee:   100 * defaultTxFee,
 		CreateBlockchainTxFee:  100 * defaultTxFee,
 		MinValidatorStake:      defaultMinValidatorStake,
 		MaxValidatorStake:      defaultMaxValidatorStake,
@@ -2084,7 +2085,7 @@ func TestBootstrapPartiallyAccepted(t *testing.T) {
 		StartupAlpha:                   (beacons.Weight() + 1) / 2,
 		Alpha:                          (beacons.Weight() + 1) / 2,
 		Sender:                         sender,
-		Allychain:                         allychain,
+		Allychain:                      allychain,
 		AncestorsMaxContainersSent:     2000,
 		AncestorsMaxContainersReceived: 2000,
 		SharedCfg:                      &common.SharedConfig{},
@@ -2712,7 +2713,7 @@ func TestRejectedStateRegressionInvalidValidatorReward(t *testing.T) {
 		vm.ctx.Lock.Unlock()
 	}()
 
-	vm.internalState.SetCurrentSupply(defaultRewardConfig.SupplyCap / 2)
+	vm.internalState.SetCurrentSupply(defaultRewardConfig.SupplyCap.Div64(2))
 
 	newValidatorStartTime0 := defaultGenesisTime.Add(syncBound).Add(1 * time.Second)
 	newValidatorEndTime0 := newValidatorStartTime0.Add(defaultMaxStakingDuration)

@@ -14,9 +14,9 @@ import (
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/utils/constants"
 	"github.com/axiacoin/axia-network-v2/utils/formatting"
+	"github.com/axiacoin/axia-network-v2/utils/uint128"
 	"github.com/axiacoin/axia-network-v2/utils/wrappers"
-
-	safemath "github.com/axiacoin/axia-network-v2/utils/math"
+	// safemath "github.com/axiacoin/axia-network-v2/utils/math"
 )
 
 type LockedAmount struct {
@@ -123,18 +123,30 @@ func (c Config) Unparse() (UnparsedConfig, error) {
 	return uc, nil
 }
 
-func (c *Config) InitialSupply() (uint64, error) {
-	initialSupply := uint64(0)
+// func (c *Config) InitialSupply() (uint64, error) {
+// 	initialSupply := uint64(0)
+// 	for _, allocation := range c.Allocations {
+// 		newInitialSupply, err := safemath.Add64(initialSupply, allocation.InitialAmount)
+// 		if err != nil {
+// 			return 0, err
+// 		}
+// 		for _, unlock := range allocation.UnlockSchedule {
+// 			newInitialSupply, err = safemath.Add64(newInitialSupply, unlock.Amount)
+// 			if err != nil {
+// 				return 0, err
+// 			}
+// 		}
+// 		initialSupply = newInitialSupply
+// 	}
+// 	return initialSupply, nil
+// }
+
+func (c *Config) InitialSupply() (uint128.Uint128, error) {
+	initialSupply := uint128.Zero
 	for _, allocation := range c.Allocations {
-		newInitialSupply, err := safemath.Add64(initialSupply, allocation.InitialAmount)
-		if err != nil {
-			return 0, err
-		}
+		newInitialSupply := initialSupply.Add64(allocation.InitialAmount)
 		for _, unlock := range allocation.UnlockSchedule {
-			newInitialSupply, err = safemath.Add64(newInitialSupply, unlock.Amount)
-			if err != nil {
-				return 0, err
-			}
+			newInitialSupply = newInitialSupply.Add64(unlock.Amount)
 		}
 		initialSupply = newInitialSupply
 	}

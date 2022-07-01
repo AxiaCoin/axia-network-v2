@@ -10,8 +10,6 @@ import (
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow"
 	"github.com/axiacoin/axia-network-v2/vms/components/axc"
-
-	safemath "github.com/axiacoin/axia-network-v2/utils/math"
 )
 
 var _ UnsignedProposalTx = &UnsignedAdvanceTimeTx{}
@@ -125,10 +123,7 @@ pendingStakerLoop:
 				staker.Validator.Wght,
 				currentSupply,
 			)
-			currentSupply, err = safemath.Add64(currentSupply, r)
-			if err != nil {
-				return nil, nil, err
-			}
+			currentSupply = currentSupply.Add64(r)
 
 			toAddDelegatorsWithRewardToCurrent = append(toAddDelegatorsWithRewardToCurrent, &validatorReward{
 				addStakerTx:     tx,
@@ -145,10 +140,7 @@ pendingStakerLoop:
 				staker.Validator.Wght,
 				currentSupply,
 			)
-			currentSupply, err = safemath.Add64(currentSupply, r)
-			if err != nil {
-				return nil, nil, err
-			}
+			currentSupply = currentSupply.Add64(r)
 
 			toAddValidatorsWithRewardToCurrent = append(toAddValidatorsWithRewardToCurrent, &validatorReward{
 				addStakerTx:     tx,

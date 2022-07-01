@@ -18,6 +18,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/utils/crypto"
 	"github.com/axiacoin/axia-network-v2/utils/formatting"
 	"github.com/axiacoin/axia-network-v2/utils/json"
+	"github.com/axiacoin/axia-network-v2/utils/uint128"
 	"github.com/axiacoin/axia-network-v2/utils/units"
 	"github.com/axiacoin/axia-network-v2/vms/avm"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm"
@@ -167,12 +168,12 @@ var _ = ginkgo.Describe("[StaticHandlers]", func() {
 
 		buildGenesisArgs := platformvm.BuildGenesisArgs{
 			NetworkID:     json.Uint32(constants.UnitTestID),
-			AxcAssetID:   ids.ID{'a', 'v', 'a', 'x'},
+			AxcAssetID:    ids.ID{'a', 'v', 'a', 'x'},
 			UTXOs:         genesisUTXOs,
 			Validators:    genesisValidators,
 			Chains:        nil,
 			Time:          json.Uint64(time.Date(1997, 1, 1, 0, 0, 0, 0, time.UTC).Unix()),
-			InitialSupply: json.Uint64(360 * units.MegaAxc),
+			InitialSupply: uint128.Zero.Add64(360 * units.MegaAxc),
 			Encoding:      formatting.CB58,
 		}
 

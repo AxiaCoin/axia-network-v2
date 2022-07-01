@@ -8,6 +8,7 @@ import (
 
 	"github.com/axiacoin/axia-network-v2/database"
 	"github.com/axiacoin/axia-network-v2/ids"
+	"github.com/axiacoin/axia-network-v2/utils/uint128"
 	"github.com/axiacoin/axia-network-v2/vms/components/axc"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/status"
 )
@@ -42,8 +43,8 @@ type MutableState interface {
 	GetTimestamp() time.Time
 	SetTimestamp(time.Time)
 
-	GetCurrentSupply() uint64
-	SetCurrentSupply(uint64)
+	GetCurrentSupply() uint128.Uint128
+	SetCurrentSupply(uint128.Uint128)
 
 	GetAllychains() ([]*Tx, error)
 	AddAllychain(createAllychainTx *Tx)
@@ -70,7 +71,7 @@ type versionedStateImpl struct {
 
 	timestamp time.Time
 
-	currentSupply uint64
+	currentSupply uint128.Uint128
 
 	addedAllychains  []*Tx
 	cachedAllychains []*Tx
@@ -120,11 +121,11 @@ func (vs *versionedStateImpl) SetTimestamp(timestamp time.Time) {
 	vs.timestamp = timestamp
 }
 
-func (vs *versionedStateImpl) GetCurrentSupply() uint64 {
+func (vs *versionedStateImpl) GetCurrentSupply() uint128.Uint128 {
 	return vs.currentSupply
 }
 
-func (vs *versionedStateImpl) SetCurrentSupply(currentSupply uint64) {
+func (vs *versionedStateImpl) SetCurrentSupply(currentSupply uint128.Uint128) {
 	vs.currentSupply = currentSupply
 }
 

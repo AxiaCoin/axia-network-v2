@@ -13,6 +13,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/utils/formatting"
 	"github.com/axiacoin/axia-network-v2/utils/json"
 	"github.com/axiacoin/axia-network-v2/utils/rpc"
+	"github.com/axiacoin/axia-network-v2/utils/uint128"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/status"
 )
 
@@ -63,7 +64,7 @@ type Client interface {
 	// GetPendingValidators returns the list of pending validators for allychain with ID [allychainID]
 	GetPendingValidators(ctx context.Context, allychainID ids.ID, nodeIDs []ids.ShortID, options ...rpc.Option) ([]interface{}, []interface{}, error)
 	// GetCurrentSupply returns an upper bound on the supply of AXC in the system
-	GetCurrentSupply(ctx context.Context, options ...rpc.Option) (uint64, error)
+	GetCurrentSupply(ctx context.Context, options ...rpc.Option) (uint128.Uint128, error)
 	// SampleValidators returns the nodeIDs of a sample of [sampleSize] validators from the current validator set for allychain with ID [allychainID]
 	SampleValidators(ctx context.Context, allychainID ids.ID, sampleSize uint16, options ...rpc.Option) ([]string, error)
 	// AddValidator issues a transaction to add a validator to the primary network
@@ -335,7 +336,7 @@ func (c *client) GetCurrentValidators(
 	res := &GetCurrentValidatorsReply{}
 	err := c.requester.SendRequest(ctx, "getCurrentValidators", &GetCurrentValidatorsArgs{
 		AllychainID: allychainID,
-		NodeIDs:  nodeIDsStr,
+		NodeIDs:     nodeIDsStr,
 	}, res, options...)
 	return res.Validators, err
 }
@@ -353,22 +354,22 @@ func (c *client) GetPendingValidators(
 	res := &GetPendingValidatorsReply{}
 	err := c.requester.SendRequest(ctx, "getPendingValidators", &GetPendingValidatorsArgs{
 		AllychainID: allychainID,
-		NodeIDs:  nodeIDsStr,
+		NodeIDs:     nodeIDsStr,
 	}, res, options...)
 	return res.Validators, res.Delegators, err
 }
 
-func (c *client) GetCurrentSupply(ctx context.Context, options ...rpc.Option) (uint64, error) {
+func (c *client) GetCurrentSupply(ctx context.Context, options ...rpc.Option) (uint128.Uint128, error) {
 	res := &GetCurrentSupplyReply{}
 	err := c.requester.SendRequest(ctx, "getCurrentSupply", struct{}{}, res, options...)
-	return uint64(res.Supply), err
+	return uint128.Uint128{Lo: res.Supply.Lo, Hi: res.Supply.Hi}, err
 }
 
 func (c *client) SampleValidators(ctx context.Context, allychainID ids.ID, sampleSize uint16, options ...rpc.Option) ([]string, error) {
 	res := &SampleValidatorsReply{}
 	err := c.requester.SendRequest(ctx, "sampleValidators", &SampleValidatorsArgs{
 		AllychainID: allychainID,
-		Size:     json.Uint16(sampleSize),
+		Size:        json.Uint16(sampleSize),
 	}, res, options...)
 	return res.Validators, err
 }
@@ -558,7 +559,7 @@ func (c *client) CreateBlockchain(
 			JSONFromAddrs:  api.JSONFromAddrs{From: from},
 			JSONChangeAddr: api.JSONChangeAddr{ChangeAddr: changeAddr},
 		},
-		AllychainID:    allychainID,
+		AllychainID: allychainID,
 		VMID:        vmID,
 		FxIDs:       fxIDs,
 		Name:        name,
@@ -677,10 +678,10 @@ func (c *client) GetTotalStake(ctx context.Context, options ...rpc.Option) (uint
 func (c *client) GetMaxStakeAmount(ctx context.Context, allychainID ids.ID, nodeID string, startTime, endTime uint64, options ...rpc.Option) (uint64, error) {
 	res := new(GetMaxStakeAmountReply)
 	err := c.requester.SendRequest(ctx, "getMaxStakeAmount", &GetMaxStakeAmountArgs{
-		AllychainID:  allychainID,
-		NodeID:    nodeID,
-		StartTime: json.Uint64(startTime),
-		EndTime:   json.Uint64(endTime),
+		AllychainID: allychainID,
+		NodeID:      nodeID,
+		StartTime:   json.Uint64(startTime),
+		EndTime:     json.Uint64(endTime),
 	}, res, options...)
 	return uint64(res.Amount), err
 }
@@ -712,7 +713,7 @@ func (c *client) GetValidatorsAt(ctx context.Context, allychainID ids.ID, height
 	res := &GetValidatorsAtReply{}
 	err := c.requester.SendRequest(ctx, "getValidatorsAt", &GetValidatorsAtArgs{
 		AllychainID: allychainID,
-		Height:   json.Uint64(height),
+		Height:      json.Uint64(height),
 	}, res, options...)
 	return res.Validators, err
 }
