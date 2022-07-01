@@ -91,7 +91,6 @@ var (
 
 // GetHRP returns the Human-Readable-Part of bech32 addresses for a networkID
 func GetHRP(networkID uint32) string {
-	fmt.Printf("GetHRP: %b\n", networkID)
 	if hrp, ok := NetworkIDToHRP[networkID]; ok {
 		return hrp
 	}
