@@ -21,7 +21,7 @@ const (
 
 	TestnetID  uint32 = TestID
 	UnitTestID uint32 = 10
-	LocalID    uint32 = 12345
+	LocalID    uint32 = 7890
 
 	MainnetName  = "mainnet"
 	CascadeName  = "cascade"
@@ -38,7 +38,7 @@ const (
 	EverestHRP  = "everest"
 	TestHRP     = "test"
 	UnitTestHRP = "testing"
-	LocalHRP    = "local"
+	LocalHRP    = "custom"
 	FallbackHRP = "custom"
 )
 
@@ -91,6 +91,7 @@ var (
 
 // GetHRP returns the Human-Readable-Part of bech32 addresses for a networkID
 func GetHRP(networkID uint32) string {
+	fmt.Printf("GetHRP: %b\n", networkID)
 	if hrp, ok := NetworkIDToHRP[networkID]; ok {
 		return hrp
 	}
