@@ -6,8 +6,8 @@ package genesis
 import (
 	"time"
 
-	"github.com/axiacoin/axia-network-v2/utils/units"
 	"github.com/axiacoin/axia-network-v2/utils/constants"
+	"github.com/axiacoin/axia-network-v2/utils/units"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/reward"
 )
 
@@ -55,7 +55,7 @@ var (
 		TxFeeConfig: TxFeeConfig{
 			TxFee:                 units.MilliAxc,
 			CreateAssetTxFee:      10 * units.MilliAxc,
-			CreateAllychainTxFee:     100 * units.MilliAxc,
+			CreateAllychainTxFee:  100 * units.MilliAxc,
 			CreateBlockchainTxFee: 100 * units.MilliAxc,
 		},
 		StakingConfig: StakingConfig{

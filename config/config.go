@@ -46,10 +46,10 @@ import (
 )
 
 const (
-	pluginsDirName       = "plugins"
-	chainConfigFileName  = "config"
-	chainUpgradeFileName = "upgrade"
-	allychainConfigFileExt  = ".json"
+	pluginsDirName         = "plugins"
+	chainConfigFileName    = "config"
+	chainUpgradeFileName   = "upgrade"
+	allychainConfigFileExt = ".json"
 )
 
 var (
@@ -688,7 +688,7 @@ func getTxFeeConfig(v *viper.Viper, networkID uint32) genesis.TxFeeConfig {
 		return genesis.TxFeeConfig{
 			TxFee:                 v.GetUint64(TxFeeKey),
 			CreateAssetTxFee:      v.GetUint64(CreateAssetTxFeeKey),
-			CreateAllychainTxFee:     v.GetUint64(CreateAllychainTxFeeKey),
+			CreateAllychainTxFee:  v.GetUint64(CreateAllychainTxFeeKey),
 			CreateBlockchainTxFee: v.GetUint64(CreateBlockchainTxFeeKey),
 		}
 	}
@@ -1036,6 +1036,9 @@ func GetNodeConfig(v *viper.Viper, buildDir string) (node.Config, error) {
 
 	// Network ID
 	nodeConfig.NetworkID, err = constants.NetworkID(v.GetString(NetworkNameKey))
+
+	fmt.Printf("networkID: %b\n", nodeConfig.NetworkID)
+	fmt.Printf("NetworkNameKey: %s\n", NetworkNameKey)
 	if err != nil {
 		return node.Config{}, err
 	}
