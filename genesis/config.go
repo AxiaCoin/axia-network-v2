@@ -151,13 +151,13 @@ var (
 
 func init() {
 	unparsedMainnetConfig := UnparsedConfig{}
-	// unparsedTestConfig := UnparsedConfig{}
+	unparsedTestConfig := UnparsedConfig{}
 	unparsedLocalConfig := UnparsedConfig{}
 
 	errs := wrappers.Errs{}
 	errs.Add(
 		json.Unmarshal([]byte(mainnetGenesisConfigJSON), &unparsedMainnetConfig),
-		// json.Unmarshal([]byte(testGenesisConfigJSON), &unparsedTestConfig),
+		json.Unmarshal([]byte(testGenesisConfigJSON), &unparsedTestConfig),
 		json.Unmarshal([]byte(localGenesisConfigJSON), &unparsedLocalConfig),
 	)
 	if errs.Errored() {
@@ -168,9 +168,9 @@ func init() {
 	errs.Add(err)
 	MainnetConfig = mainnetConfig
 
-	// testConfig, err := unparsedTestConfig.Parse()
-	// errs.Add(err)
-	// TestConfig = testConfig
+	testConfig, err := unparsedTestConfig.Parse()
+	errs.Add(err)
+	TestConfig = testConfig
 
 	localConfig, err := unparsedLocalConfig.Parse()
 	errs.Add(err)
