@@ -153,7 +153,6 @@ var (
 				"initialAmount": 240000000000,
 				"unlockSchedule": []
 			}
-			}
 		],
 		"startTime": 1599696000,
 		"initialStakeDuration": 7776000,
