@@ -3,7 +3,8 @@
 --http-port=9650 \
 --staking-port=9651 \
 --db-dir=db/node1 \
---network-id=local \
+--network-id=test \
+--config-file=./config.json \
 --staking-tls-cert-file=$(pwd)/staking/local/staker1.crt \
 --staking-tls-key-file=$(pwd)/staking/local/staker1.key
 
@@ -12,7 +13,7 @@
 --http-port=9652 \
 --staking-port=9653 \
 --db-dir=db/node2 \
---network-id=local \
+--network-id=test \
 --bootstrap-ips=127.0.0.1:9651 \
 --bootstrap-ids=NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg \
 --staking-tls-cert-file=$(pwd)/staking/local/staker2.crt \
@@ -23,7 +24,7 @@
 --http-port=9654 \
 --staking-port=9655 \
 --db-dir=db/node3 \
---network-id=local \
+--network-id=test \
 --bootstrap-ips=127.0.0.1:9651 \
 --bootstrap-ids=NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg \
 --staking-tls-cert-file=$(pwd)/staking/local/staker3.crt \
@@ -34,7 +35,7 @@
 --http-port=9656 \
 --staking-port=9657 \
 --db-dir=db/node4 \
---network-id=local \
+--network-id=test \
 --bootstrap-ips=127.0.0.1:9651 \
 --bootstrap-ids=NodeID-7Xhw2mDxuDS44j42TCB6U5579esbSt3Lg \
 --staking-tls-cert-file=$(pwd)/staking/local/staker4.crt \
