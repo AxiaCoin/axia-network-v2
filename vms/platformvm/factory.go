@@ -53,7 +53,7 @@ type Factory struct {
 	MaxValidatorStake uint64
 
 	// Minimum stake, in nAXC, that can be delegated on the primary network
-	MinDelegatorStake uint64
+	MinNominatorStake uint64
 
 	// Minimum fee that can be charged for delegation
 	MinDelegationFee uint32

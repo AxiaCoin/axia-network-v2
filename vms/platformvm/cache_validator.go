@@ -10,19 +10,19 @@ import (
 var _ validator = &validatorImpl{}
 
 type validator interface {
-	Delegators() []*UnsignedAddDelegatorTx
+	Nominators() []*UnsignedAddNominatorTx
 	AllychainValidators() map[ids.ID]*UnsignedAddAllychainValidatorTx
 }
 
 type validatorImpl struct {
 	// sorted in order of next operation, either addition or removal.
-	delegators []*UnsignedAddDelegatorTx
+	nominators []*UnsignedAddNominatorTx
 	// maps allychainID to tx
 	allychains map[ids.ID]*UnsignedAddAllychainValidatorTx
 }
 
-func (v *validatorImpl) Delegators() []*UnsignedAddDelegatorTx {
-	return v.delegators
+func (v *validatorImpl) Nominators() []*UnsignedAddNominatorTx {
+	return v.nominators
 }
 
 func (v *validatorImpl) AllychainValidators() map[ids.ID]*UnsignedAddAllychainValidatorTx {

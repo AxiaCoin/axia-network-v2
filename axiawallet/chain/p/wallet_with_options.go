@@ -69,12 +69,12 @@ func (w *axiawalletWithOptions) IssueAddAllychainValidatorTx(
 	)
 }
 
-func (w *axiawalletWithOptions) IssueAddDelegatorTx(
+func (w *axiawalletWithOptions) IssueAddNominatorTx(
 	validator *platformvm.Validator,
 	rewardsOwner *secp256k1fx.OutputOwners,
 	options ...common.Option,
 ) (ids.ID, error) {
-	return w.AxiaWallet.IssueAddDelegatorTx(
+	return w.AxiaWallet.IssueAddNominatorTx(
 		validator,
 		rewardsOwner,
 		common.UnionOptions(w.options, options)...,

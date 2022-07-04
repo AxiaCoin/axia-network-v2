@@ -123,24 +123,6 @@ func (c Config) Unparse() (UnparsedConfig, error) {
 	return uc, nil
 }
 
-// func (c *Config) InitialSupply() (uint64, error) {
-// 	initialSupply := uint64(0)
-// 	for _, allocation := range c.Allocations {
-// 		newInitialSupply, err := safemath.Add64(initialSupply, allocation.InitialAmount)
-// 		if err != nil {
-// 			return 0, err
-// 		}
-// 		for _, unlock := range allocation.UnlockSchedule {
-// 			newInitialSupply, err = safemath.Add64(newInitialSupply, unlock.Amount)
-// 			if err != nil {
-// 				return 0, err
-// 			}
-// 		}
-// 		initialSupply = newInitialSupply
-// 	}
-// 	return initialSupply, nil
-// }
-
 func (c *Config) InitialSupply() (uint128.Uint128, error) {
 	initialSupply := uint128.Zero
 	for _, allocation := range c.Allocations {
@@ -168,28 +150,28 @@ var (
 )
 
 func init() {
-	//	unparsedMainnetConfig := UnparsedConfig{}
-	//	unparsedTestConfig := UnparsedConfig{}
+	unparsedMainnetConfig := UnparsedConfig{}
+	// unparsedTestConfig := UnparsedConfig{}
 	unparsedLocalConfig := UnparsedConfig{}
 
 	errs := wrappers.Errs{}
 	errs.Add(
-		//		json.Unmarshal([]byte(mainnetGenesisConfigJSON), &unparsedMainnetConfig),
-		//		json.Unmarshal([]byte(testGenesisConfigJSON), &unparsedTestConfig),
+		json.Unmarshal([]byte(mainnetGenesisConfigJSON), &unparsedMainnetConfig),
+		// json.Unmarshal([]byte(testGenesisConfigJSON), &unparsedTestConfig),
 		json.Unmarshal([]byte(localGenesisConfigJSON), &unparsedLocalConfig),
 	)
 	if errs.Errored() {
 		panic(errs.Err)
 	}
 
-	/*	mainnetConfig, err := unparsedMainnetConfig.Parse()
-		errs.Add(err)
-		MainnetConfig = mainnetConfig
+	mainnetConfig, err := unparsedMainnetConfig.Parse()
+	errs.Add(err)
+	MainnetConfig = mainnetConfig
 
-		testConfig, err := unparsedTestConfig.Parse()
-		errs.Add(err)
-		TestConfig = testConfig
-	*/
+	// testConfig, err := unparsedTestConfig.Parse()
+	// errs.Add(err)
+	// TestConfig = testConfig
+
 	localConfig, err := unparsedLocalConfig.Parse()
 	errs.Add(err)
 	LocalConfig = localConfig

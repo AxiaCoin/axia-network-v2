@@ -31,7 +31,7 @@ type metrics struct {
 
 	numVotesWon, numVotesLost prometheus.Counter
 
-	numAddDelegatorTxs,
+	numAddNominatorTxs,
 	numAddAllychainValidatorTxs,
 	numAddValidatorTxs,
 	numAdvanceTimeTxs,
@@ -112,7 +112,7 @@ func (m *metrics) Initialize(
 		Help:      "Total number of votes this node has lost",
 	})
 
-	m.numAddDelegatorTxs = newTxMetrics(namespace, "add_delegator")
+	m.numAddNominatorTxs = newTxMetrics(namespace, "add_nominator")
 	m.numAddAllychainValidatorTxs = newTxMetrics(namespace, "add_allychain_validator")
 	m.numAddValidatorTxs = newTxMetrics(namespace, "add_validator")
 	m.numAdvanceTimeTxs = newTxMetrics(namespace, "advance_time")
@@ -163,7 +163,7 @@ func (m *metrics) Initialize(
 		registerer.Register(m.numVotesWon),
 		registerer.Register(m.numVotesLost),
 
-		registerer.Register(m.numAddDelegatorTxs),
+		registerer.Register(m.numAddNominatorTxs),
 		registerer.Register(m.numAddAllychainValidatorTxs),
 		registerer.Register(m.numAddValidatorTxs),
 		registerer.Register(m.numAdvanceTimeTxs),
@@ -214,8 +214,8 @@ func (m *metrics) AcceptBlock(b snowman.Block) error {
 
 func (m *metrics) AcceptTx(tx *Tx) error {
 	switch tx.UnsignedTx.(type) {
-	case *UnsignedAddDelegatorTx:
-		m.numAddDelegatorTxs.Inc()
+	case *UnsignedAddNominatorTx:
+		m.numAddNominatorTxs.Inc()
 	case *UnsignedAddAllychainValidatorTx:
 		m.numAddAllychainValidatorTxs.Inc()
 	case *UnsignedAddValidatorTx:

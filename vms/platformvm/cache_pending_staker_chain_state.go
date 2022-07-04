@@ -16,7 +16,7 @@ import (
 var _ pendingStakerChainState = &pendingStakerChainStateImpl{}
 
 // pendingStakerChainState manages the set of stakers (both validators and
-// delegators) that are slated to start staking in the future.
+// nominators) that are slated to start staking in the future.
 type pendingStakerChainState interface {
 	GetValidatorTx(nodeID ids.ShortID) (addStakerTx *UnsignedAddValidatorTx, err error)
 	GetValidator(nodeID ids.ShortID) validator
@@ -80,7 +80,7 @@ func (ps *pendingStakerChainStateImpl) AddStaker(addStakerTx *Tx) pendingStakerC
 			newPS.validatorsByNodeID[nodeID] = vdr
 		}
 		newPS.validatorsByNodeID[tx.Validator.NodeID] = tx
-	case *UnsignedAddDelegatorTx:
+	case *UnsignedAddNominatorTx:
 		newPS.validatorsByNodeID = ps.validatorsByNodeID
 
 		newPS.validatorExtrasByNodeID = make(map[ids.ShortID]*validatorImpl, len(ps.validatorExtrasByNodeID)+1)
@@ -90,18 +90,18 @@ func (ps *pendingStakerChainStateImpl) AddStaker(addStakerTx *Tx) pendingStakerC
 			}
 		}
 		if vdr, exists := ps.validatorExtrasByNodeID[tx.Validator.NodeID]; exists {
-			newDelegators := make([]*UnsignedAddDelegatorTx, len(vdr.delegators)+1)
-			copy(newDelegators, vdr.delegators)
-			newDelegators[len(vdr.delegators)] = tx
-			sortDelegatorsByAddition(newDelegators)
+			newNominators := make([]*UnsignedAddNominatorTx, len(vdr.nominators)+1)
+			copy(newNominators, vdr.nominators)
+			newNominators[len(vdr.nominators)] = tx
+			sortNominatorsByAddition(newNominators)
 
 			newPS.validatorExtrasByNodeID[tx.Validator.NodeID] = &validatorImpl{
-				delegators: newDelegators,
+				nominators: newNominators,
 				allychains:    vdr.allychains,
 			}
 		} else {
 			newPS.validatorExtrasByNodeID[tx.Validator.NodeID] = &validatorImpl{
-				delegators: []*UnsignedAddDelegatorTx{
+				nominators: []*UnsignedAddNominatorTx{
 					tx,
 				},
 			}
@@ -123,7 +123,7 @@ func (ps *pendingStakerChainStateImpl) AddStaker(addStakerTx *Tx) pendingStakerC
 			newAllychains[tx.Validator.Allychain] = tx
 
 			newPS.validatorExtrasByNodeID[tx.Validator.NodeID] = &validatorImpl{
-				delegators: vdr.delegators,
+				nominators: vdr.nominators,
 				allychains:    newAllychains,
 			}
 		} else {
@@ -160,19 +160,19 @@ func (ps *pendingStakerChainStateImpl) DeleteStakers(numToRemove int) pendingSta
 		switch tx := removedTx.UnsignedTx.(type) {
 		case *UnsignedAddValidatorTx:
 			delete(newPS.validatorsByNodeID, tx.Validator.NodeID)
-		case *UnsignedAddDelegatorTx:
+		case *UnsignedAddNominatorTx:
 			vdr := newPS.validatorExtrasByNodeID[tx.Validator.NodeID]
-			if len(vdr.delegators) == 1 && len(vdr.allychains) == 0 {
+			if len(vdr.nominators) == 1 && len(vdr.allychains) == 0 {
 				delete(newPS.validatorExtrasByNodeID, tx.Validator.NodeID)
 				break
 			}
 			newPS.validatorExtrasByNodeID[tx.Validator.NodeID] = &validatorImpl{
-				delegators: vdr.delegators[1:], // sorted in order of removal
+				nominators: vdr.nominators[1:], // sorted in order of removal
 				allychains:    vdr.allychains,
 			}
 		case *UnsignedAddAllychainValidatorTx:
 			vdr := newPS.validatorExtrasByNodeID[tx.Validator.NodeID]
-			if len(vdr.delegators) == 0 && len(vdr.allychains) == 1 {
+			if len(vdr.nominators) == 0 && len(vdr.allychains) == 1 {
 				delete(newPS.validatorExtrasByNodeID, tx.Validator.NodeID)
 				break
 			}
@@ -183,7 +183,7 @@ func (ps *pendingStakerChainStateImpl) DeleteStakers(numToRemove int) pendingSta
 				}
 			}
 			newPS.validatorExtrasByNodeID[tx.Validator.NodeID] = &validatorImpl{
-				delegators: vdr.delegators,
+				nominators: vdr.nominators,
 				allychains:    newAllychains,
 			}
 		default:
@@ -226,7 +226,7 @@ func (s innerSortValidatorsByAddition) Less(i, j int) bool {
 	case *UnsignedAddValidatorTx:
 		iStartTime = tx.StartTime()
 		iPriority = mediumPriority
-	case *UnsignedAddDelegatorTx:
+	case *UnsignedAddNominatorTx:
 		iStartTime = tx.StartTime()
 		iPriority = topPriority
 	case *UnsignedAddAllychainValidatorTx:
@@ -244,7 +244,7 @@ func (s innerSortValidatorsByAddition) Less(i, j int) bool {
 	case *UnsignedAddValidatorTx:
 		jStartTime = tx.StartTime()
 		jPriority = mediumPriority
-	case *UnsignedAddDelegatorTx:
+	case *UnsignedAddNominatorTx:
 		jStartTime = tx.StartTime()
 		jPriority = topPriority
 	case *UnsignedAddAllychainValidatorTx:
@@ -262,7 +262,7 @@ func (s innerSortValidatorsByAddition) Less(i, j int) bool {
 	}
 
 	// If the end times are the same, then we sort by the tx type. First we
-	// add UnsignedAddValidatorTx, then UnsignedAddDelegatorTx, then
+	// add UnsignedAddValidatorTx, then UnsignedAddNominatorTx, then
 	// UnsignedAddAllychainValidatorTxs.
 	if iPriority > jPriority {
 		return true
@@ -290,9 +290,9 @@ func sortValidatorsByAddition(s []*Tx) {
 	sort.Sort(innerSortValidatorsByAddition(s))
 }
 
-type innerSortDelegatorsByAddition []*UnsignedAddDelegatorTx
+type innerSortNominatorsByAddition []*UnsignedAddNominatorTx
 
-func (s innerSortDelegatorsByAddition) Less(i, j int) bool {
+func (s innerSortNominatorsByAddition) Less(i, j int) bool {
 	iDel := s[i]
 	jDel := s[j]
 
@@ -311,14 +311,14 @@ func (s innerSortDelegatorsByAddition) Less(i, j int) bool {
 	return bytes.Compare(iTxID[:], jTxID[:]) == -1
 }
 
-func (s innerSortDelegatorsByAddition) Len() int {
+func (s innerSortNominatorsByAddition) Len() int {
 	return len(s)
 }
 
-func (s innerSortDelegatorsByAddition) Swap(i, j int) {
+func (s innerSortNominatorsByAddition) Swap(i, j int) {
 	s[j], s[i] = s[i], s[j]
 }
 
-func sortDelegatorsByAddition(s []*UnsignedAddDelegatorTx) {
-	sort.Sort(innerSortDelegatorsByAddition(s))
+func sortNominatorsByAddition(s []*UnsignedAddNominatorTx) {
+	sort.Sort(innerSortNominatorsByAddition(s))
 }

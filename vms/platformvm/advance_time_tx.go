@@ -103,7 +103,7 @@ func (tx *UnsignedAdvanceTimeTx) Execute(
 
 	pendingStakers := parentState.PendingStakerChainState()
 	toAddValidatorsWithRewardToCurrent := []*validatorReward(nil)
-	toAddDelegatorsWithRewardToCurrent := []*validatorReward(nil)
+	toAddNominatorsWithRewardToCurrent := []*validatorReward(nil)
 	toAddWithoutRewardToCurrent := []*Tx(nil)
 	numToRemoveFromPending := 0
 
@@ -113,7 +113,7 @@ func (tx *UnsignedAdvanceTimeTx) Execute(
 pendingStakerLoop:
 	for _, tx := range pendingStakers.Stakers() {
 		switch staker := tx.UnsignedTx.(type) {
-		case *UnsignedAddDelegatorTx:
+		case *UnsignedAddNominatorTx:
 			if staker.StartTime().After(txTimestamp) {
 				break pendingStakerLoop
 			}
@@ -125,7 +125,7 @@ pendingStakerLoop:
 			)
 			currentSupply = currentSupply.Add64(r)
 
-			toAddDelegatorsWithRewardToCurrent = append(toAddDelegatorsWithRewardToCurrent, &validatorReward{
+			toAddNominatorsWithRewardToCurrent = append(toAddNominatorsWithRewardToCurrent, &validatorReward{
 				addStakerTx:     tx,
 				potentialReward: r,
 			})
@@ -178,7 +178,7 @@ currentStakerLoop:
 			}
 
 			numToRemoveFromCurrent++
-		case *UnsignedAddValidatorTx, *UnsignedAddDelegatorTx:
+		case *UnsignedAddValidatorTx, *UnsignedAddNominatorTx:
 			// We shouldn't be removing any primary network validators here
 			break currentStakerLoop
 		default:
@@ -187,7 +187,7 @@ currentStakerLoop:
 	}
 	newlyCurrentStakers, err := currentStakers.UpdateStakers(
 		toAddValidatorsWithRewardToCurrent,
-		toAddDelegatorsWithRewardToCurrent,
+		toAddNominatorsWithRewardToCurrent,
 		toAddWithoutRewardToCurrent,
 		numToRemoveFromCurrent,
 	)
