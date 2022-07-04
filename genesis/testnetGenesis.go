@@ -33,7 +33,7 @@ var (
 			"unlockSchedule": [
 			 
 			  {
-				"amount": 100000000000000,
+				"amount": 1000000000000000,
 				"locktime": 1655936730
 			  }
 			]
@@ -44,7 +44,7 @@ var (
 			"initialAmount": 30000000000000000,
 			"unlockSchedule": [
 			  {
-				"amount": 100000000000000,
+				"amount": 1000000000000000,
 				"locktime": 1655936730
 			  }
 			]
@@ -55,7 +55,7 @@ var (
 			"initialAmount": 30000000000000000,
 			"unlockSchedule": [
 			  {
-				"amount": 100000000000000,
+				"amount": 1000000000000000,
 				"locktime": 1655936730
 			  }
 			]
@@ -66,7 +66,7 @@ var (
 			"initialAmount": 30000000000000000,
 			"unlockSchedule": [
 			  {
-				"amount": 100000000000000,
+				"amount": 1000000000000000,
 				"locktime": 1655936730
 			  }
 			]
@@ -77,7 +77,7 @@ var (
 			"initialAmount": 30000000000000000,
 			"unlockSchedule": [
 			  {
-				"amount": 100000000000000,
+				"amount": 1000000000000000,
 				"locktime": 1655936730
 			  }
 			]
@@ -134,7 +134,7 @@ var (
 				MaxConsumptionRate: .12 * reward.PercentDenominator,
 				MinConsumptionRate: .10 * reward.PercentDenominator,
 				MintingPeriod:      365 * 24 * time.Hour,
-				SupplyCap:          uint128.Zero.Add64(720 * units.MegaAxc),
+				SupplyCap:          uint128.Zero.Add64(1800 * units.MegaAxc),
 			},
 		},
 	}
