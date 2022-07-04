@@ -4,7 +4,6 @@
 --staking-port=9651 \
 --db-dir=db/node1 \
 --network-id=test \
---config-file=./config.json \
 --staking-tls-cert-file=$(pwd)/staking/local/staker1.crt \
 --staking-tls-key-file=$(pwd)/staking/local/staker1.key
 
