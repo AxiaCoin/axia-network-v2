@@ -53,10 +53,10 @@ var (
 		constants.MainnetID: time.Date(2021, time.September, 22, 21, 0, 0, 0, time.UTC),
 		constants.TestID:    time.Date(2021, time.September, 16, 21, 0, 0, 0, time.UTC),
 	}
-	ApricotPhase4DefaultTime     = time.Date(2020, time.December, 5, 5, 0, 0, 0, time.UTC)
+	ApricotPhase4DefaultTime        = time.Date(2020, time.December, 5, 5, 0, 0, 0, time.UTC)
 	ApricotPhase4MinCoreChainHeight = map[uint32]uint64{
-		constants.MainnetID: 793005,
-		constants.TestID:    47437,
+		constants.MainnetID: 0, // 793005
+		constants.TestID:    0, // 47437
 	}
 	ApricotPhase4DefaultMinCoreChainHeight uint64
 

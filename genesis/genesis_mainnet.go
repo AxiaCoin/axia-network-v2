@@ -428,16 +428,16 @@ var (
 		},
 		StakingConfig: StakingConfig{
 			UptimeRequirement: .8, // 80%
-			MinValidatorStake: 2 * units.KiloAxc,
+			MinValidatorStake: 1 * units.MegaAxc,
 			MaxValidatorStake: 3 * units.MegaAxc,
-			MinNominatorStake: 25 * units.Axc,
+			MinNominatorStake: 20 * units.Axc,
 			MinNominationFee:  20000, // 2%
-			MinStakeDuration:  2 * 7 * 24 * time.Hour,
-			MaxStakeDuration:  365 * 24 * time.Hour,
+			MinStakeDuration:  120 * 24 * time.Hour,
+			MaxStakeDuration:  2 * 365 * 24 * time.Hour,
 			RewardConfig: reward.Config{
 				MaxConsumptionRate: .12 * reward.PercentDenominator,
 				MinConsumptionRate: .10 * reward.PercentDenominator,
-				MintingPeriod:      365 * 24 * time.Hour,
+				MintingPeriod:      2 * 365 * 24 * time.Hour,
 				SupplyCap:          uint128.Uint128{Hi: 180, Lo: 000000000000000000},
 			},
 		},
