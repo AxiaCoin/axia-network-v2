@@ -80,7 +80,7 @@ func getNodeIDs(networkID uint32) []string {
 			"NodeID-BLaJAbw7aYCmZtYoemCBpowijcBPq7yZs",
 			"NodeID-FTirsWrt7FJVTTvQejEQpJERuJDKk9BW2",
 			"NodeID-Gym2UoBo3b4tp3pukZzDjxJefNc5XE8Cw",
-			"NodeID-AkZUoGaJUWrfGUBtk7Wrsyvu5DZKVkxKQ",
+/*			"NodeID-AkZUoGaJUWrfGUBtk7Wrsyvu5DZKVkxKQ",
 			"NodeID-FuzyvQMfFRhAWiiQLvcDVErbNoA2czuYp",
 			"NodeID-Ag6dycckf8nwo2EYrvfnuw4oAw8xTz6P3",
 			"NodeID-PUWVULUUXozYBvUQwoPxQFMXT13MqRBAK",
@@ -97,7 +97,7 @@ func getNodeIDs(networkID uint32) []string {
 			"NodeID-Q1KAsFkpTVszwbAtANydsRTLj9jjs8PAP",
 			"NodeID-HPz5qwnbvsiz4oqmsf7zr8NeWsmbSnAep",
 			"NodeID-G3FjbZ7rSrBqL11BpZG89RJPXkP2cUaiL",
-			"NodeID-5wFDMxCVVpvZip4oUrMyunwRde1aU9Vmb",
+			"NodeID-5wFDMxCVVpvZip4oUrMyunwRde1aU9Vmb", */
 		}
 	case constants.TestID:
 		return []string{
