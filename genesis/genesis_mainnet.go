@@ -432,7 +432,7 @@ var (
 			MaxValidatorStake: 3 * units.MegaAxc,
 			MinNominatorStake: 25 * units.Axc,
 			MinNominationFee:  20000, // 2%
-			MinStakeDuration:  2 * 7 * 24 * time.Hour,
+			MinStakeDuration:  120 * 24 * time.Hour,
 			MaxStakeDuration:  365 * 24 * time.Hour,
 			RewardConfig: reward.Config{
 				MaxConsumptionRate: .12 * reward.PercentDenominator,
