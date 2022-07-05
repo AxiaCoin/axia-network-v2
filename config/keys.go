@@ -20,7 +20,7 @@ const (
 	MinValidatorStakeKey                               = "min-validator-stake"
 	MaxValidatorStakeKey                               = "max-validator-stake"
 	MinNominatorStakeKey                               = "min-nominator-stake"
-	MinNominatorFeeKey                                 = "min-delegation-fee"
+	MinNominatorFeeKey                                 = "min-nomination-fee"
 	MinStakeDurationKey                                = "min-stake-duration"
 	MaxStakeDurationKey                                = "max-stake-duration"
 	StakeMaxConsumptionRateKey                         = "stake-max-consumption-rate"

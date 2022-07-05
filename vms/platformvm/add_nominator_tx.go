@@ -23,7 +23,7 @@ import (
 var (
 	errNominatorSubset = errors.New("nominator's time range must be a subset of the validator's time range")
 	errInvalidState    = errors.New("generated output isn't valid state")
-	errOverDelegated   = errors.New("validator would be over delegated")
+	errOverNominated   = errors.New("validator would be over nominated")
 
 	_ UnsignedProposalTx = &UnsignedAddNominatorTx{}
 	_ TimedTx            = &UnsignedAddNominatorTx{}
@@ -33,7 +33,7 @@ var (
 type UnsignedAddNominatorTx struct {
 	// Metadata, inputs and outputs
 	BaseTx `serialize:"true"`
-	// Describes the delegatee
+	// Describes the nominatee
 	Validator Validator `serialize:"true" json:"validator"`
 	// Where to send staked tokens when done validating
 	Stake []*axc.TransferableOutput `serialize:"true" json:"stake"`
@@ -188,13 +188,13 @@ func (tx *UnsignedAddNominatorTx) Execute(
 			currentNominators      []*UnsignedAddNominatorTx
 		)
 		if err == nil {
-			// This nominator is attempting to delegate to a currently validing
+			// This nominator is attempting to nominate to a currently validing
 			// node.
 			vdrTx = currentValidator.AddValidatorTx()
 			currentNominatorWeight = currentValidator.NominatorWeight()
 			currentNominators = currentValidator.Nominators()
 		} else {
-			// This nominator is attempting to delegate to a node that hasn't
+			// This nominator is attempting to nominate to a node that hasn't
 			// started validating yet.
 			vdrTx, err = pendingStakers.GetValidatorTx(tx.Validator.NodeID)
 			if err != nil {
@@ -209,14 +209,14 @@ func (tx *UnsignedAddNominatorTx) Execute(
 			}
 		}
 
-		// Ensure that the period this nominator delegates is a subset of the
+		// Ensure that the period this nominator nominates is a subset of the
 		// time the validator validates.
 		if !tx.Validator.BoundedBy(vdrTx.StartTime(), vdrTx.EndTime()) {
 			return nil, nil, errNominatorSubset
 		}
 
-		// Ensure that the period this nominator delegates wouldn't become over
-		// delegated.
+		// Ensure that the period this nominator nominates wouldn't become over
+		// nominated.
 		vdrWeight := vdrTx.Weight()
 		currentWeight, err := math.Add64(vdrWeight, currentNominatorWeight)
 		if err != nil {
@@ -232,7 +232,7 @@ func (tx *UnsignedAddNominatorTx) Execute(
 			maximumWeight = math.Min64(maximumWeight, vm.MaxValidatorStake)
 		}
 
-		canDelegate, err := CanDelegate(
+		canNominate, err := CanNominate(
 			currentNominators,
 			pendingNominators,
 			tx,
@@ -242,8 +242,8 @@ func (tx *UnsignedAddNominatorTx) Execute(
 		if err != nil {
 			return nil, nil, err
 		}
-		if !canDelegate {
-			return nil, nil, errOverDelegated
+		if !canNominate {
+			return nil, nil, errOverNominated
 		}
 
 		// Verify the flowcheck
@@ -289,9 +289,9 @@ func (tx *UnsignedAddNominatorTx) InitiallyPrefersCommit(vm *VM) bool {
 // Creates a new transaction
 func (vm *VM) newAddNominatorTx(
 	stakeAmt, // Amount the nominator stakes
-	startTime, // Unix time they start delegating
-	endTime uint64, // Unix time they stop delegating
-	nodeID ids.ShortID, // ID of the node we are delegating to
+	startTime, // Unix time they start nominating
+	endTime uint64, // Unix time they stop nominating
+	nodeID ids.ShortID, // ID of the node we are nominating to
 	rewardAddress ids.ShortID, // Address to send reward to, if applicable
 	keys []*crypto.PrivateKeySECP256K1R, // Keys providing the staked tokens
 	changeAddr ids.ShortID, // Address to send change to, if there is any
@@ -328,13 +328,13 @@ func (vm *VM) newAddNominatorTx(
 	return tx, utx.SyntacticVerify(vm.ctx)
 }
 
-// CanDelegate returns if the [new] nominator can be added to a validator who
+// CanNominate returns if the [new] nominator can be added to a validator who
 // has [current] and [pending] nominators. [currentStake] is the current amount
 // of stake on the validator, include the [current] nominators. [maximumStake]
 // is the maximum amount of stake that can be on the validator at any given
 // time. It is assumed that the validator without adding [new] does not violate
 // [maximumStake].
-func CanDelegate(
+func CanNominate(
 	current,
 	pending []*UnsignedAddNominatorTx, // sorted by next start time first
 	new *UnsignedAddNominatorTx,
@@ -352,16 +352,16 @@ func CanDelegate(
 	return newMaxStake <= maximumStake, nil
 }
 
-// Return the maximum amount of stake on a node (including delegations) at any
+// Return the maximum amount of stake on a node (including nominations) at any
 // given time between [startTime] and [endTime] given that:
 // * The amount of stake on the node right now is [currentStake]
-// * The delegations currently on this node are [current]
-// * [current] is sorted in order of increasing delegation end time.
-// * The stake delegated in [current] are already included in [currentStake]
+// * The nominations currently on this node are [current]
+// * [current] is sorted in order of increasing nomination end time.
+// * The stake nominated in [current] are already included in [currentStake]
 // * [startTime] is in the future, and [endTime] > [startTime]
-// * The delegations that will be on this node in the future are [pending]
-// * The start time of all delegations in [pending] are in the future
-// * [pending] is sorted in order of increasing delegation start time
+// * The nominations that will be on this node in the future are [pending]
+// * The start time of all nominations in [pending] are in the future
+// * [pending] is sorted in order of increasing nomination start time
 func maxStakeAmount(
 	current,
 	pending []*UnsignedAddNominatorTx, // sorted by next start time first
@@ -382,30 +382,30 @@ func maxStakeAmount(
 		maxStake uint64
 	)
 
-	// Calculate what the amount staked will be when each pending delegation
+	// Calculate what the amount staked will be when each pending nomination
 	// starts.
 	for _, nextPending := range pending { // Iterates in order of increasing start time
-		// Calculate what the amount staked will be when this delegation starts.
+		// Calculate what the amount staked will be when this nomination starts.
 		nextPendingStartTime := nextPending.StartTime()
 
 		if nextPendingStartTime.After(endTime) {
-			// This delegation starts after [endTime].
+			// This nomination starts after [endTime].
 			// Since we're calculating the max amount staked in
 			// [startTime, endTime], we can stop. (Recall that [pending] is
 			// sorted in order of increasing end time.)
 			break
 		}
 
-		// Subtract from [currentStake] all of the current delegations that will
-		// have ended by the time that the delegation [nextPending] starts.
+		// Subtract from [currentStake] all of the current nominations that will
+		// have ended by the time that the nomination [nextPending] starts.
 		for toRemoveHeap.Len() > 0 {
-			// Get the next current delegation that will end.
+			// Get the next current nomination that will end.
 			toRemove := toRemoveHeap.Peek()
 			toRemoveEndTime := toRemove.EndTime()
 			if toRemoveEndTime.After(nextPendingStartTime) {
 				break
 			}
-			// This current delegation [toRemove] ends before [nextPending]
+			// This current nomination [toRemove] ends before [nextPending]
 			// starts, so its stake should be subtracted from [currentStake].
 
 			// Changed in AP3:
@@ -429,7 +429,7 @@ func maxStakeAmount(
 		}
 
 		// Add to [currentStake] the stake of this pending nominator to
-		// calculate what the stake will be when this pending delegation has
+		// calculate what the stake will be when this pending nomination has
 		// started.
 		currentStake, err = math.Add64(currentStake, nextPending.Validator.Wght)
 		if err != nil {
@@ -440,7 +440,7 @@ func maxStakeAmount(
 		// If the new nominator has started, then this pending nominator should
 		// have a start time that is >= [startTime]. Otherwise, the nominator
 		// hasn't started yet and the [currentStake] shouldn't count towards the
-		// [maximumStake] during the nominators delegation period.
+		// [maximumStake] during the nominators nomination period.
 		newNominatorHasStarted := !nextPendingStartTime.Before(startTime)
 		if newNominatorHasStarted && currentStake > maxStake {
 			// Only update [maxStake] if it's after [startTime]
@@ -456,7 +456,7 @@ func maxStakeAmount(
 	// whose start time is after [endTime].
 
 	// If there aren't any nominators that will be added before the end of our
-	// delegation period, we should advance through time until our delegation
+	// nomination period, we should advance through time until our nomination
 	// period starts.
 	for toRemoveHeap.Len() > 0 {
 		toRemove := toRemoveHeap.Peek()
@@ -476,7 +476,7 @@ func maxStakeAmount(
 		toRemoveHeap.Remove()
 	}
 
-	// We have advanced time to be inside the delegation window.
+	// We have advanced time to be inside the nomination window.
 	// Make sure that the max stake is updated accordingly.
 	if currentStake > maxStake {
 		maxStake = currentStake

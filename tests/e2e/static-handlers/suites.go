@@ -162,7 +162,7 @@ var _ = ginkgo.Describe("[StaticHandlers]", func() {
 					Amount:  json.Uint64(10000),
 					Address: addr,
 				}},
-				DelegationFee: reward.PercentDenominator,
+				NominationFee: reward.PercentDenominator,
 			}
 		}
 

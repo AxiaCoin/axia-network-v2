@@ -205,7 +205,7 @@ func (tx *UnsignedRewardValidatorTx) Execute(
 		}
 		vdrTx := vdr.AddValidatorTx()
 
-		// Calculate split of reward between nominator/delegatee
+		// Calculate split of reward between nominator/nominatee
 		// The nominator gives stake to the validatee
 		nominatorShares := reward.PercentDenominator - uint64(vdrTx.Shares)             // parentTx.Shares <= reward.PercentDenominator so no underflow
 		nominatorReward := nominatorShares * (stakerReward / reward.PercentDenominator) // nominatorShares <= reward.PercentDenominator so no overflow
@@ -213,7 +213,7 @@ func (tx *UnsignedRewardValidatorTx) Execute(
 		if optimisticReward, err := math.Mul64(nominatorShares, stakerReward); err == nil {
 			nominatorReward = optimisticReward / reward.PercentDenominator
 		}
-		delegateeReward := stakerReward - nominatorReward // nominatorReward <= reward so no underflow
+		nominateeReward := stakerReward - nominatorReward // nominatorReward <= reward so no underflow
 
 		offset := 0
 
@@ -242,9 +242,9 @@ func (tx *UnsignedRewardValidatorTx) Execute(
 			offset++
 		}
 
-		// Reward the delegatee here
-		if delegateeReward > 0 {
-			outIntf, err := vm.fx.CreateOutput(delegateeReward, vdrTx.RewardsOwner)
+		// Reward the nominatee here
+		if nominateeReward > 0 {
+			outIntf, err := vm.fx.CreateOutput(nominateeReward, vdrTx.RewardsOwner)
 			if err != nil {
 				return nil, nil, fmt.Errorf("failed to create output: %w", err)
 			}

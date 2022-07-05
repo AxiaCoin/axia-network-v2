@@ -10,7 +10,7 @@ type currentValidator interface {
 
 	AddValidatorTx() *UnsignedAddValidatorTx
 
-	// Weight of delegations to this validator. Doesn't include the stake
+	// Weight of nominations to this validator. Doesn't include the stake
 	// provided by this validator.
 	NominatorWeight() uint64
 

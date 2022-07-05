@@ -27,7 +27,7 @@ var (
 	errWeightTooLarge            = errors.New("weight of this validator is too large")
 	errStakeTooShort             = errors.New("staking period is too short")
 	errStakeTooLong              = errors.New("staking period is too long")
-	errInsufficientDelegationFee = errors.New("staker charges an insufficient delegation fee")
+	errInsufficientNominationFee = errors.New("staker charges an insufficient nomination fee")
 	errFutureStakeTime           = fmt.Errorf("staker is attempting to start staking more than %s ahead of the current chain time", maxFutureStartTime)
 	errTooManyShares             = fmt.Errorf("a staker can only require at most %d shares from nominators", reward.PercentDenominator)
 
@@ -39,7 +39,7 @@ var (
 type UnsignedAddValidatorTx struct {
 	// Metadata, inputs and outputs
 	BaseTx `serialize:"true"`
-	// Describes the delegatee
+	// Describes the nominatee
 	Validator Validator `serialize:"true" json:"validator"`
 	// Where to send staked tokens when done validating
 	Stake []*axc.TransferableOutput `serialize:"true" json:"stake"`
@@ -156,8 +156,8 @@ func (tx *UnsignedAddValidatorTx) Execute(
 		return nil, nil, errWeightTooSmall
 	case tx.Validator.Wght > vm.MaxValidatorStake: // Ensure validator isn't staking too much
 		return nil, nil, errWeightTooLarge
-	case tx.Shares < vm.MinDelegationFee:
-		return nil, nil, errInsufficientDelegationFee
+	case tx.Shares < vm.MinNominationFee:
+		return nil, nil, errInsufficientNominationFee
 	}
 
 	duration := tx.Validator.Duration()

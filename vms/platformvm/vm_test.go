@@ -211,7 +211,7 @@ func defaultGenesis() (*BuildGenesisArgs, []byte) {
 				Amount:  json.Uint64(defaultWeight),
 				Address: addr,
 			}},
-			DelegationFee: reward.PercentDenominator,
+			NominationFee: reward.PercentDenominator,
 		}
 	}
 
@@ -286,7 +286,7 @@ func BuildGenesisTestWithArgs(t *testing.T, args *BuildGenesisArgs) (*BuildGenes
 				Amount:  json.Uint64(defaultWeight),
 				Address: addr,
 			}},
-			DelegationFee: reward.PercentDenominator,
+			NominationFee: reward.PercentDenominator,
 		}
 	}
 

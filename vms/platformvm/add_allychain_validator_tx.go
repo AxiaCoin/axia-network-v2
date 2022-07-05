@@ -253,8 +253,8 @@ func (tx *UnsignedAddAllychainValidatorTx) InitiallyPrefersCommit(vm *VM) bool {
 // Create a new transaction
 func (vm *VM) newAddAllychainValidatorTx(
 	weight, // Sampling weight of the new validator
-	startTime, // Unix time they start delegating
-	endTime uint64, // Unix time they top delegating
+	startTime, // Unix time they start nominating
+	endTime uint64, // Unix time they top nominating
 	nodeID ids.ShortID, // ID of the node validating
 	allychainID ids.ID, // ID of the allychain the validator will validate
 	keys []*crypto.PrivateKeySECP256K1R, // Keys to use for adding the validator

@@ -94,22 +94,22 @@ var (
 		  {
 			"nodeID": "NodeID-5cu5HH5gBCWnPqh1mKJYbRXFtCpFq22hL",
 			"rewardAddress": "Swap-custom1n9ulqdw7t5atnscqakh8m8v050fl90masx5haf",
-			"delegationFee": 1000000
+			"nominationFee": 1000000
 		  }, 
 		  {
 			"nodeID": "NodeID-7qAvF7Zdb7SGsPrYSCLTxqJHN5AZ6QQSs",
 			"rewardAddress": "Swap-custom1n9ulqdw7t5atnscqakh8m8v050fl90masx5haf",
-			"delegationFee": 500000
+			"nominationFee": 500000
 		  },
 		  {
 			"nodeID": "NodeID-NFBbbJ4qCmNaCzeW7sxErhvWqvEQMnYcN",
 			"rewardAddress": "Swap-custom1n9ulqdw7t5atnscqakh8m8v050fl90masx5haf",
-			"delegationFee": 250000
+			"nominationFee": 250000
 		  },
 		  {
 			"nodeID": "NodeID-5FEKyX6b86Kjvhqsbb8gmCnSB9toAUmjP",
 			"rewardAddress": "Swap-custom1n9ulqdw7t5atnscqakh8m8v050fl90masx5haf",
-			"delegationFee": 125000
+			"nominationFee": 125000
 		  }
 		],
 		"axChainGenesis": "{\"config\":{\"chainId\":4000,\"homesteadBlock\":0,\"daoForkBlock\":0,\"daoForkSupport\":true,\"eip150Block\":0,\"eip150Hash\":\"0x2086799aeebeae135c246c65021c82b4e15a2c451340993aacfd2751886514f0\",\"eip155Block\":0,\"eip158Block\":0,\"byzantiumBlock\":0,\"constantinopleBlock\":0,\"petersburgBlock\":0,\"istanbulBlock\":0,\"muirGlacierBlock\":0,\"apricotPhase1BlockTimestamp\":0,\"apricotPhase2BlockTimestamp\":0},\"nonce\":\"0x0\",\"timestamp\":\"0x0\",\"extraData\":\"0x00\",\"gasLimit\":\"0x7A1200\",\"minBaseFee\":1000000,\"difficulty\":\"0x0\",\"mixHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\",\"coinbase\":\"0x0000000000000000000000000000000000000000\",\"alloc\":{\"790e5825b65ade90095ddfe30709f14f04372194\":{\"balance\":\"0xD3C21BCECCEDA1000000\"},\"07464552eae4efb8b985d311b093d25de1d69f91\":{\"balance\":\"0xD3C21BCECCEDA1000000\"},\"6fac93cbe0263cbabf9b95ce415fcdc5829713c4\":{\"balance\":\"0xD3C21BCECCEDA1000000\"},\"d05b8c7da18b39ef013dd490181d337d968a9bb0\":{\"balance\":\"0xD3C21BCECCEDA1000000\"},\"0f9ebc77d4681c2c3242fdf687806a3a1aff3422\":{\"balance\":\"0xD3C21BCECCEDA1000000\"}},\"number\":\"0x0\",\"gasUsed\":\"0x0\",\"parentHash\":\"0x0000000000000000000000000000000000000000000000000000000000000000\"}",
@@ -128,7 +128,7 @@ var (
 			MinValidatorStake: 10 * units.KiloAxc,
 			MaxValidatorStake: 3 * units.MegaAxc,
 			MinNominatorStake: 1 * units.Axc,
-			MinDelegationFee:  20000, // 2%
+			MinNominationFee:  20000, // 2%
 			MinStakeDuration:  120 * 24 * time.Hour,
 			MaxStakeDuration:  2 * 365 * 24 * time.Hour,
 			RewardConfig: reward.Config{

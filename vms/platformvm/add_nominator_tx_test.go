@@ -287,7 +287,7 @@ func TestAddNominatorTxExecute(t *testing.T) {
 			setup:         addMaxStakeValidator,
 			AP3Time:       defaultValidateEndTime,
 			shouldErr:     false,
-			description:   "over delegation before AP3",
+			description:   "over nomination before AP3",
 		},
 		{
 			stakeAmount:   freshVM.MinNominatorStake,
@@ -299,7 +299,7 @@ func TestAddNominatorTxExecute(t *testing.T) {
 			setup:         addMaxStakeValidator,
 			AP3Time:       defaultGenesisTime,
 			shouldErr:     true,
-			description:   "over delegation after AP3",
+			description:   "over nomination after AP3",
 		},
 	}
 
@@ -340,7 +340,7 @@ func TestAddNominatorTxExecute(t *testing.T) {
 	}
 }
 
-func TestAddNominatorTxOverDelegatedRegression(t *testing.T) {
+func TestAddNominatorTxOverNominatedRegression(t *testing.T) {
 	assert := assert.New(t)
 
 	vm, _, _ := defaultVM()
@@ -463,7 +463,7 @@ func TestAddNominatorTxOverDelegatedRegression(t *testing.T) {
 
 	// trigger block creation
 	err = vm.blockBuilder.AddUnverifiedTx(addThirdNominatorTx)
-	assert.Error(err, "should have marked the nominator as being over delegated")
+	assert.Error(err, "should have marked the nominator as being over nominated")
 }
 
 func TestAddNominatorTxHeapCorruption(t *testing.T) {

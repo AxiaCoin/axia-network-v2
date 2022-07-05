@@ -18,11 +18,11 @@ type StakingConfig struct {
 	// Maximum stake, in nAXC, allowed to be placed on a single validator in
 	// the primary network
 	MaxValidatorStake uint64 `json:"maxValidatorStake"`
-	// Minimum stake, in nAXC, that can be delegated on the primary network
+	// Minimum stake, in nAXC, that can be nominated on the primary network
 	MinNominatorStake uint64 `json:"minNominatorStake"`
-	// Minimum delegation fee, in the range [0, 1000000], that can be charged
-	// for delegation on the primary network.
-	MinDelegationFee uint32 `json:"minDelegationFee"`
+	// Minimum nomination fee, in the range [0, 1000000], that can be charged
+	// for nomination on the primary network.
+	MinNominationFee uint32 `json:"minNominationFee"`
 	// MinStakeDuration is the minimum amount of time a validator can validate
 	// for in a single period.
 	MinStakeDuration time.Duration `json:"minStakeDuration"`

@@ -397,7 +397,7 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 			}
 		}
 
-		delegationFee := json.Uint32(staker.DelegationFee)
+		nominationFee := json.Uint32(staker.NominationFee)
 
 		platformvmArgs.Validators = append(platformvmArgs.Validators,
 			platformvm.APIPrimaryValidator{
@@ -411,7 +411,7 @@ func FromConfig(config *Config) ([]byte, ids.ID, error) {
 					Addresses: []string{destAddrStr},
 				},
 				Staked:             utxos,
-				ExactDelegationFee: &delegationFee,
+				ExactNominationFee: &nominationFee,
 			},
 		)
 	}

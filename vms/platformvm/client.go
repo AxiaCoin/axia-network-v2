@@ -79,7 +79,7 @@ type Client interface {
 		stakeAmount,
 		startTime,
 		endTime uint64,
-		delegationFeeRate float32,
+		nominationFeeRate float32,
 		options ...rpc.Option,
 	) (ids.ID, error)
 	// AddNominator issues a transaction to add a nominator to the primary network
@@ -384,7 +384,7 @@ func (c *client) AddValidator(
 	stakeAmount,
 	startTime,
 	endTime uint64,
-	delegationFeeRate float32,
+	nominationFeeRate float32,
 	options ...rpc.Option,
 ) (ids.ID, error) {
 	res := &api.JSONTxID{}
@@ -401,7 +401,7 @@ func (c *client) AddValidator(
 			EndTime:     json.Uint64(endTime),
 		},
 		RewardAddress:     rewardAddress,
-		DelegationFeeRate: json.Float32(delegationFeeRate),
+		NominationFeeRate: json.Float32(nominationFeeRate),
 	}, res, options...)
 	return res.TxID, err
 }

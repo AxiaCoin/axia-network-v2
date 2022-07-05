@@ -46,7 +46,7 @@ var (
 	errNoFunds                     = errors.New("no spendable funds were found")
 	errNoAllychainID               = errors.New("argument 'allychainID' not provided")
 	errNoRewardAddress             = errors.New("argument 'rewardAddress' not provided")
-	errInvalidDelegationRate       = errors.New("argument 'delegationFeeRate' must be between 0 and 100, inclusive")
+	errInvalidNominationRate       = errors.New("argument 'nominationFeeRate' must be between 0 and 100, inclusive")
 	errNoAddresses                 = errors.New("no addresses provided")
 	errNoKeys                      = errors.New("user has no keys or funds")
 	errNoPrimaryValidators         = errors.New("no default allychain validators")
@@ -730,7 +730,7 @@ func (service *Service) GetCurrentValidators(_ *http.Request, args *GetCurrentVa
 			startTime := staker.StartTime()
 			weight := json.Uint64(staker.Validator.Weight())
 			potentialReward := json.Uint64(rewardAmount)
-			delegationFee := json.Float32(100 * float32(staker.Shares) / float32(reward.PercentDenominator))
+			nominationFee := json.Float32(100 * float32(staker.Shares) / float32(reward.PercentDenominator))
 			rawUptime, err := service.vm.uptimeManager.CalculateUptimePercentFrom(nodeID, startTime)
 			if err != nil {
 				return err
@@ -767,7 +767,7 @@ func (service *Service) GetCurrentValidators(_ *http.Request, args *GetCurrentVa
 				Connected:       &connected,
 				PotentialReward: &potentialReward,
 				RewardOwner:     rewardOwner,
-				DelegationFee:   delegationFee,
+				NominationFee:   nominationFee,
 			})
 		case *UnsignedAddAllychainValidatorTx:
 			if args.AllychainID != staker.Validator.Allychain {
@@ -871,7 +871,7 @@ func (service *Service) GetPendingValidators(_ *http.Request, args *GetPendingVa
 
 			nodeID := staker.Validator.ID()
 			weight := json.Uint64(staker.Validator.Weight())
-			delegationFee := json.Float32(100 * float32(staker.Shares) / float32(reward.PercentDenominator))
+			nominationFee := json.Float32(100 * float32(staker.Shares) / float32(reward.PercentDenominator))
 
 			connected := service.vm.uptimeManager.IsConnected(nodeID)
 			reply.Validators = append(reply.Validators, APIPrimaryValidator{
@@ -882,7 +882,7 @@ func (service *Service) GetPendingValidators(_ *http.Request, args *GetPendingVa
 					EndTime:     json.Uint64(staker.EndTime().Unix()),
 					StakeAmount: &weight,
 				},
-				DelegationFee: delegationFee,
+				NominationFee: nominationFee,
 				Connected:     &connected,
 			})
 		case *UnsignedAddAllychainValidatorTx:
@@ -979,7 +979,7 @@ type AddValidatorArgs struct {
 	APIStaker
 	// The address the staking reward, if applicable, will go to
 	RewardAddress     string       `json:"rewardAddress"`
-	DelegationFeeRate json.Float32 `json:"delegationFeeRate"`
+	NominationFeeRate json.Float32 `json:"nominationFeeRate"`
 }
 
 // AddValidator creates and signs and issues a transaction to add a validator to
@@ -1004,8 +1004,8 @@ func (service *Service) AddValidator(_ *http.Request, args *AddValidatorArgs, re
 		return errStartTimeTooSoon
 	case args.StartTime > maxAddStakerUnix:
 		return errStartTimeTooLate
-	case args.DelegationFeeRate < 0 || args.DelegationFeeRate > 100:
-		return errInvalidDelegationRate
+	case args.NominationFeeRate < 0 || args.NominationFeeRate > 100:
+		return errInvalidNominationRate
 	}
 
 	// Parse the node ID
@@ -1063,7 +1063,7 @@ func (service *Service) AddValidator(_ *http.Request, args *AddValidatorArgs, re
 		uint64(args.EndTime),                 // End time
 		nodeID,                               // Node ID
 		rewardAddress,                        // Reward Address
-		uint32(10000*args.DelegationFeeRate), // Shares
+		uint32(10000*args.NominationFeeRate), // Shares
 		privKeys.Keys,                        // Private keys
 		changeAddr,                           // Change address
 	)
@@ -2193,7 +2193,7 @@ func (service *Service) GetStake(_ *http.Request, args *GetStakeArgs, response *
 type GetMinStakeReply struct {
 	//  The minimum amount of tokens one must bond to be a validator
 	MinValidatorStake json.Uint64 `json:"minValidatorStake"`
-	// Minimum stake, in nAXC, that can be delegated on the primary network
+	// Minimum stake, in nAXC, that can be nominated on the primary network
 	MinNominatorStake json.Uint64 `json:"minNominatorStake"`
 }
 
