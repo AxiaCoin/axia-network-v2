@@ -431,14 +431,14 @@ var (
 			MinValidatorStake: 2 * units.KiloAxc,
 			MaxValidatorStake: 3 * units.MegaAxc,
 			MinNominatorStake: 25 * units.Axc,
-			MinDelegationFee:  20000, // 2%
+			MinNominationFee:  20000, // 2%
 			MinStakeDuration:  2 * 7 * 24 * time.Hour,
 			MaxStakeDuration:  365 * 24 * time.Hour,
 			RewardConfig: reward.Config{
 				MaxConsumptionRate: .12 * reward.PercentDenominator,
 				MinConsumptionRate: .10 * reward.PercentDenominator,
 				MintingPeriod:      365 * 24 * time.Hour,
-				SupplyCap:          uint128.Zero.Add64(720 * units.MegaAxc),
+				SupplyCap:          uint128.Uint128{Hi: 180, Lo: 000000000000000000},
 			},
 		},
 	}
