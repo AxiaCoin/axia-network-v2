@@ -54,7 +54,7 @@ func (b *backend) AcceptTx(ctx stdcontext.Context, tx *platformvm.Tx) error {
 	var baseTx *platformvm.BaseTx
 	txID := tx.ID()
 	switch utx := tx.UnsignedTx.(type) {
-	case *platformvm.UnsignedAddDelegatorTx:
+	case *platformvm.UnsignedAddNominatorTx:
 		baseTx = &utx.BaseTx
 	case *platformvm.UnsignedAddAllychainValidatorTx:
 		baseTx = &utx.BaseTx

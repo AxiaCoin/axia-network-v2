@@ -240,11 +240,11 @@ func addNodeFlags(fs *flag.FlagSet) {
 	fs.Float64(UptimeRequirementKey, genesis.LocalParams.UptimeRequirement, "Fraction of time a validator must be online to receive rewards")
 	// Minimum Stake required to validate the Primary Network
 	fs.Uint64(MinValidatorStakeKey, genesis.LocalParams.MinValidatorStake, "Minimum stake, in nAXC, required to validate the primary network")
-	// Maximum Stake that can be staked and delegated to a validator on the Primary Network
+	// Maximum Stake that can be staked and nominated to a validator on the Primary Network
 	fs.Uint64(MaxValidatorStakeKey, genesis.LocalParams.MaxValidatorStake, "Maximum stake, in nAXC, that can be placed on a validator on the primary network")
-	// Minimum Stake that can be delegated on the Primary Network
-	fs.Uint64(MinDelegatorStakeKey, genesis.LocalParams.MinDelegatorStake, "Minimum stake, in nAXC, that can be delegated on the primary network")
-	fs.Uint64(MinDelegatorFeeKey, uint64(genesis.LocalParams.MinDelegationFee), "Minimum delegation fee, in the range [0, 1000000], that can be charged for delegation on the primary network")
+	// Minimum Stake that can be nominated on the Primary Network
+	fs.Uint64(MinNominatorStakeKey, genesis.LocalParams.MinNominatorStake, "Minimum stake, in nAXC, that can be nominated on the primary network")
+	fs.Uint64(MinNominatorFeeKey, uint64(genesis.LocalParams.MinNominationFee), "Minimum nomination fee, in the range [0, 1000000], that can be charged for nomination on the primary network")
 	// Minimum Stake Duration
 	fs.Duration(MinStakeDurationKey, genesis.LocalParams.MinStakeDuration, "Minimum staking duration")
 	// Maximum Stake Duration
@@ -262,8 +262,8 @@ func addNodeFlags(fs *flag.FlagSet) {
 	fs.String(BootstrapIPsKey, "", "Comma separated list of bootstrap peer ips to connect to. Example: 127.0.0.1:9630,127.0.0.1:9631")
 	fs.String(BootstrapIDsKey, "", "Comma separated list of bootstrap peer ids to connect to. Example: NodeID-JR4dVmy6ffUGAKCBDkyCbeZbyHQBeDsET,NodeID-8CrVPQZ4VSqgL8zTdvL14G8HqAfrBr4z")
 	fs.Bool(RetryBootstrapKey, true, "Specifies whether bootstrap should be retried")
-	fs.Int(RetryBootstrapWarnFrequencyKey, 50, "Specifies how many times bootstrap should be retried before warning the operator")
-	fs.Duration(BootstrapBeaconConnectionTimeoutKey, time.Minute, "Timeout when attempting to connect to bootstrapping beacons")
+	fs.Int(RetryBootstrapWarnFrequencyKey, 3600, "Specifies how many times bootstrap should be retried before warning the operator")
+	fs.Duration(BootstrapBeaconConnectionTimeoutKey, time.Hour, "Timeout when attempting to connect to bootstrapping beacons")
 	fs.Duration(BootstrapMaxTimeGetAncestorsKey, 50*time.Millisecond, "Max Time to spend fetching a container and its ancestors when responding to a GetAncestors")
 	fs.Uint(BootstrapAncestorsMaxContainersSentKey, 2000, "Max number of containers in an Ancestors message sent by this node")
 	fs.Uint(BootstrapAncestorsMaxContainersReceivedKey, 2000, "This node reads at most this many containers from an incoming Ancestors message")

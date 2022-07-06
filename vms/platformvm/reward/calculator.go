@@ -40,22 +40,23 @@ func NewCalculator(c Config) Calculator {
 // MintingRate = MinMintingRate + MaxSubMinMintingRate * PortionOfStakingDuration
 // Reward = RemainingSupply * PortionOfExistingSupply * MintingRate * PortionOfStakingDuration
 func (c *calculator) Calculate(stakedDuration time.Duration, stakedAmount uint64, currentSupply uint128.Uint128) uint64 {
-	bigStakedDuration := new(big.Int).SetUint64(uint64(stakedDuration))
-	bigStakedAmount := new(big.Int).SetUint64(stakedAmount)
-	bigCurrentSupply, _ := new(big.Int).SetString(currentSupply.String(), 10)
+	return 0
+	// bigStakedDuration := new(big.Int).SetUint64(uint64(stakedDuration))
+	// bigStakedAmount := new(big.Int).SetUint64(stakedAmount)
+	// bigCurrentSupply, _ := new(big.Int).SetString(currentSupply.String(), 10)
 
-	adjustedConsumptionRateNumerator := new(big.Int).Mul(c.maxSubMinConsumptionRate, bigStakedDuration)
-	adjustedMinConsumptionRateNumerator := new(big.Int).Mul(c.minConsumptionRate, c.mintingPeriod)
-	adjustedConsumptionRateNumerator.Add(adjustedConsumptionRateNumerator, adjustedMinConsumptionRateNumerator)
-	adjustedConsumptionRateDenominator := new(big.Int).Mul(c.mintingPeriod, consumptionRateDenominator)
+	// adjustedConsumptionRateNumerator := new(big.Int).Mul(c.maxSubMinConsumptionRate, bigStakedDuration)
+	// adjustedMinConsumptionRateNumerator := new(big.Int).Mul(c.minConsumptionRate, c.mintingPeriod)
+	// adjustedConsumptionRateNumerator.Add(adjustedConsumptionRateNumerator, adjustedMinConsumptionRateNumerator)
+	// adjustedConsumptionRateDenominator := new(big.Int).Mul(c.mintingPeriod, consumptionRateDenominator)
 
-	reward, _ := new(big.Int).SetString(c.supplyCap.Sub(currentSupply).String(), 10)
-	reward.Mul(reward, adjustedConsumptionRateNumerator)
-	reward.Mul(reward, bigStakedAmount)
-	reward.Mul(reward, bigStakedDuration)
-	reward.Div(reward, adjustedConsumptionRateDenominator)
-	reward.Div(reward, bigCurrentSupply)
-	reward.Div(reward, c.mintingPeriod)
+	// reward, _ := new(big.Int).SetString(c.supplyCap.Sub(currentSupply).String(), 10)
+	// reward.Mul(reward, adjustedConsumptionRateNumerator)
+	// reward.Mul(reward, bigStakedAmount)
+	// reward.Mul(reward, bigStakedDuration)
+	// reward.Div(reward, adjustedConsumptionRateDenominator)
+	// reward.Div(reward, bigCurrentSupply)
+	// reward.Div(reward, c.mintingPeriod)
 
-	return reward.Uint64()
+	// return reward.Uint64()
 }

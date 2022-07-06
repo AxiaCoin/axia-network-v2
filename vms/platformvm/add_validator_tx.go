@@ -27,9 +27,9 @@ var (
 	errWeightTooLarge            = errors.New("weight of this validator is too large")
 	errStakeTooShort             = errors.New("staking period is too short")
 	errStakeTooLong              = errors.New("staking period is too long")
-	errInsufficientDelegationFee = errors.New("staker charges an insufficient delegation fee")
+	errInsufficientNominationFee = errors.New("staker charges an insufficient nomination fee")
 	errFutureStakeTime           = fmt.Errorf("staker is attempting to start staking more than %s ahead of the current chain time", maxFutureStartTime)
-	errTooManyShares             = fmt.Errorf("a staker can only require at most %d shares from delegators", reward.PercentDenominator)
+	errTooManyShares             = fmt.Errorf("a staker can only require at most %d shares from nominators", reward.PercentDenominator)
 
 	_ UnsignedProposalTx = &UnsignedAddValidatorTx{}
 	_ TimedTx            = &UnsignedAddValidatorTx{}
@@ -39,14 +39,14 @@ var (
 type UnsignedAddValidatorTx struct {
 	// Metadata, inputs and outputs
 	BaseTx `serialize:"true"`
-	// Describes the delegatee
+	// Describes the nominatee
 	Validator Validator `serialize:"true" json:"validator"`
 	// Where to send staked tokens when done validating
 	Stake []*axc.TransferableOutput `serialize:"true" json:"stake"`
 	// Where to send staking rewards when done validating
 	RewardsOwner Owner `serialize:"true" json:"rewardsOwner"`
-	// Fee this validator charges delegators as a percentage, times 10,000
-	// For example, if this validator has Shares=300,000 then they take 30% of rewards from delegators
+	// Fee this validator charges nominators as a percentage, times 10,000
+	// For example, if this validator has Shares=300,000 then they take 30% of rewards from nominators
 	Shares uint32 `serialize:"true" json:"shares"`
 }
 
@@ -84,7 +84,7 @@ func (tx *UnsignedAddValidatorTx) SyntacticVerify(ctx *snow.Context) error {
 		return errNilTx
 	case tx.syntacticallyVerified: // already passed syntactic verification
 		return nil
-	case tx.Shares > reward.PercentDenominator: // Ensure delegators shares are in the allowed amount
+	case tx.Shares > reward.PercentDenominator: // Ensure nominators shares are in the allowed amount
 		return errTooManyShares
 	}
 
@@ -156,8 +156,8 @@ func (tx *UnsignedAddValidatorTx) Execute(
 		return nil, nil, errWeightTooSmall
 	case tx.Validator.Wght > vm.MaxValidatorStake: // Ensure validator isn't staking too much
 		return nil, nil, errWeightTooLarge
-	case tx.Shares < vm.MinDelegationFee:
-		return nil, nil, errInsufficientDelegationFee
+	case tx.Shares < vm.MinNominationFee:
+		return nil, nil, errInsufficientNominationFee
 	}
 
 	duration := tx.Validator.Duration()
@@ -266,7 +266,7 @@ func (vm *VM) newAddValidatorTx(
 	endTime uint64, // Unix time they stop validating
 	nodeID ids.ShortID, // ID of the node we want to validate with
 	rewardAddress ids.ShortID, // Address to send reward to, if applicable
-	shares uint32, // 10,000 times percentage of reward taken from delegators
+	shares uint32, // 10,000 times percentage of reward taken from nominators
 	keys []*crypto.PrivateKeySECP256K1R, // Keys providing the staked tokens
 	changeAddr ids.ShortID, // Address to send change to, if there is any
 ) (*Tx, error) {

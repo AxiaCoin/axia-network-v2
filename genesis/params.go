@@ -7,8 +7,6 @@ import (
 	"time"
 
 	"github.com/axiacoin/axia-network-v2/utils/constants"
-	"github.com/axiacoin/axia-network-v2/utils/uint128"
-	"github.com/axiacoin/axia-network-v2/utils/units"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/reward"
 )
 
@@ -20,11 +18,11 @@ type StakingConfig struct {
 	// Maximum stake, in nAXC, allowed to be placed on a single validator in
 	// the primary network
 	MaxValidatorStake uint64 `json:"maxValidatorStake"`
-	// Minimum stake, in nAXC, that can be delegated on the primary network
-	MinDelegatorStake uint64 `json:"minDelegatorStake"`
-	// Minimum delegation fee, in the range [0, 1000000], that can be charged
-	// for delegation on the primary network.
-	MinDelegationFee uint32 `json:"minDelegationFee"`
+	// Minimum stake, in nAXC, that can be nominated on the primary network
+	MinNominatorStake uint64 `json:"minNominatorStake"`
+	// Minimum nomination fee, in the range [0, 1000000], that can be charged
+	// for nomination on the primary network.
+	MinNominationFee uint32 `json:"minNominationFee"`
 	// MinStakeDuration is the minimum amount of time a validator can validate
 	// for in a single period.
 	MinStakeDuration time.Duration `json:"minStakeDuration"`
@@ -50,33 +48,6 @@ type Params struct {
 	StakingConfig
 	TxFeeConfig
 }
-
-var (
-	TestParams = Params{
-		TxFeeConfig: TxFeeConfig{
-			TxFee:                 units.MilliAxc,
-			CreateAssetTxFee:      10 * units.MilliAxc,
-			CreateAllychainTxFee:  100 * units.MilliAxc,
-			CreateBlockchainTxFee: 100 * units.MilliAxc,
-		},
-		StakingConfig: StakingConfig{
-			UptimeRequirement: .8, // 80%
-			MinValidatorStake: 1 * units.Axc,
-			MaxValidatorStake: 3 * units.MegaAxc,
-			MinDelegatorStake: 1 * units.Axc,
-			MinDelegationFee:  20000, // 2%
-			MinStakeDuration:  24 * time.Hour,
-			MaxStakeDuration:  365 * 24 * time.Hour,
-			RewardConfig: reward.Config{
-				MaxConsumptionRate: .12 * reward.PercentDenominator,
-				MinConsumptionRate: .10 * reward.PercentDenominator,
-				MintingPeriod:      365 * 24 * time.Hour,
-				// SupplyCap:          720 * units.MegaAxc,
-				SupplyCap: uint128.Zero.Add64(720 * units.MegaAxc),
-			},
-		},
-	}
-)
 
 func GetTxFeeConfig(networkID uint32) TxFeeConfig {
 	switch networkID {

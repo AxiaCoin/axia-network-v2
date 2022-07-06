@@ -72,17 +72,17 @@ type APIPrimaryValidator struct {
 	// The owner the staking reward, if applicable, will go to
 	RewardOwner        *APIOwner     `json:"rewardOwner,omitempty"`
 	PotentialReward    *json.Uint64  `json:"potentialReward,omitempty"`
-	DelegationFee      json.Float32  `json:"delegationFee"`
-	ExactDelegationFee *json.Uint32  `json:"exactDelegationFee,omitempty"`
+	NominationFee      json.Float32  `json:"nominationFee"`
+	ExactNominationFee *json.Uint32  `json:"exactNominationFee,omitempty"`
 	Uptime             *json.Float32 `json:"uptime,omitempty"`
 	Connected          *bool         `json:"connected,omitempty"`
 	Staked             []APIUTXO     `json:"staked,omitempty"`
-	// The delegators delegating to this validator
-	Delegators []APIPrimaryDelegator `json:"delegators"`
+	// The nominators nominating to this validator
+	Nominators []APIPrimaryNominator `json:"nominators"`
 }
 
-// APIPrimaryDelegator is the repr. of a primary network delegator sent over APIs.
-type APIPrimaryDelegator struct {
+// APIPrimaryNominator is the repr. of a primary network nominator sent over APIs.
+type APIPrimaryNominator struct {
 	APIStaker
 	RewardOwner     *APIOwner    `json:"rewardOwner,omitempty"`
 	PotentialReward *json.Uint64 `json:"potentialReward,omitempty"`
@@ -284,9 +284,9 @@ func (ss *StaticService) BuildGenesis(_ *http.Request, args *BuildGenesisArgs, r
 		}
 		ids.SortShortIDs(owner.Addrs)
 
-		delegationFee := uint32(0)
-		if validator.ExactDelegationFee != nil {
-			delegationFee = uint32(*validator.ExactDelegationFee)
+		nominationFee := uint32(0)
+		if validator.ExactNominationFee != nil {
+			nominationFee = uint32(*validator.ExactNominationFee)
 		}
 
 		tx := &Tx{UnsignedTx: &UnsignedAddValidatorTx{
@@ -302,7 +302,7 @@ func (ss *StaticService) BuildGenesis(_ *http.Request, args *BuildGenesisArgs, r
 			},
 			Stake:        stake,
 			RewardsOwner: owner,
-			Shares:       delegationFee,
+			Shares:       nominationFee,
 		}}
 		if err := tx.Sign(GenesisCodec, nil); err != nil {
 			return err

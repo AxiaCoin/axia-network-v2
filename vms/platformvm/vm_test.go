@@ -85,7 +85,7 @@ var (
 
 	defaultMinValidatorStake = 5 * units.MilliAxc
 	defaultMaxValidatorStake = 500 * units.MilliAxc
-	defaultMinDelegatorStake = 1 * units.MilliAxc
+	defaultMinNominatorStake = 1 * units.MilliAxc
 
 	// amount all genesis validators have in defaultVM
 	defaultBalance = 100 * defaultMinValidatorStake
@@ -211,7 +211,7 @@ func defaultGenesis() (*BuildGenesisArgs, []byte) {
 				Amount:  json.Uint64(defaultWeight),
 				Address: addr,
 			}},
-			DelegationFee: reward.PercentDenominator,
+			NominationFee: reward.PercentDenominator,
 		}
 	}
 
@@ -286,7 +286,7 @@ func BuildGenesisTestWithArgs(t *testing.T, args *BuildGenesisArgs) (*BuildGenes
 				Amount:  json.Uint64(defaultWeight),
 				Address: addr,
 			}},
-			DelegationFee: reward.PercentDenominator,
+			NominationFee: reward.PercentDenominator,
 		}
 	}
 
@@ -329,7 +329,7 @@ func defaultVM() (*VM, database.Database, *common.SenderTest) {
 		CreateBlockchainTxFee:  100 * defaultTxFee,
 		MinValidatorStake:      defaultMinValidatorStake,
 		MaxValidatorStake:      defaultMaxValidatorStake,
-		MinDelegatorStake:      defaultMinDelegatorStake,
+		MinNominatorStake:      defaultMinNominatorStake,
 		MinStakeDuration:       defaultMinStakingDuration,
 		MaxStakeDuration:       defaultMaxStakingDuration,
 		RewardConfig:           defaultRewardConfig,
@@ -407,7 +407,7 @@ func GenesisVMWithArgs(t *testing.T, args *BuildGenesisArgs) ([]byte, chan commo
 		TxFee:                  defaultTxFee,
 		MinValidatorStake:      defaultMinValidatorStake,
 		MaxValidatorStake:      defaultMaxValidatorStake,
-		MinDelegatorStake:      defaultMinDelegatorStake,
+		MinNominatorStake:      defaultMinNominatorStake,
 		MinStakeDuration:       defaultMinStakingDuration,
 		MaxStakeDuration:       defaultMaxStakingDuration,
 		RewardConfig:           defaultRewardConfig,

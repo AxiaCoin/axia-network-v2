@@ -36,7 +36,7 @@ func NewServer(db database.Database) *DatabaseServer {
 	}
 }
 
-// Has delegates the Has call to the managed database and returns the result
+// Has nominates the Has call to the managed database and returns the result
 func (db *DatabaseServer) Has(_ context.Context, req *rpcdbpb.HasRequest) (*rpcdbpb.HasResponse, error) {
 	has, err := db.db.Has(req.Key)
 	return &rpcdbpb.HasResponse{
@@ -45,7 +45,7 @@ func (db *DatabaseServer) Has(_ context.Context, req *rpcdbpb.HasRequest) (*rpcd
 	}, errorToRPCError(err)
 }
 
-// Get delegates the Get call to the managed database and returns the result
+// Get nominates the Get call to the managed database and returns the result
 func (db *DatabaseServer) Get(_ context.Context, req *rpcdbpb.GetRequest) (*rpcdbpb.GetResponse, error) {
 	value, err := db.db.Get(req.Key)
 	return &rpcdbpb.GetResponse{
@@ -54,20 +54,20 @@ func (db *DatabaseServer) Get(_ context.Context, req *rpcdbpb.GetRequest) (*rpcd
 	}, errorToRPCError(err)
 }
 
-// Put delegates the Put call to the managed database and returns the result
+// Put nominates the Put call to the managed database and returns the result
 func (db *DatabaseServer) Put(_ context.Context, req *rpcdbpb.PutRequest) (*rpcdbpb.PutResponse, error) {
 	err := db.db.Put(req.Key, req.Value)
 	return &rpcdbpb.PutResponse{Err: errorToErrCode[err]}, errorToRPCError(err)
 }
 
-// Delete delegates the Delete call to the managed database and returns the
+// Delete nominates the Delete call to the managed database and returns the
 // result
 func (db *DatabaseServer) Delete(_ context.Context, req *rpcdbpb.DeleteRequest) (*rpcdbpb.DeleteResponse, error) {
 	err := db.db.Delete(req.Key)
 	return &rpcdbpb.DeleteResponse{Err: errorToErrCode[err]}, errorToRPCError(err)
 }
 
-// Stat delegates the Stat call to the managed database and returns the result
+// Stat nominates the Stat call to the managed database and returns the result
 func (db *DatabaseServer) Stat(_ context.Context, req *rpcdbpb.StatRequest) (*rpcdbpb.StatResponse, error) {
 	stat, err := db.db.Stat(req.Property)
 	return &rpcdbpb.StatResponse{
@@ -76,14 +76,14 @@ func (db *DatabaseServer) Stat(_ context.Context, req *rpcdbpb.StatRequest) (*rp
 	}, errorToRPCError(err)
 }
 
-// Compact delegates the Compact call to the managed database and returns the
+// Compact nominates the Compact call to the managed database and returns the
 // result
 func (db *DatabaseServer) Compact(_ context.Context, req *rpcdbpb.CompactRequest) (*rpcdbpb.CompactResponse, error) {
 	err := db.db.Compact(req.Start, req.Limit)
 	return &rpcdbpb.CompactResponse{Err: errorToErrCode[err]}, errorToRPCError(err)
 }
 
-// Close delegates the Close call to the managed database and returns the result
+// Close nominates the Close call to the managed database and returns the result
 func (db *DatabaseServer) Close(context.Context, *rpcdbpb.CloseRequest) (*rpcdbpb.CloseResponse, error) {
 	err := db.db.Close()
 	return &rpcdbpb.CloseResponse{Err: errorToErrCode[err]}, errorToRPCError(err)

@@ -48,8 +48,8 @@ type AxiaWallet interface {
 	// - [rewardsOwner] specifies the owner of all the rewards this validator
 	//   may accrue during its validation period.
 	// - [shares] specifies the fraction (out of 1,000,000) that this validator
-	//   will take from delegation rewards. If 1,000,000 is provided, 100% of
-	//   the delegation reward will be sent to the validator's [rewardsOwner].
+	//   will take from nomination rewards. If 1,000,000 is provided, 100% of
+	//   the nomination reward will be sent to the validator's [rewardsOwner].
 	IssueAddValidatorTx(
 		validator *platformvm.Validator,
 		rewardsOwner *secp256k1fx.OutputOwners,
@@ -67,14 +67,14 @@ type AxiaWallet interface {
 		options ...common.Option,
 	) (ids.ID, error)
 
-	// IssueAddDelegatorTx creates, signs, and issues a new delegator to a
+	// IssueAddNominatorTx creates, signs, and issues a new nominator to a
 	// validator on the primary network.
 	//
-	// - [validator] specifies all the details of the delegation period such as
+	// - [validator] specifies all the details of the nomination period such as
 	//   the startTime, endTime, stake weight, and validator's nodeID.
-	// - [rewardsOwner] specifies the owner of all the rewards this delegator
-	//   may accrue at the end of its delegation period.
-	IssueAddDelegatorTx(
+	// - [rewardsOwner] specifies the owner of all the rewards this nominator
+	//   may accrue at the end of its nomination period.
+	IssueAddNominatorTx(
 		validator *platformvm.Validator,
 		rewardsOwner *secp256k1fx.OutputOwners,
 		options ...common.Option,
@@ -203,12 +203,12 @@ func (w *axiawallet) IssueAddAllychainValidatorTx(
 	return w.IssueUnsignedTx(utx, options...)
 }
 
-func (w *axiawallet) IssueAddDelegatorTx(
+func (w *axiawallet) IssueAddNominatorTx(
 	validator *platformvm.Validator,
 	rewardsOwner *secp256k1fx.OutputOwners,
 	options ...common.Option,
 ) (ids.ID, error) {
-	utx, err := w.builder.NewAddDelegatorTx(validator, rewardsOwner, options...)
+	utx, err := w.builder.NewAddNominatorTx(validator, rewardsOwner, options...)
 	if err != nil {
 		return ids.Empty, err
 	}

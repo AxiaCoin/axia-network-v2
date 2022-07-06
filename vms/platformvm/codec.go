@@ -51,7 +51,7 @@ func init() {
 
 			c.RegisterType(&UnsignedAddValidatorTx{}),
 			c.RegisterType(&UnsignedAddAllychainValidatorTx{}),
-			c.RegisterType(&UnsignedAddDelegatorTx{}),
+			c.RegisterType(&UnsignedAddNominatorTx{}),
 
 			c.RegisterType(&UnsignedCreateChainTx{}),
 			c.RegisterType(&UnsignedCreateAllychainTx{}),
