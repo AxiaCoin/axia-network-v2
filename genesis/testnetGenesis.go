@@ -19,7 +19,7 @@ var (
 			{
 				"ethAddr": "0xc185c8478f60acf3f9b3a9ed1b83284c7498e751",
 				"axcAddr": "Swap-test1dssj9m0xtvpacypu2u536rjs39wte799zpmgk7",
-				"initialAmount": 8000000000000000000,
+				"initialAmount": 499000000000000000,
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
@@ -30,7 +30,7 @@ var (
 			{
 				"ethAddr": "0xf28723a02b06a64d196ea2432f17b96b61c1129a",
 				"axcAddr": "Swap-test10cgn6cknsyvp0n6afwrzmvp93maesf4c9fdn8z",
-				"initialAmount": 8000000000000000000,
+				"initialAmount": 499000000000000000,
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
@@ -41,7 +41,7 @@ var (
 			{
 				"ethAddr": "0xbfe147a3df764a8be03e5994030ea90e6ba481ce",
 				"axcAddr": "Swap-test102u6y4juspq0e0wgqy62pdgd3579asn4nfm8zh",
-				"initialAmount": 8000000000000000000,
+				"initialAmount": 499000000000000000,
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
@@ -52,7 +52,7 @@ var (
 			{
 				"ethAddr": "0x2484d46bafd67ffb0d8a9111cc4c5456c7831c33",
 				"axcAddr": "Swap-test16wy9v23ay2w070c0ppgm35gue755hewsnv4npf",
-				"initialAmount": 8000000000000000000,
+				"initialAmount": 499000000000000000,
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
@@ -63,7 +63,7 @@ var (
 			{
 				"ethAddr": "0xf511a6d4d3f7f130d3b06ad21f3e69f1aad9a7bf",
 				"axcAddr": "Swap-test156uyw8uy3c4cldv4gfmy6c5p0j79q3z0762jl6",
-				"initialAmount": 8000000000000000000,
+				"initialAmount": 499000000000000000,
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
@@ -74,7 +74,7 @@ var (
 			{
 				"ethAddr": "0xdd1595ac09d1aa4127ad1a34a74b830f8655a5df",
 				"axcAddr": "Swap-test1es639wwwxpzectuvdwlstc473qa6m3qrzuf3rk",
-				"initialAmount": 8000000000000000000,
+				"initialAmount": 499000000000000000,
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
@@ -85,7 +85,7 @@ var (
 			{
 				"ethAddr": "0xff898744b24f63bafd9828a4a9fb151035eddd08",
 				"axcAddr": "Swap-test1jzc63t9hxcesljtl23efqv4dq6ehny5x4nwm0w",
-				"initialAmount": 8000000000000000000,
+				"initialAmount": 499000000000000000,
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
@@ -96,7 +96,7 @@ var (
 			{
 				"ethAddr": "0xac19d1fbb9ad3868bc9b244d4a7e2ff2ec160322",
 				"axcAddr": "Swap-test16uvswz0rdj2c5ecpq6s9zeccgpq0w8lwcw4xda",
-				"initialAmount": 8000000000000000000,
+				"initialAmount": 499000000000000000,
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
@@ -107,7 +107,7 @@ var (
 			{
 				"ethAddr": "0x539a62ad0f8c6174fd304582fa8fbab063bda03e",
 				"axcAddr": "Swap-test1s5n5xq0uamylwldrky9ln4fu0cus8mt6mq4ayy",
-				"initialAmount": 8000000000000000000,
+				"initialAmount": 499000000000000000,
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
@@ -118,7 +118,7 @@ var (
 			{
 				"ethAddr": "0x6a64052efac875715404a2c4c1ff045f4f894128",
 				"axcAddr": "Swap-test1asg2ukxyhr45yyc7d4vzrwun9xfsl0zza30nlu",
-				"initialAmount": 8000000000000000000,
+				"initialAmount": 499000000000000000,
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
@@ -129,7 +129,7 @@ var (
 			{
 				"ethAddr": "0x074d22b601aeedca6b918912c22ec0324e929e31",
 				"axcAddr": "Swap-test1tezw3pagmmjfjz53k8kt0ymmp24zq9ewvc4ey8",
-				"initialAmount": 8000000000000000000,
+				"initialAmount": 499000000000000000,
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
@@ -140,7 +140,7 @@ var (
 			{
 				"ethAddr": "0xa953dcc9b2f4c510861101435a5f71f8ebcc9dbf",
 				"axcAddr": "Swap-test1mmdwn3n2a4ft524ggzw8jnvva92jd6wjxnjg4m",
-				"initialAmount": 8000000000000000000,
+				"initialAmount": 499000000000000000,
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
@@ -151,7 +151,7 @@ var (
 			{
 				"ethAddr": "0x97554d4a9be8a170030137062532b40a8a1c85b4",
 				"axcAddr": "Swap-test1nqvz6agrfxwuyj6skg0j6zwxcnqrun6mz8zvkj",
-				"initialAmount": 8000000000000000000,
+				"initialAmount": 499000000000000000,
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
@@ -162,7 +162,7 @@ var (
 			{
 				"ethAddr": "0xf3644354d3736f7dc9e346e9a49ca9aac8259f3b",
 				"axcAddr": "Swap-test1fmrn33tlxpvmrxcppddvh4tdvr7560w0c8lcry",
-				"initialAmount": 8000000000000000000,
+				"initialAmount": 499000000000000000,
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
@@ -173,7 +173,7 @@ var (
 			{
 				"ethAddr": "0x5e1073ad14b87e1690b677105e3017ac1d224c97",
 				"axcAddr": "Swap-test1q6xuesh0qe08eeadk262hge2xrg6e0pxelzuw8",
-				"initialAmount": 8000000000000000000,
+				"initialAmount": 499000000000000000,
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
@@ -184,7 +184,7 @@ var (
 			{
 				"ethAddr": "0x8a07c956b599d1554434d9c0568a03d2b3318c97",
 				"axcAddr": "Swap-test1kkepg8m6f49a6k66vqrs84cqretj6pvctnw7f3",
-				"initialAmount": 8000000000000000000,
+				"initialAmount": 499000000000000000,
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
@@ -195,7 +195,7 @@ var (
 			{
 				"ethAddr": "0x78c7ae1be01a8e5068de8cc201af3f22e386129a",
 				"axcAddr": "Swap-test1fslvqs9rduee2wjzyrhkfztff36kxmjt6a9urc",
-				"initialAmount": 8000000000000000000,
+				"initialAmount": 499000000000000000,
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
@@ -206,7 +206,7 @@ var (
 			{
 				"ethAddr": "0x208c6a0f0a682a4ed44e43320f5d8feebd74ec2e",
 				"axcAddr": "Swap-test17n9p4egxfjz7heu065ezvnxckdd3fdt6cfpy6d",
-				"initialAmount": 8000000000000000000,
+				"initialAmount": 499000000000000000,
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
@@ -217,7 +217,7 @@ var (
 			{
 				"ethAddr": "0x18ba6590cdf76f26951197530b37433d95ce60b1",
 				"axcAddr": "Swap-test1356g6fcq7r5v96ld3mqpntm0su0j80ppdm4r80",
-				"initialAmount": 8000000000000000000,
+				"initialAmount": 499000000000000000,
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
@@ -228,7 +228,7 @@ var (
 			{
 				"ethAddr": "0xb43ab7e2b4dad9a4f43cb274d9cbee8a88319e24",
 				"axcAddr": "Swap-test1vvlcdwcwlu5xs9qs0scn2t8gu3rsp0vtz06kjg",
-				"initialAmount": 8000000000000000000,
+				"initialAmount": 499000000000000000,
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
