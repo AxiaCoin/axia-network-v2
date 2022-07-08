@@ -23,7 +23,7 @@ var (
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
-							  "locktime": 1633824000
+							  "locktime": 1688816151
 							}
 						  ]
 			},
@@ -34,7 +34,7 @@ var (
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
-							  "locktime": 1633824000
+							  "locktime": 1688816151
 							}
 						  ]
 			},
@@ -45,7 +45,7 @@ var (
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
-							  "locktime": 1633824000
+							  "locktime": 1688816151
 							}
 						  ]
 			},
@@ -56,7 +56,7 @@ var (
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
-							  "locktime": 1633824000
+							  "locktime": 1688816151
 							}
 						  ]
 			},
@@ -67,7 +67,7 @@ var (
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
-							  "locktime": 1633824000
+							  "locktime": 1688816151
 							}
 						  ]
 			},
@@ -78,7 +78,7 @@ var (
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
-							  "locktime": 1633824000
+							  "locktime": 1688816151
 							}
 						  ]
 			},
@@ -89,7 +89,7 @@ var (
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
-							  "locktime": 1633824000
+							  "locktime": 1688816151
 							}
 						  ]
 			},
@@ -100,7 +100,7 @@ var (
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
-							  "locktime": 1633824000
+							  "locktime": 1688816151
 							}
 						  ]
 			},
@@ -111,7 +111,7 @@ var (
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
-							  "locktime": 1633824000
+							  "locktime": 1688816151
 							}
 						  ]
 			},
@@ -122,7 +122,7 @@ var (
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
-							  "locktime": 1633824000
+							  "locktime": 1688816151
 							}
 						  ]
 			},
@@ -133,7 +133,7 @@ var (
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
-							  "locktime": 1633824000
+							  "locktime": 1688816151
 							}
 						  ]
 			},
@@ -144,7 +144,7 @@ var (
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
-							  "locktime": 1633824000
+							  "locktime": 1688816151
 							}
 						  ]
 			},
@@ -155,7 +155,7 @@ var (
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
-							  "locktime": 1633824000
+							  "locktime": 1688816151
 							}
 						  ]
 			},
@@ -166,7 +166,7 @@ var (
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
-							  "locktime": 1633824000
+							  "locktime": 1688816151
 							}
 						  ]
 			},
@@ -177,7 +177,7 @@ var (
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
-							  "locktime": 1633824000
+							  "locktime": 1688816151
 							}
 						  ]
 			},
@@ -188,7 +188,7 @@ var (
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
-							  "locktime": 1633824000
+							  "locktime": 1688816151
 							}
 						  ]
 			},
@@ -199,7 +199,7 @@ var (
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
-							  "locktime": 1633824000
+							  "locktime": 1688816151
 							}
 						  ]
 			},
@@ -210,7 +210,7 @@ var (
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
-							  "locktime": 1633824000
+							  "locktime": 1688816151
 							}
 						  ]
 			},
@@ -221,7 +221,7 @@ var (
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
-							  "locktime": 1633824000
+							  "locktime": 1688816151
 							}
 						  ]
 			},
@@ -232,13 +232,13 @@ var (
 				"unlockSchedule": [
 							{
 							  "amount": 1000000000000000,
-							  "locktime": 1633824000
+							  "locktime": 1688816151
 							}
 						  ]
 			}
 		],
 		"startTime": 1657179865,
-		"initialStakeDuration": 7776000,
+		"initialStakeDuration": 31536000,
 		"initialStakeDurationOffset": 5400,
 		"initialStakedFunds": [
 			"Swap-test1dssj9m0xtvpacypu2u536rjs39wte799zpmgk7",
@@ -387,7 +387,7 @@ var (
 				MaxConsumptionRate: .12 * reward.PercentDenominator,
 				MinConsumptionRate: .10 * reward.PercentDenominator,
 				MintingPeriod:      2 * 365 * 24 * time.Hour,
-				SupplyCap:          uint128.Uint128{Hi: 180, Lo: 000000000000000000},
+				SupplyCap:          uint128.Uint128{Hi: 10, Lo: 000000000000000000},
 			},
 		},
 	}
