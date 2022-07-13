@@ -12,7 +12,7 @@ go 1.17
 require (
 	github.com/Microsoft/go-winio v0.4.16
 	github.com/NYTimes/gziphandler v1.1.1
-	github.com/axiacoin/axia-network-v2-coreth v0.0.0-20220705131545-929b4c93c5f6
+	github.com/axiacoin/axia-network-v2-coreth v0.0.0-20220713135113-4584bd22645e
 	github.com/axiacoin/axia-network-v2-runner v0.0.0-20220713062345-160b43983c6d
 	github.com/btcsuite/btcutil v1.0.2
 	github.com/decred/dcrd/dcrec/secp256k1/v3 v3.0.0-20200627015759-01fd2de07837
