@@ -10,9 +10,9 @@ import (
 	"github.com/axiacoin/axia-network-v2/database/manager"
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/kleroterion"
 	"github.com/axiacoin/axia-network-v2/snow/engine/common"
-	"github.com/axiacoin/axia-network-v2/snow/engine/snowman/block"
+	"github.com/axiacoin/axia-network-v2/snow/engine/kleroterion/block"
 	"github.com/axiacoin/axia-network-v2/utils/timer/mockable"
 )
 
@@ -62,7 +62,7 @@ func (vm *blockVM) Initialize(
 	return vm.ChainVM.Initialize(ctx, db, genesisBytes, upgradeBytes, configBytes, toEngine, fxs, appSender)
 }
 
-func (vm *blockVM) BuildBlock() (snowman.Block, error) {
+func (vm *blockVM) BuildBlock() (kleroterion.Block, error) {
 	start := vm.clock.Time()
 	blk, err := vm.ChainVM.BuildBlock()
 	end := vm.clock.Time()
@@ -78,7 +78,7 @@ func (vm *blockVM) BuildBlock() (snowman.Block, error) {
 	}, nil
 }
 
-func (vm *blockVM) ParseBlock(b []byte) (snowman.Block, error) {
+func (vm *blockVM) ParseBlock(b []byte) (kleroterion.Block, error) {
 	start := vm.clock.Time()
 	blk, err := vm.ChainVM.ParseBlock(b)
 	end := vm.clock.Time()
@@ -94,7 +94,7 @@ func (vm *blockVM) ParseBlock(b []byte) (snowman.Block, error) {
 	}, nil
 }
 
-func (vm *blockVM) GetBlock(id ids.ID) (snowman.Block, error) {
+func (vm *blockVM) GetBlock(id ids.ID) (kleroterion.Block, error) {
 	start := vm.clock.Time()
 	blk, err := vm.ChainVM.GetBlock(id)
 	end := vm.clock.Time()

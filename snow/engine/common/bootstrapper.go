@@ -42,7 +42,7 @@ type Bootstrapper interface {
 	Restart(reset bool) error
 }
 
-// It collects mechanisms common to both snowman and axia bootstrappers
+// It collects mechanisms common to both kleroterion and axia bootstrappers
 type bootstrapper struct {
 	Config
 	Halter

@@ -25,7 +25,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/snow/choices"
 	"github.com/axiacoin/axia-network-v2/snow/engine/common"
 	"github.com/axiacoin/axia-network-v2/snow/engine/common/appsender"
-	"github.com/axiacoin/axia-network-v2/snow/engine/snowman/block"
+	"github.com/axiacoin/axia-network-v2/snow/engine/kleroterion/block"
 	"github.com/axiacoin/axia-network-v2/utils/logging"
 	"github.com/axiacoin/axia-network-v2/utils/wrappers"
 	"github.com/axiacoin/axia-network-v2/version"
@@ -172,7 +172,7 @@ func (vm *VMServer) Initialize(_ context.Context, req *vmpb.InitializeRequest) (
 		SNLookup:     snLookupClient,
 		Metrics:      metrics.NewOptionalGatherer(),
 
-		// TODO: support snowman++ fields
+		// TODO: support kleroterion++ fields
 	}
 
 	if err := vm.vm.Initialize(vm.ctx, dbManager, req.GenesisBytes, req.UpgradeBytes, req.ConfigBytes, toEngine, nil, appSenderClient); err != nil {

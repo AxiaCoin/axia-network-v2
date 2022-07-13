@@ -13,7 +13,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/api/server"
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow/engine/common"
-	"github.com/axiacoin/axia-network-v2/snow/engine/snowman/block/mocks"
+	"github.com/axiacoin/axia-network-v2/snow/engine/kleroterion/block/mocks"
 	"github.com/axiacoin/axia-network-v2/utils/constants"
 	"github.com/axiacoin/axia-network-v2/utils/logging"
 	"github.com/axiacoin/axia-network-v2/vms"

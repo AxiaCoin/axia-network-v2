@@ -12,7 +12,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/database"
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow/choices"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/kleroterion"
 	"github.com/axiacoin/axia-network-v2/vms/proposervm/block"
 	"github.com/axiacoin/axia-network-v2/vms/proposervm/proposer"
 )
@@ -22,33 +22,33 @@ func TestOracle_PostForkBlock_ImplementsInterface(t *testing.T) {
 	// setup
 	proBlk := postForkBlock{
 		postForkCommonComponents: postForkCommonComponents{
-			innerBlk: &snowman.TestBlock{},
+			innerBlk: &kleroterion.TestBlock{},
 		},
 	}
 
 	// test
 	_, err := proBlk.Options()
-	if err != snowman.ErrNotOracle {
+	if err != kleroterion.ErrNotOracle {
 		t.Fatal("Proposer block should signal that it wraps a block not implementing Options interface with ErrNotOracleBlock error")
 	}
 
 	// setup
 	_, _, proVM, _, _ := initTestProposerVM(t, time.Time{}, 0) // enable ProBlks
 	innerOracleBlk := &TestOptionsBlock{
-		TestBlock: snowman.TestBlock{
+		TestBlock: kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV: ids.Empty.Prefix(1111),
 			},
 			BytesV: []byte{1},
 		},
-		opts: [2]snowman.Block{
-			&snowman.TestBlock{
+		opts: [2]kleroterion.Block{
+			&kleroterion.TestBlock{
 				TestDecidable: choices.TestDecidable{
 					IDV: ids.Empty.Prefix(2222),
 				},
 				BytesV: []byte{2},
 			},
-			&snowman.TestBlock{
+			&kleroterion.TestBlock{
 				TestDecidable: choices.TestDecidable{
 					IDV: ids.Empty.Prefix(3333),
 				},
@@ -92,7 +92,7 @@ func TestBlockVerify_PostForkBlock_ParentChecks(t *testing.T) {
 	valState.GetCurrentHeightF = func() (uint64, error) { return coreChainHeight, nil }
 
 	// create parent block ...
-	prntCoreBlk := &snowman.TestBlock{
+	prntCoreBlk := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(1111),
 			StatusV: choices.Processing,
@@ -101,8 +101,8 @@ func TestBlockVerify_PostForkBlock_ParentChecks(t *testing.T) {
 		ParentV:    coreGenBlk.ID(),
 		TimestampV: coreGenBlk.Timestamp(),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return prntCoreBlk, nil }
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return prntCoreBlk, nil }
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -112,7 +112,7 @@ func TestBlockVerify_PostForkBlock_ParentChecks(t *testing.T) {
 			return nil, database.ErrNotFound
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil
@@ -137,7 +137,7 @@ func TestBlockVerify_PostForkBlock_ParentChecks(t *testing.T) {
 	}
 
 	// .. create child block ...
-	childCoreBlk := &snowman.TestBlock{
+	childCoreBlk := &kleroterion.TestBlock{
 		ParentV:    prntCoreBlk.ID(),
 		BytesV:     []byte{2},
 		TimestampV: prntCoreBlk.Timestamp(),
@@ -196,7 +196,7 @@ func TestBlockVerify_PostForkBlock_TimestampChecks(t *testing.T) {
 	valState.GetCurrentHeightF = func() (uint64, error) { return coreChainHeight, nil }
 
 	// create parent block ...
-	prntCoreBlk := &snowman.TestBlock{
+	prntCoreBlk := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(1111),
 			StatusV: choices.Processing,
@@ -205,8 +205,8 @@ func TestBlockVerify_PostForkBlock_TimestampChecks(t *testing.T) {
 		ParentV:    coreGenBlk.ID(),
 		TimestampV: coreGenBlk.Timestamp().Add(proposer.MaxDelay),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return prntCoreBlk, nil }
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return prntCoreBlk, nil }
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -216,7 +216,7 @@ func TestBlockVerify_PostForkBlock_TimestampChecks(t *testing.T) {
 			return nil, database.ErrNotFound
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil
@@ -241,7 +241,7 @@ func TestBlockVerify_PostForkBlock_TimestampChecks(t *testing.T) {
 
 	prntTimestamp := prntProBlk.Timestamp()
 
-	childCoreBlk := &snowman.TestBlock{
+	childCoreBlk := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(2222),
 			StatusV: choices.Processing,
@@ -390,7 +390,7 @@ func TestBlockVerify_PostForkBlock_CoreChainHeightChecks(t *testing.T) {
 	valState.GetCurrentHeightF = func() (uint64, error) { return coreChainHeight, nil }
 
 	// create parent block ...
-	prntCoreBlk := &snowman.TestBlock{
+	prntCoreBlk := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(1111),
 			StatusV: choices.Processing,
@@ -399,8 +399,8 @@ func TestBlockVerify_PostForkBlock_CoreChainHeightChecks(t *testing.T) {
 		ParentV:    coreGenBlk.ID(),
 		TimestampV: coreGenBlk.Timestamp().Add(proposer.MaxDelay),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return prntCoreBlk, nil }
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return prntCoreBlk, nil }
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -410,7 +410,7 @@ func TestBlockVerify_PostForkBlock_CoreChainHeightChecks(t *testing.T) {
 			return nil, database.ErrNotFound
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil
@@ -435,7 +435,7 @@ func TestBlockVerify_PostForkBlock_CoreChainHeightChecks(t *testing.T) {
 
 	prntBlkCoreChainHeight := coreChainHeight
 
-	childCoreBlk := &snowman.TestBlock{
+	childCoreBlk := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(2222),
 			StatusV: choices.Processing,
@@ -546,7 +546,7 @@ func TestBlockVerify_PostForkBlockBuiltOnOption_CoreChainHeightChecks(t *testing
 
 	// create post fork oracle block ...
 	oracleCoreBlk := &TestOptionsBlock{
-		TestBlock: snowman.TestBlock{
+		TestBlock: kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     ids.Empty.Prefix(1111),
 				StatusV: choices.Processing,
@@ -556,8 +556,8 @@ func TestBlockVerify_PostForkBlockBuiltOnOption_CoreChainHeightChecks(t *testing
 			TimestampV: coreGenBlk.Timestamp().Add(proposer.MaxDelay),
 		},
 	}
-	oracleCoreBlk.opts = [2]snowman.Block{
-		&snowman.TestBlock{
+	oracleCoreBlk.opts = [2]kleroterion.Block{
+		&kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     ids.Empty.Prefix(2222),
 				StatusV: choices.Processing,
@@ -566,7 +566,7 @@ func TestBlockVerify_PostForkBlockBuiltOnOption_CoreChainHeightChecks(t *testing
 			ParentV:    oracleCoreBlk.ID(),
 			TimestampV: oracleCoreBlk.Timestamp(),
 		},
-		&snowman.TestBlock{
+		&kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     ids.Empty.Prefix(3333),
 				StatusV: choices.Processing,
@@ -577,8 +577,8 @@ func TestBlockVerify_PostForkBlockBuiltOnOption_CoreChainHeightChecks(t *testing
 		},
 	}
 
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return oracleCoreBlk, nil }
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return oracleCoreBlk, nil }
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -592,7 +592,7 @@ func TestBlockVerify_PostForkBlockBuiltOnOption_CoreChainHeightChecks(t *testing
 			return nil, database.ErrNotFound
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil
@@ -639,7 +639,7 @@ func TestBlockVerify_PostForkBlockBuiltOnOption_CoreChainHeightChecks(t *testing
 
 	prntBlkCoreChainHeight := coreChainHeight
 
-	childCoreBlk := &snowman.TestBlock{
+	childCoreBlk := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(2222),
 			StatusV: choices.Processing,
@@ -747,7 +747,7 @@ func TestBlockVerify_PostForkBlock_CoreBlockVerifyIsCalledOnce(t *testing.T) {
 	coreChainHeight := uint64(2000)
 	valState.GetCurrentHeightF = func() (uint64, error) { return coreChainHeight, nil }
 
-	coreBlk := &snowman.TestBlock{
+	coreBlk := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(1111),
 			StatusV: choices.Processing,
@@ -756,8 +756,8 @@ func TestBlockVerify_PostForkBlock_CoreBlockVerifyIsCalledOnce(t *testing.T) {
 		ParentV:    coreGenBlk.ID(),
 		TimestampV: coreGenBlk.Timestamp().Add(proposer.MaxDelay),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk, nil }
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk, nil }
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -767,7 +767,7 @@ func TestBlockVerify_PostForkBlock_CoreBlockVerifyIsCalledOnce(t *testing.T) {
 			return nil, database.ErrNotFound
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil
@@ -807,7 +807,7 @@ func TestBlockAccept_PostForkBlock_SetsLastAcceptedBlock(t *testing.T) {
 	coreChainHeight := uint64(2000)
 	valState.GetCurrentHeightF = func() (uint64, error) { return coreChainHeight, nil }
 
-	coreBlk := &snowman.TestBlock{
+	coreBlk := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(1111),
 			StatusV: choices.Processing,
@@ -816,8 +816,8 @@ func TestBlockAccept_PostForkBlock_SetsLastAcceptedBlock(t *testing.T) {
 		ParentV:    coreGenBlk.ID(),
 		TimestampV: coreGenBlk.Timestamp().Add(proposer.MaxDelay),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk, nil }
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk, nil }
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -827,7 +827,7 @@ func TestBlockAccept_PostForkBlock_SetsLastAcceptedBlock(t *testing.T) {
 			return nil, database.ErrNotFound
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil
@@ -867,7 +867,7 @@ func TestBlockAccept_PostForkBlock_TwoProBlocksWithSameCoreBlock_OneIsAccepted(t
 	valState.GetMinimumHeightF = func() (uint64, error) { return minimumHeight, nil }
 
 	// generate two blocks with the same core block and store them
-	coreBlk := &snowman.TestBlock{
+	coreBlk := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(111),
 			StatusV: choices.Processing,
@@ -877,7 +877,7 @@ func TestBlockAccept_PostForkBlock_TwoProBlocksWithSameCoreBlock_OneIsAccepted(t
 		HeightV:    coreGenBlk.Height() + 1,
 		TimestampV: coreGenBlk.Timestamp().Add(proposer.MaxDelay),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk, nil }
 
 	minimumHeight = coreGenBlk.Height()
 
@@ -913,7 +913,7 @@ func TestBlockAccept_PostForkBlock_TwoProBlocksWithSameCoreBlock_OneIsAccepted(t
 // ProposerBlock.Reject tests section
 func TestBlockReject_PostForkBlock_InnerBlockIsNotRejected(t *testing.T) {
 	coreVM, _, proVM, coreGenBlk, _ := initTestProposerVM(t, time.Time{}, 0) // enable ProBlks
-	coreBlk := &snowman.TestBlock{
+	coreBlk := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(111),
 			StatusV: choices.Processing,
@@ -923,7 +923,7 @@ func TestBlockReject_PostForkBlock_InnerBlockIsNotRejected(t *testing.T) {
 		HeightV:    coreGenBlk.Height() + 1,
 		TimestampV: coreGenBlk.Timestamp().Add(proposer.MaxDelay),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk, nil }
 
 	sb, err := proVM.BuildBlock()
 	if err != nil {
@@ -953,7 +953,7 @@ func TestBlockVerify_PostForkBlock_ShouldBePostForkOption(t *testing.T) {
 
 	// create post fork oracle block ...
 	oracleCoreBlk := &TestOptionsBlock{
-		TestBlock: snowman.TestBlock{
+		TestBlock: kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     ids.Empty.Prefix(1111),
 				StatusV: choices.Processing,
@@ -963,7 +963,7 @@ func TestBlockVerify_PostForkBlock_ShouldBePostForkOption(t *testing.T) {
 			TimestampV: coreGenBlk.Timestamp(),
 		},
 	}
-	coreOpt0 := &snowman.TestBlock{
+	coreOpt0 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(2222),
 			StatusV: choices.Processing,
@@ -972,7 +972,7 @@ func TestBlockVerify_PostForkBlock_ShouldBePostForkOption(t *testing.T) {
 		ParentV:    oracleCoreBlk.ID(),
 		TimestampV: oracleCoreBlk.Timestamp(),
 	}
-	coreOpt1 := &snowman.TestBlock{
+	coreOpt1 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(3333),
 			StatusV: choices.Processing,
@@ -981,13 +981,13 @@ func TestBlockVerify_PostForkBlock_ShouldBePostForkOption(t *testing.T) {
 		ParentV:    oracleCoreBlk.ID(),
 		TimestampV: oracleCoreBlk.Timestamp(),
 	}
-	oracleCoreBlk.opts = [2]snowman.Block{
+	oracleCoreBlk.opts = [2]kleroterion.Block{
 		coreOpt0,
 		coreOpt1,
 	}
 
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return oracleCoreBlk, nil }
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return oracleCoreBlk, nil }
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -1001,7 +1001,7 @@ func TestBlockVerify_PostForkBlock_ShouldBePostForkOption(t *testing.T) {
 			return nil, database.ErrNotFound
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil
@@ -1079,7 +1079,7 @@ func TestBlockVerify_PostForkBlock_CoreChainTooLow(t *testing.T) {
 	coreVM, _, proVM, coreGenBlk, _ := initTestProposerVM(t, time.Time{}, 5)
 	proVM.Set(coreGenBlk.Timestamp())
 
-	coreBlk := &snowman.TestBlock{
+	coreBlk := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.GenerateTestID(),
 			StatusV: choices.Processing,
@@ -1089,7 +1089,7 @@ func TestBlockVerify_PostForkBlock_CoreChainTooLow(t *testing.T) {
 		TimestampV: coreGenBlk.Timestamp(),
 	}
 
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -1099,7 +1099,7 @@ func TestBlockVerify_PostForkBlock_CoreChainTooLow(t *testing.T) {
 			return nil, database.ErrNotFound
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil

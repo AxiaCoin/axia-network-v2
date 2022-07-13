@@ -30,10 +30,10 @@ import (
 	"github.com/axiacoin/axia-network-v2/ids/galiasreader"
 	"github.com/axiacoin/axia-network-v2/snow"
 	"github.com/axiacoin/axia-network-v2/snow/choices"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/kleroterion"
 	"github.com/axiacoin/axia-network-v2/snow/engine/common"
 	"github.com/axiacoin/axia-network-v2/snow/engine/common/appsender"
-	"github.com/axiacoin/axia-network-v2/snow/engine/snowman/block"
+	"github.com/axiacoin/axia-network-v2/snow/engine/kleroterion/block"
 	"github.com/axiacoin/axia-network-v2/utils/wrappers"
 	"github.com/axiacoin/axia-network-v2/version"
 	"github.com/axiacoin/axia-network-v2/vms/components/chain"
@@ -382,7 +382,7 @@ func (vm *VMClient) CreateStaticHandlers() (map[string]*common.HTTPHandler, erro
 	return handlers, nil
 }
 
-func (vm *VMClient) buildBlock() (snowman.Block, error) {
+func (vm *VMClient) buildBlock() (kleroterion.Block, error) {
 	resp, err := vm.client.BuildBlock(context.Background(), &emptypb.Empty{})
 	if err != nil {
 		return nil, err
@@ -414,7 +414,7 @@ func (vm *VMClient) buildBlock() (snowman.Block, error) {
 	}, nil
 }
 
-func (vm *VMClient) parseBlock(bytes []byte) (snowman.Block, error) {
+func (vm *VMClient) parseBlock(bytes []byte) (kleroterion.Block, error) {
 	resp, err := vm.client.ParseBlock(context.Background(), &vmpb.ParseBlockRequest{
 		Bytes: bytes,
 	})
@@ -455,7 +455,7 @@ func (vm *VMClient) parseBlock(bytes []byte) (snowman.Block, error) {
 	return blk, nil
 }
 
-func (vm *VMClient) getBlock(id ids.ID) (snowman.Block, error) {
+func (vm *VMClient) getBlock(id ids.ID) (kleroterion.Block, error) {
 	resp, err := vm.client.GetBlock(context.Background(), &vmpb.GetBlockRequest{
 		Id: id[:],
 	})
@@ -602,7 +602,7 @@ func (vm *VMClient) GetAncestors(
 	return resp.BlksBytes, nil
 }
 
-func (vm *VMClient) BatchedParseBlock(blksBytes [][]byte) ([]snowman.Block, error) {
+func (vm *VMClient) BatchedParseBlock(blksBytes [][]byte) ([]kleroterion.Block, error) {
 	resp, err := vm.client.BatchedParseBlock(context.Background(), &vmpb.BatchedParseBlockRequest{
 		Request: blksBytes,
 	})
@@ -613,7 +613,7 @@ func (vm *VMClient) BatchedParseBlock(blksBytes [][]byte) ([]snowman.Block, erro
 		return nil, fmt.Errorf("BatchedParse block returned different number of blocks than expected")
 	}
 
-	res := make([]snowman.Block, 0, len(blksBytes))
+	res := make([]kleroterion.Block, 0, len(blksBytes))
 	for idx, blkResp := range resp.Response {
 		id, err := ids.ToID(blkResp.Id)
 		if err != nil {

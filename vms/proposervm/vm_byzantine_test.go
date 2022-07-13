@@ -12,7 +12,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/database"
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow/choices"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/kleroterion"
 	"github.com/axiacoin/axia-network-v2/vms/proposervm/block"
 	"github.com/axiacoin/axia-network-v2/vms/proposervm/proposer"
 )
@@ -29,7 +29,7 @@ func TestInvalidByzantineProposerParent(t *testing.T) {
 	forkTime := time.Unix(0, 0) // enable ProBlks
 	coreVM, _, proVM, gBlock, _ := initTestProposerVM(t, forkTime, 0)
 
-	xBlock := &snowman.TestBlock{
+	xBlock := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.GenerateTestID(),
 			StatusV: choices.Processing,
@@ -39,7 +39,7 @@ func TestInvalidByzantineProposerParent(t *testing.T) {
 		HeightV:    gBlock.Height() + 1,
 		TimestampV: gBlock.Timestamp().Add(proposer.MaxDelay),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return xBlock, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return xBlock, nil }
 
 	aBlock, err := proVM.BuildBlock()
 	if err != nil {
@@ -57,7 +57,7 @@ func TestInvalidByzantineProposerParent(t *testing.T) {
 	}
 
 	yBlockBytes := []byte{2}
-	yBlock := &snowman.TestBlock{
+	yBlock := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.GenerateTestID(),
 			StatusV: choices.Processing,
@@ -68,7 +68,7 @@ func TestInvalidByzantineProposerParent(t *testing.T) {
 		TimestampV: xBlock.Timestamp().Add(proposer.MaxDelay),
 	}
 
-	coreVM.ParseBlockF = func(blockBytes []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(blockBytes []byte) (kleroterion.Block, error) {
 		if !bytes.Equal(blockBytes, yBlockBytes) {
 			return nil, errUnknownBlock
 		}
@@ -101,7 +101,7 @@ func TestInvalidByzantineProposerOracleParent(t *testing.T) {
 
 	xBlockID := ids.GenerateTestID()
 	xBlock := &TestOptionsBlock{
-		TestBlock: snowman.TestBlock{
+		TestBlock: kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     xBlockID,
 				StatusV: choices.Processing,
@@ -110,8 +110,8 @@ func TestInvalidByzantineProposerOracleParent(t *testing.T) {
 			ParentV:    coreGenBlk.ID(),
 			TimestampV: coreGenBlk.Timestamp(),
 		},
-		opts: [2]snowman.Block{
-			&snowman.TestBlock{
+		opts: [2]kleroterion.Block{
+			&kleroterion.TestBlock{
 				TestDecidable: choices.TestDecidable{
 					IDV:     ids.GenerateTestID(),
 					StatusV: choices.Processing,
@@ -120,7 +120,7 @@ func TestInvalidByzantineProposerOracleParent(t *testing.T) {
 				ParentV:    xBlockID,
 				TimestampV: coreGenBlk.Timestamp(),
 			},
-			&snowman.TestBlock{
+			&kleroterion.TestBlock{
 				TestDecidable: choices.TestDecidable{
 					IDV:     ids.GenerateTestID(),
 					StatusV: choices.Processing,
@@ -132,8 +132,8 @@ func TestInvalidByzantineProposerOracleParent(t *testing.T) {
 		},
 	}
 
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return xBlock, nil }
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return xBlock, nil }
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -147,7 +147,7 @@ func TestInvalidByzantineProposerOracleParent(t *testing.T) {
 			return nil, database.ErrNotFound
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil
@@ -217,7 +217,7 @@ func TestInvalidByzantineProposerPreForkParent(t *testing.T) {
 	forkTime := time.Unix(0, 0) // enable ProBlks
 	coreVM, _, proVM, gBlock, _ := initTestProposerVM(t, forkTime, 0)
 
-	xBlock := &snowman.TestBlock{
+	xBlock := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.GenerateTestID(),
 			StatusV: choices.Processing,
@@ -227,7 +227,7 @@ func TestInvalidByzantineProposerPreForkParent(t *testing.T) {
 		HeightV:    gBlock.Height() + 1,
 		TimestampV: gBlock.Timestamp().Add(proposer.MaxDelay),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return xBlock, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return xBlock, nil }
 
 	aBlock, err := proVM.BuildBlock()
 	if err != nil {
@@ -237,7 +237,7 @@ func TestInvalidByzantineProposerPreForkParent(t *testing.T) {
 	coreVM.BuildBlockF = nil
 
 	yBlockBytes := []byte{2}
-	yBlock := &snowman.TestBlock{
+	yBlock := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.GenerateTestID(),
 			StatusV: choices.Processing,
@@ -248,7 +248,7 @@ func TestInvalidByzantineProposerPreForkParent(t *testing.T) {
 		TimestampV: xBlock.Timestamp().Add(proposer.MaxDelay),
 	}
 
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case gBlock.ID():
 			return gBlock, nil
@@ -260,7 +260,7 @@ func TestInvalidByzantineProposerPreForkParent(t *testing.T) {
 			return nil, errUnknownBlock
 		}
 	}
-	coreVM.ParseBlockF = func(blockBytes []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(blockBytes []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(blockBytes, gBlock.Bytes()):
 			return gBlock, nil
@@ -321,7 +321,7 @@ func TestBlockVerify_PostForkOption_FaultyParent(t *testing.T) {
 	proVM.Set(coreGenBlk.Timestamp())
 
 	xBlock := &TestOptionsBlock{
-		TestBlock: snowman.TestBlock{
+		TestBlock: kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     ids.GenerateTestID(),
 				StatusV: choices.Processing,
@@ -330,8 +330,8 @@ func TestBlockVerify_PostForkOption_FaultyParent(t *testing.T) {
 			ParentV:    coreGenBlk.ID(),
 			TimestampV: coreGenBlk.Timestamp(),
 		},
-		opts: [2]snowman.Block{
-			&snowman.TestBlock{
+		opts: [2]kleroterion.Block{
+			&kleroterion.TestBlock{
 				TestDecidable: choices.TestDecidable{
 					IDV:     ids.GenerateTestID(),
 					StatusV: choices.Processing,
@@ -340,7 +340,7 @@ func TestBlockVerify_PostForkOption_FaultyParent(t *testing.T) {
 				ParentV:    coreGenBlk.ID(), // valid block should reference xBlock
 				TimestampV: coreGenBlk.Timestamp(),
 			},
-			&snowman.TestBlock{
+			&kleroterion.TestBlock{
 				TestDecidable: choices.TestDecidable{
 					IDV:     ids.GenerateTestID(),
 					StatusV: choices.Processing,
@@ -352,8 +352,8 @@ func TestBlockVerify_PostForkOption_FaultyParent(t *testing.T) {
 		},
 	}
 
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return xBlock, nil }
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return xBlock, nil }
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -367,7 +367,7 @@ func TestBlockVerify_PostForkOption_FaultyParent(t *testing.T) {
 			return nil, database.ErrNotFound
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil
@@ -425,7 +425,7 @@ func TestBlockVerify_InvalidPostForkOption(t *testing.T) {
 	// create an Oracle pre-fork block X
 	xBlockID := ids.GenerateTestID()
 	xBlock := &TestOptionsBlock{
-		TestBlock: snowman.TestBlock{
+		TestBlock: kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     xBlockID,
 				StatusV: choices.Processing,
@@ -434,8 +434,8 @@ func TestBlockVerify_InvalidPostForkOption(t *testing.T) {
 			ParentV:    coreGenBlk.ID(),
 			TimestampV: coreGenBlk.Timestamp(),
 		},
-		opts: [2]snowman.Block{
-			&snowman.TestBlock{
+		opts: [2]kleroterion.Block{
+			&kleroterion.TestBlock{
 				TestDecidable: choices.TestDecidable{
 					IDV:     ids.GenerateTestID(),
 					StatusV: choices.Processing,
@@ -444,7 +444,7 @@ func TestBlockVerify_InvalidPostForkOption(t *testing.T) {
 				ParentV:    xBlockID,
 				TimestampV: coreGenBlk.Timestamp(),
 			},
-			&snowman.TestBlock{
+			&kleroterion.TestBlock{
 				TestDecidable: choices.TestDecidable{
 					IDV:     ids.GenerateTestID(),
 					StatusV: choices.Processing,
@@ -463,7 +463,7 @@ func TestBlockVerify_InvalidPostForkOption(t *testing.T) {
 	xInnerOption := xInnerOptions[0]
 
 	// create a non-Oracle pre-fork block Y
-	yBlock := &snowman.TestBlock{
+	yBlock := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.GenerateTestID(),
 			StatusV: choices.Processing,
@@ -521,7 +521,7 @@ func TestBlockVerify_InvalidPostForkOption(t *testing.T) {
 	}
 
 	// generate A from X and O2
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return xBlock, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return xBlock, nil }
 	aBlock, err := proVM.BuildBlock()
 	if err != nil {
 		t.Fatal(err)
@@ -556,7 +556,7 @@ func TestBlockVerify_InvalidPostForkOption(t *testing.T) {
 	// create post-fork block B from Y
 	zBlockID := ids.GenerateTestID()
 	zBlock := &TestOptionsBlock{
-		TestBlock: snowman.TestBlock{
+		TestBlock: kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     zBlockID,
 				StatusV: choices.Processing,
@@ -565,8 +565,8 @@ func TestBlockVerify_InvalidPostForkOption(t *testing.T) {
 			ParentV:    coreGenBlk.ID(),
 			TimestampV: coreGenBlk.Timestamp(),
 		},
-		opts: [2]snowman.Block{
-			&snowman.TestBlock{
+		opts: [2]kleroterion.Block{
+			&kleroterion.TestBlock{
 				TestDecidable: choices.TestDecidable{
 					IDV:     ids.GenerateTestID(),
 					StatusV: choices.Processing,
@@ -575,7 +575,7 @@ func TestBlockVerify_InvalidPostForkOption(t *testing.T) {
 				ParentV:    zBlockID,
 				TimestampV: coreGenBlk.Timestamp(),
 			},
-			&snowman.TestBlock{
+			&kleroterion.TestBlock{
 				TestDecidable: choices.TestDecidable{
 					IDV:     ids.GenerateTestID(),
 					StatusV: choices.Processing,
@@ -587,7 +587,7 @@ func TestBlockVerify_InvalidPostForkOption(t *testing.T) {
 		},
 	}
 
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return zBlock, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return zBlock, nil }
 	cBlock, err := proVM.BuildBlock()
 	if err != nil {
 		t.Fatal(err)
@@ -633,7 +633,7 @@ func TestGetBlock_MutatedSignature(t *testing.T) {
 	proVM.Set(coreGenBlk.Timestamp())
 
 	// Create valid core blocks to build our chain on.
-	coreBlk0 := &snowman.TestBlock{
+	coreBlk0 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(1111),
 			StatusV: choices.Processing,
@@ -644,7 +644,7 @@ func TestGetBlock_MutatedSignature(t *testing.T) {
 		TimestampV: coreGenBlk.Timestamp(),
 	}
 
-	coreBlk1 := &snowman.TestBlock{
+	coreBlk1 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(2222),
 			StatusV: choices.Processing,
@@ -655,7 +655,7 @@ func TestGetBlock_MutatedSignature(t *testing.T) {
 		TimestampV: coreGenBlk.Timestamp(),
 	}
 
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -667,7 +667,7 @@ func TestGetBlock_MutatedSignature(t *testing.T) {
 			return nil, database.ErrNotFound
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil
@@ -681,7 +681,7 @@ func TestGetBlock_MutatedSignature(t *testing.T) {
 	}
 
 	// Build the first proposal block
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk0, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk0, nil }
 
 	builtBlk0, err := proVM.BuildBlock()
 	if err != nil {

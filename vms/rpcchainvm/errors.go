@@ -5,7 +5,7 @@ package rpcchainvm
 
 import (
 	"github.com/axiacoin/axia-network-v2/database"
-	"github.com/axiacoin/axia-network-v2/snow/engine/snowman/block"
+	"github.com/axiacoin/axia-network-v2/snow/engine/kleroterion/block"
 )
 
 var (

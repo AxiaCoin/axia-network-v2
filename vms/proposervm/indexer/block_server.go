@@ -6,7 +6,7 @@ package indexer
 import (
 	"github.com/axiacoin/axia-network-v2/database/versiondb"
 	"github.com/axiacoin/axia-network-v2/ids"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/kleroterion"
 )
 
 // BlockServer represents all requests heightIndexer can issue
@@ -16,5 +16,5 @@ type BlockServer interface {
 
 	// Note: this is a contention heavy call that should be avoided
 	// for frequent/repeated indexer ops
-	GetFullPostForkBlock(blkID ids.ID) (snowman.Block, error)
+	GetFullPostForkBlock(blkID ids.ID) (kleroterion.Block, error)
 }

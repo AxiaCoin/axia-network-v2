@@ -21,9 +21,9 @@ import (
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow"
 	"github.com/axiacoin/axia-network-v2/snow/choices"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/kleroterion"
 	"github.com/axiacoin/axia-network-v2/snow/engine/common"
-	"github.com/axiacoin/axia-network-v2/snow/engine/snowman/block"
+	"github.com/axiacoin/axia-network-v2/snow/engine/kleroterion/block"
 	"github.com/axiacoin/axia-network-v2/snow/uptime"
 	"github.com/axiacoin/axia-network-v2/snow/validators"
 	"github.com/axiacoin/axia-network-v2/utils"
@@ -370,9 +370,9 @@ func (vm *VM) Shutdown() error {
 }
 
 // BuildBlock builds a block to be added to consensus
-func (vm *VM) BuildBlock() (snowman.Block, error) { return vm.blockBuilder.BuildBlock() }
+func (vm *VM) BuildBlock() (kleroterion.Block, error) { return vm.blockBuilder.BuildBlock() }
 
-func (vm *VM) ParseBlock(b []byte) (snowman.Block, error) {
+func (vm *VM) ParseBlock(b []byte) (kleroterion.Block, error) {
 	var blk Block
 	if _, err := Codec.Unmarshal(b, &blk); err != nil {
 		return nil, err
@@ -390,7 +390,7 @@ func (vm *VM) ParseBlock(b []byte) (snowman.Block, error) {
 	return blk, nil
 }
 
-func (vm *VM) GetBlock(blkID ids.ID) (snowman.Block, error) { return vm.getBlock(blkID) }
+func (vm *VM) GetBlock(blkID ids.ID) (kleroterion.Block, error) { return vm.getBlock(blkID) }
 
 func (vm *VM) getBlock(blkID ids.ID) (Block, error) {
 	// If block is in memory, return it.

@@ -10,7 +10,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/axiacoin/axia-network-v2/ids"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/kleroterion"
 	"github.com/axiacoin/axia-network-v2/utils/metric"
 	"github.com/axiacoin/axia-network-v2/utils/wrappers"
 )
@@ -187,7 +187,7 @@ func (m *metrics) Initialize(
 	return errs.Err
 }
 
-func (m *metrics) AcceptBlock(b snowman.Block) error {
+func (m *metrics) AcceptBlock(b kleroterion.Block) error {
 	switch b := b.(type) {
 	case *AbortBlock:
 		m.numAbortBlocks.Inc()

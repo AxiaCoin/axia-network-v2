@@ -3,15 +3,15 @@
 
 package metervm
 
-import "github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
+import "github.com/axiacoin/axia-network-v2/snow/consensus/kleroterion"
 
 var (
-	_ snowman.Block       = &meterBlock{}
-	_ snowman.OracleBlock = &meterBlock{}
+	_ kleroterion.Block       = &meterBlock{}
+	_ kleroterion.OracleBlock = &meterBlock{}
 )
 
 type meterBlock struct {
-	snowman.Block
+	kleroterion.Block
 
 	vm *blockVM
 }
@@ -47,17 +47,17 @@ func (mb *meterBlock) Reject() error {
 	return err
 }
 
-func (mb *meterBlock) Options() ([2]snowman.Block, error) {
-	oracleBlock, ok := mb.Block.(snowman.OracleBlock)
+func (mb *meterBlock) Options() ([2]kleroterion.Block, error) {
+	oracleBlock, ok := mb.Block.(kleroterion.OracleBlock)
 	if !ok {
-		return [2]snowman.Block{}, snowman.ErrNotOracle
+		return [2]kleroterion.Block{}, kleroterion.ErrNotOracle
 	}
 
 	blks, err := oracleBlock.Options()
 	if err != nil {
-		return [2]snowman.Block{}, err
+		return [2]kleroterion.Block{}, err
 	}
-	return [2]snowman.Block{
+	return [2]kleroterion.Block{
 		&meterBlock{
 			Block: blks[0],
 			vm:    mb.vm,

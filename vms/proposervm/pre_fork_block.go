@@ -8,14 +8,14 @@ import (
 
 	"github.com/axiacoin/axia-network-v2/database"
 	"github.com/axiacoin/axia-network-v2/snow/choices"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/kleroterion"
 	"github.com/axiacoin/axia-network-v2/vms/proposervm/block"
 )
 
 var _ Block = &preForkBlock{}
 
 type preForkBlock struct {
-	snowman.Block
+	kleroterion.Block
 	vm *VM
 }
 
@@ -27,18 +27,18 @@ func (b *preForkBlock) Verify() error {
 	return parent.verifyPreForkChild(b)
 }
 
-func (b *preForkBlock) Options() ([2]snowman.Block, error) {
-	oracleBlk, ok := b.Block.(snowman.OracleBlock)
+func (b *preForkBlock) Options() ([2]kleroterion.Block, error) {
+	oracleBlk, ok := b.Block.(kleroterion.OracleBlock)
 	if !ok {
-		return [2]snowman.Block{}, snowman.ErrNotOracle
+		return [2]kleroterion.Block{}, kleroterion.ErrNotOracle
 	}
 
 	options, err := oracleBlk.Options()
 	if err != nil {
-		return [2]snowman.Block{}, err
+		return [2]kleroterion.Block{}, err
 	}
 	// A pre-fork block's child options are always pre-fork blocks
-	return [2]snowman.Block{
+	return [2]kleroterion.Block{
 		&preForkBlock{
 			Block: options[0],
 			vm:    b.vm,
@@ -50,7 +50,7 @@ func (b *preForkBlock) Options() ([2]snowman.Block, error) {
 	}, nil
 }
 
-func (b *preForkBlock) getInnerBlk() snowman.Block {
+func (b *preForkBlock) getInnerBlk() kleroterion.Block {
 	return b.Block
 }
 

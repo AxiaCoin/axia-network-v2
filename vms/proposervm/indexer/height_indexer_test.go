@@ -14,7 +14,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/database/versiondb"
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow/choices"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/kleroterion"
 	"github.com/axiacoin/axia-network-v2/utils/logging"
 	"github.com/axiacoin/axia-network-v2/vms/proposervm/block"
 	"github.com/axiacoin/axia-network-v2/vms/proposervm/state"
@@ -32,7 +32,7 @@ func TestHeightBlockIndexPostFork(t *testing.T) {
 	var (
 		blkNumber = uint64(10)
 		lastBlkID = ids.Empty.Prefix(0) // initially set to a dummyGenesisID
-		proBlks   = make(map[ids.ID]snowman.Block)
+		proBlks   = make(map[ids.ID]kleroterion.Block)
 	)
 
 	for blkHeight := uint64(1); blkHeight <= blkNumber; blkHeight++ {
@@ -51,7 +51,7 @@ func TestHeightBlockIndexPostFork(t *testing.T) {
 		assert.NoError(storedState.PutBlock(postForkStatelessBlk, choices.Accepted))
 
 		// ... and create a corresponding test block just for block server
-		postForkBlk := &snowman.TestBlock{
+		postForkBlk := &kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     postForkStatelessBlk.ID(),
 				StatusV: choices.Accepted,
@@ -67,7 +67,7 @@ func TestHeightBlockIndexPostFork(t *testing.T) {
 		CantGetFullPostForkBlock: true,
 		CantCommit:               true,
 
-		GetFullPostForkBlockF: func(blkID ids.ID) (snowman.Block, error) {
+		GetFullPostForkBlockF: func(blkID ids.ID) (kleroterion.Block, error) {
 			blk, found := proBlks[blkID]
 			if !found {
 				return nil, database.ErrNotFound
@@ -110,7 +110,7 @@ func TestHeightBlockIndexAcrossFork(t *testing.T) {
 		blkNumber  = uint64(10)
 		forkHeight = blkNumber / 2
 		lastBlkID  = ids.Empty.Prefix(0) // initially set to a last pre fork blk
-		proBlks    = make(map[ids.ID]snowman.Block)
+		proBlks    = make(map[ids.ID]kleroterion.Block)
 	)
 
 	for blkHeight := forkHeight; blkHeight <= blkNumber; blkHeight++ {
@@ -129,7 +129,7 @@ func TestHeightBlockIndexAcrossFork(t *testing.T) {
 		assert.NoError(storedState.PutBlock(postForkStatelessBlk, choices.Accepted))
 
 		// ... and create a corresponding test block just for block server
-		postForkBlk := &snowman.TestBlock{
+		postForkBlk := &kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     postForkStatelessBlk.ID(),
 				StatusV: choices.Accepted,
@@ -145,7 +145,7 @@ func TestHeightBlockIndexAcrossFork(t *testing.T) {
 		CantGetFullPostForkBlock: true,
 		CantCommit:               true,
 
-		GetFullPostForkBlockF: func(blkID ids.ID) (snowman.Block, error) {
+		GetFullPostForkBlockF: func(blkID ids.ID) (kleroterion.Block, error) {
 			blk, found := proBlks[blkID]
 			if !found {
 				return nil, database.ErrNotFound
@@ -192,7 +192,7 @@ func TestHeightBlockIndexResumeFromCheckPoint(t *testing.T) {
 		blkNumber  = uint64(10)
 		forkHeight = blkNumber / 2
 		lastBlkID  = ids.Empty.Prefix(0) // initially set to a last pre fork blk
-		proBlks    = make(map[ids.ID]snowman.Block)
+		proBlks    = make(map[ids.ID]kleroterion.Block)
 	)
 
 	for blkHeight := forkHeight; blkHeight <= blkNumber; blkHeight++ {
@@ -211,7 +211,7 @@ func TestHeightBlockIndexResumeFromCheckPoint(t *testing.T) {
 		assert.NoError(storedState.PutBlock(postForkStatelessBlk, choices.Accepted))
 
 		// ... and create a corresponding test block just for block server
-		postForkBlk := &snowman.TestBlock{
+		postForkBlk := &kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     postForkStatelessBlk.ID(),
 				StatusV: choices.Accepted,
@@ -227,7 +227,7 @@ func TestHeightBlockIndexResumeFromCheckPoint(t *testing.T) {
 		CantGetFullPostForkBlock: true,
 		CantCommit:               true,
 
-		GetFullPostForkBlockF: func(blkID ids.ID) (snowman.Block, error) {
+		GetFullPostForkBlockF: func(blkID ids.ID) (kleroterion.Block, error) {
 			blk, found := proBlks[blkID]
 			if !found {
 				return nil, database.ErrNotFound
@@ -245,7 +245,7 @@ func TestHeightBlockIndexResumeFromCheckPoint(t *testing.T) {
 
 	// pick a random block in the chain and checkpoint it;...
 	rndPostForkHeight := rand.Intn(int(blkNumber-forkHeight)) + int(forkHeight) // #nosec G404
-	var checkpointBlk snowman.Block
+	var checkpointBlk kleroterion.Block
 	for _, blk := range proBlks {
 		if blk.Height() != uint64(rndPostForkHeight) {
 			continue // not the blk we are looking for

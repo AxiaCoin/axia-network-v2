@@ -14,19 +14,19 @@ import (
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow"
 	"github.com/axiacoin/axia-network-v2/snow/choices"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/kleroterion"
 	"github.com/axiacoin/axia-network-v2/snow/engine/common"
 	"github.com/axiacoin/axia-network-v2/vms/proposervm/block"
 	"github.com/axiacoin/axia-network-v2/vms/proposervm/proposer"
 )
 
 type TestOptionsBlock struct {
-	snowman.TestBlock
-	opts    [2]snowman.Block
+	kleroterion.TestBlock
+	opts    [2]kleroterion.Block
 	optsErr error
 }
 
-func (tob TestOptionsBlock) Options() ([2]snowman.Block, error) {
+func (tob TestOptionsBlock) Options() ([2]kleroterion.Block, error) {
 	return tob.opts, tob.optsErr
 }
 
@@ -37,7 +37,7 @@ func TestBlockVerify_PostForkOption_ParentChecks(t *testing.T) {
 
 	// create post fork oracle block ...
 	oracleCoreBlk := &TestOptionsBlock{
-		TestBlock: snowman.TestBlock{
+		TestBlock: kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     ids.Empty.Prefix(1111),
 				StatusV: choices.Processing,
@@ -47,8 +47,8 @@ func TestBlockVerify_PostForkOption_ParentChecks(t *testing.T) {
 			TimestampV: coreGenBlk.Timestamp(),
 		},
 	}
-	oracleCoreBlk.opts = [2]snowman.Block{
-		&snowman.TestBlock{
+	oracleCoreBlk.opts = [2]kleroterion.Block{
+		&kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     ids.Empty.Prefix(2222),
 				StatusV: choices.Processing,
@@ -57,7 +57,7 @@ func TestBlockVerify_PostForkOption_ParentChecks(t *testing.T) {
 			ParentV:    oracleCoreBlk.ID(),
 			TimestampV: oracleCoreBlk.Timestamp(),
 		},
-		&snowman.TestBlock{
+		&kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     ids.Empty.Prefix(3333),
 				StatusV: choices.Processing,
@@ -68,8 +68,8 @@ func TestBlockVerify_PostForkOption_ParentChecks(t *testing.T) {
 		},
 	}
 
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return oracleCoreBlk, nil }
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return oracleCoreBlk, nil }
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -83,7 +83,7 @@ func TestBlockVerify_PostForkOption_ParentChecks(t *testing.T) {
 			return nil, database.ErrNotFound
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil
@@ -136,7 +136,7 @@ func TestBlockVerify_PostForkOption_ParentChecks(t *testing.T) {
 		t.Fatal("could not set preference")
 	}
 
-	childCoreBlk := &snowman.TestBlock{
+	childCoreBlk := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(4444),
 			StatusV: choices.Processing,
@@ -145,7 +145,7 @@ func TestBlockVerify_PostForkOption_ParentChecks(t *testing.T) {
 		BytesV:     []byte{4},
 		TimestampV: oracleCoreBlk.opts[0].Timestamp().Add(proposer.MaxDelay),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return childCoreBlk, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return childCoreBlk, nil }
 	proVM.Set(childCoreBlk.Timestamp())
 
 	proChild, err := proVM.BuildBlock()
@@ -168,7 +168,7 @@ func TestBlockVerify_PostForkOption_CoreBlockVerifyIsCalledOnce(t *testing.T) {
 
 	// create post fork oracle block ...
 	oracleCoreBlk := &TestOptionsBlock{
-		TestBlock: snowman.TestBlock{
+		TestBlock: kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     ids.Empty.Prefix(1111),
 				StatusV: choices.Processing,
@@ -178,7 +178,7 @@ func TestBlockVerify_PostForkOption_CoreBlockVerifyIsCalledOnce(t *testing.T) {
 			TimestampV: coreGenBlk.Timestamp(),
 		},
 	}
-	coreOpt0 := &snowman.TestBlock{
+	coreOpt0 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(2222),
 			StatusV: choices.Processing,
@@ -187,7 +187,7 @@ func TestBlockVerify_PostForkOption_CoreBlockVerifyIsCalledOnce(t *testing.T) {
 		ParentV:    oracleCoreBlk.ID(),
 		TimestampV: oracleCoreBlk.Timestamp(),
 	}
-	coreOpt1 := &snowman.TestBlock{
+	coreOpt1 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(3333),
 			StatusV: choices.Processing,
@@ -196,13 +196,13 @@ func TestBlockVerify_PostForkOption_CoreBlockVerifyIsCalledOnce(t *testing.T) {
 		ParentV:    oracleCoreBlk.ID(),
 		TimestampV: oracleCoreBlk.Timestamp(),
 	}
-	oracleCoreBlk.opts = [2]snowman.Block{
+	oracleCoreBlk.opts = [2]kleroterion.Block{
 		coreOpt0,
 		coreOpt1,
 	}
 
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return oracleCoreBlk, nil }
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return oracleCoreBlk, nil }
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -216,7 +216,7 @@ func TestBlockVerify_PostForkOption_CoreBlockVerifyIsCalledOnce(t *testing.T) {
 			return nil, database.ErrNotFound
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil
@@ -284,7 +284,7 @@ func TestBlockAccept_PostForkOption_SetsLastAcceptedBlock(t *testing.T) {
 
 	// create post fork oracle block ...
 	oracleCoreBlk := &TestOptionsBlock{
-		TestBlock: snowman.TestBlock{
+		TestBlock: kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     ids.Empty.Prefix(1111),
 				StatusV: choices.Processing,
@@ -294,8 +294,8 @@ func TestBlockAccept_PostForkOption_SetsLastAcceptedBlock(t *testing.T) {
 			TimestampV: coreGenBlk.Timestamp(),
 		},
 	}
-	oracleCoreBlk.opts = [2]snowman.Block{
-		&snowman.TestBlock{
+	oracleCoreBlk.opts = [2]kleroterion.Block{
+		&kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     ids.Empty.Prefix(2222),
 				StatusV: choices.Processing,
@@ -304,7 +304,7 @@ func TestBlockAccept_PostForkOption_SetsLastAcceptedBlock(t *testing.T) {
 			ParentV:    oracleCoreBlk.ID(),
 			TimestampV: oracleCoreBlk.Timestamp(),
 		},
-		&snowman.TestBlock{
+		&kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     ids.Empty.Prefix(3333),
 				StatusV: choices.Processing,
@@ -315,8 +315,8 @@ func TestBlockAccept_PostForkOption_SetsLastAcceptedBlock(t *testing.T) {
 		},
 	}
 
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return oracleCoreBlk, nil }
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return oracleCoreBlk, nil }
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -330,7 +330,7 @@ func TestBlockAccept_PostForkOption_SetsLastAcceptedBlock(t *testing.T) {
 			return nil, database.ErrNotFound
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil
@@ -402,7 +402,7 @@ func TestBlockReject_InnerBlockIsNotRejected(t *testing.T) {
 
 	// create post fork oracle block ...
 	oracleCoreBlk := &TestOptionsBlock{
-		TestBlock: snowman.TestBlock{
+		TestBlock: kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     ids.Empty.Prefix(1111),
 				StatusV: choices.Processing,
@@ -412,8 +412,8 @@ func TestBlockReject_InnerBlockIsNotRejected(t *testing.T) {
 			TimestampV: coreGenBlk.Timestamp(),
 		},
 	}
-	oracleCoreBlk.opts = [2]snowman.Block{
-		&snowman.TestBlock{
+	oracleCoreBlk.opts = [2]kleroterion.Block{
+		&kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     ids.Empty.Prefix(2222),
 				StatusV: choices.Processing,
@@ -422,7 +422,7 @@ func TestBlockReject_InnerBlockIsNotRejected(t *testing.T) {
 			ParentV:    oracleCoreBlk.ID(),
 			TimestampV: oracleCoreBlk.Timestamp(),
 		},
-		&snowman.TestBlock{
+		&kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     ids.Empty.Prefix(3333),
 				StatusV: choices.Processing,
@@ -433,8 +433,8 @@ func TestBlockReject_InnerBlockIsNotRejected(t *testing.T) {
 		},
 	}
 
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return oracleCoreBlk, nil }
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return oracleCoreBlk, nil }
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -448,7 +448,7 @@ func TestBlockReject_InnerBlockIsNotRejected(t *testing.T) {
 			return nil, database.ErrNotFound
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil
@@ -518,7 +518,7 @@ func TestBlockVerify_PostForkOption_ParentIsNotOracleWithError(t *testing.T) {
 	proVM.Set(coreGenBlk.Timestamp())
 
 	coreBlk := &TestOptionsBlock{
-		TestBlock: snowman.TestBlock{
+		TestBlock: kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     ids.GenerateTestID(),
 				StatusV: choices.Processing,
@@ -527,10 +527,10 @@ func TestBlockVerify_PostForkOption_ParentIsNotOracleWithError(t *testing.T) {
 			ParentV:    coreGenBlk.ID(),
 			TimestampV: coreGenBlk.Timestamp(),
 		},
-		optsErr: snowman.ErrNotOracle,
+		optsErr: kleroterion.ErrNotOracle,
 	}
 
-	coreChildBlk := &snowman.TestBlock{
+	coreChildBlk := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.GenerateTestID(),
 			StatusV: choices.Processing,
@@ -541,8 +541,8 @@ func TestBlockVerify_PostForkOption_ParentIsNotOracleWithError(t *testing.T) {
 		TimestampV: coreBlk.Timestamp(),
 	}
 
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk, nil }
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk, nil }
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -554,7 +554,7 @@ func TestBlockVerify_PostForkOption_ParentIsNotOracleWithError(t *testing.T) {
 			return nil, database.ErrNotFound
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil
@@ -577,7 +577,7 @@ func TestBlockVerify_PostForkOption_ParentIsNotOracleWithError(t *testing.T) {
 		t.Fatal("expected post fork block")
 	}
 	_, err = postForkBlk.Options()
-	if err != snowman.ErrNotOracle {
+	if err != kleroterion.ErrNotOracle {
 		t.Fatal("should have reported that the block isn't an oracle block")
 	}
 
@@ -607,7 +607,7 @@ func TestOptionTimestampValidity(t *testing.T) {
 
 	coreOracleBlkID := ids.GenerateTestID()
 	coreOracleBlk := &TestOptionsBlock{
-		TestBlock: snowman.TestBlock{
+		TestBlock: kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     coreOracleBlkID,
 				StatusV: choices.Processing,
@@ -617,8 +617,8 @@ func TestOptionTimestampValidity(t *testing.T) {
 			HeightV:    coreGenBlk.Height() + 1,
 			TimestampV: coreGenBlk.Timestamp().Add(time.Second),
 		},
-		opts: [2]snowman.Block{
-			&snowman.TestBlock{
+		opts: [2]kleroterion.Block{
+			&kleroterion.TestBlock{
 				TestDecidable: choices.TestDecidable{
 					IDV:     ids.GenerateTestID(),
 					StatusV: choices.Processing,
@@ -627,7 +627,7 @@ func TestOptionTimestampValidity(t *testing.T) {
 				ParentV:    coreOracleBlkID,
 				TimestampV: coreGenBlk.Timestamp().Add(time.Second),
 			},
-			&snowman.TestBlock{
+			&kleroterion.TestBlock{
 				TestDecidable: choices.TestDecidable{
 					IDV:     ids.GenerateTestID(),
 					StatusV: choices.Processing,
@@ -648,7 +648,7 @@ func TestOptionTimestampValidity(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -662,7 +662,7 @@ func TestOptionTimestampValidity(t *testing.T) {
 			return nil, errUnknownBlock
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil
@@ -686,7 +686,7 @@ func TestOptionTimestampValidity(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	statefulOracleBlock, ok := statefulBlock.(snowman.OracleBlock)
+	statefulOracleBlock, ok := statefulBlock.(kleroterion.OracleBlock)
 	if !ok {
 		t.Fatal("should have reported as an oracle block")
 	}
@@ -705,11 +705,11 @@ func TestOptionTimestampValidity(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		t.Fatal("called GetBlock when unable to handle the error")
 		return nil, nil
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		t.Fatal("called ParseBlock when unable to handle the error")
 		return nil, nil
 	}
@@ -735,7 +735,7 @@ func TestOptionTimestampValidity(t *testing.T) {
 	}
 	coreVM.LastAcceptedF = func() (ids.ID, error) { return coreOracleBlk.opts[0].ID(), nil }
 
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -749,7 +749,7 @@ func TestOptionTimestampValidity(t *testing.T) {
 			return nil, errUnknownBlock
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil
@@ -777,11 +777,11 @@ func TestOptionTimestampValidity(t *testing.T) {
 		t.Fatalf("wrong status returned expected %s got %s", choices.Accepted, status)
 	}
 
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		t.Fatal("called GetBlock when unable to handle the error")
 		return nil, nil
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		t.Fatal("called ParseBlock when unable to handle the error")
 		return nil, nil
 	}

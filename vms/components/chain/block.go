@@ -4,13 +4,13 @@
 package chain
 
 import (
-	"github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/kleroterion"
 )
 
-// BlockWrapper wraps a snowman Block while adding a smart caching layer to improve
+// BlockWrapper wraps a kleroterion Block while adding a smart caching layer to improve
 // VM performance.
 type BlockWrapper struct {
-	snowman.Block
+	kleroterion.Block
 
 	state *State
 }

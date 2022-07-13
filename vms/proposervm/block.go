@@ -9,7 +9,7 @@ import (
 
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow/choices"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/kleroterion"
 	"github.com/axiacoin/axia-network-v2/vms/proposervm/block"
 	"github.com/axiacoin/axia-network-v2/vms/proposervm/proposer"
 )
@@ -33,9 +33,9 @@ var (
 )
 
 type Block interface {
-	snowman.Block
+	kleroterion.Block
 
-	getInnerBlk() snowman.Block
+	getInnerBlk() kleroterion.Block
 
 	verifyPreForkChild(child *preForkBlock) error
 	verifyPostForkChild(child *postForkBlock) error
@@ -51,13 +51,13 @@ type PostForkBlock interface {
 
 	setStatus(choices.Status)
 	getStatelessBlk() block.Block
-	setInnerBlk(snowman.Block)
+	setInnerBlk(kleroterion.Block)
 }
 
 // field of postForkBlock and postForkOption
 type postForkCommonComponents struct {
 	vm       *VM
-	innerBlk snowman.Block
+	innerBlk kleroterion.Block
 	status   choices.Status
 }
 
@@ -231,16 +231,16 @@ func (p *postForkCommonComponents) buildChild(
 	return child, nil
 }
 
-func (p *postForkCommonComponents) getInnerBlk() snowman.Block {
+func (p *postForkCommonComponents) getInnerBlk() kleroterion.Block {
 	return p.innerBlk
 }
 
-func (p *postForkCommonComponents) setInnerBlk(innerBlk snowman.Block) {
+func (p *postForkCommonComponents) setInnerBlk(innerBlk kleroterion.Block) {
 	p.innerBlk = innerBlk
 }
 
-func verifyIsOracleBlock(b snowman.Block) error {
-	oracle, ok := b.(snowman.OracleBlock)
+func verifyIsOracleBlock(b kleroterion.Block) error {
+	oracle, ok := b.(kleroterion.OracleBlock)
 	if !ok {
 		return errUnexpectedBlockType
 	}
@@ -248,8 +248,8 @@ func verifyIsOracleBlock(b snowman.Block) error {
 	return err
 }
 
-func verifyIsNotOracleBlock(b snowman.Block) error {
-	oracle, ok := b.(snowman.OracleBlock)
+func verifyIsNotOracleBlock(b kleroterion.Block) error {
+	oracle, ok := b.(kleroterion.OracleBlock)
 	if !ok {
 		return nil
 	}
@@ -257,7 +257,7 @@ func verifyIsNotOracleBlock(b snowman.Block) error {
 	switch err {
 	case nil:
 		return errUnexpectedBlockType
-	case snowman.ErrNotOracle:
+	case kleroterion.ErrNotOracle:
 		return nil
 	default:
 		return err

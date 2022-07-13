@@ -14,9 +14,9 @@ import (
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow"
 	"github.com/axiacoin/axia-network-v2/snow/choices"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/kleroterion"
 	"github.com/axiacoin/axia-network-v2/snow/engine/common"
-	"github.com/axiacoin/axia-network-v2/snow/engine/snowman/block"
+	"github.com/axiacoin/axia-network-v2/snow/engine/kleroterion/block"
 	"github.com/axiacoin/axia-network-v2/utils"
 	"github.com/axiacoin/axia-network-v2/utils/math"
 	"github.com/axiacoin/axia-network-v2/utils/timer/mockable"
@@ -249,7 +249,7 @@ func (vm *VM) SetState(state snow.State) error {
 	return vm.ChainVM.SetState(state)
 }
 
-func (vm *VM) BuildBlock() (snowman.Block, error) {
+func (vm *VM) BuildBlock() (kleroterion.Block, error) {
 	preferredBlock, err := vm.getBlock(vm.preferred)
 	if err != nil {
 		return nil, err
@@ -258,14 +258,14 @@ func (vm *VM) BuildBlock() (snowman.Block, error) {
 	return preferredBlock.buildChild()
 }
 
-func (vm *VM) ParseBlock(b []byte) (snowman.Block, error) {
+func (vm *VM) ParseBlock(b []byte) (kleroterion.Block, error) {
 	if blk, err := vm.parsePostForkBlock(b); err == nil {
 		return blk, nil
 	}
 	return vm.parsePreForkBlock(b)
 }
 
-func (vm *VM) GetBlock(id ids.ID) (snowman.Block, error) {
+func (vm *VM) GetBlock(id ids.ID) (kleroterion.Block, error) {
 	return vm.getBlock(id)
 }
 

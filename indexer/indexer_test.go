@@ -18,7 +18,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/snow"
 	"github.com/axiacoin/axia-network-v2/snow/choices"
 	"github.com/axiacoin/axia-network-v2/snow/consensus/axia"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/kleroterion"
 	"github.com/axiacoin/axia-network-v2/snow/consensus/snowstorm"
 	"github.com/axiacoin/axia-network-v2/snow/engine/axia/mocks"
 	"github.com/axiacoin/axia-network-v2/snow/engine/common"
@@ -27,8 +27,8 @@ import (
 	"github.com/axiacoin/axia-network-v2/utils/logging"
 
 	avvtxmocks "github.com/axiacoin/axia-network-v2/snow/engine/axia/vertex/mocks"
-	smblockmocks "github.com/axiacoin/axia-network-v2/snow/engine/snowman/block/mocks"
-	smengmocks "github.com/axiacoin/axia-network-v2/snow/engine/snowman/mocks"
+	smblockmocks "github.com/axiacoin/axia-network-v2/snow/engine/kleroterion/block/mocks"
+	smengmocks "github.com/axiacoin/axia-network-v2/snow/engine/kleroterion/mocks"
 )
 
 var _ server.PathAdder = &apiServerMock{}
@@ -189,7 +189,7 @@ func TestIndexer(t *testing.T) {
 	}
 	// Mocked VM knows about this block now
 	chainVM.On("GetBlock", blkID).Return(
-		&snowman.TestBlock{
+		&kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				StatusV: choices.Accepted,
 				IDV:     blkID,

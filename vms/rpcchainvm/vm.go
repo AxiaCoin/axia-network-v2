@@ -10,7 +10,7 @@ import (
 
 	"github.com/hashicorp/go-plugin"
 
-	"github.com/axiacoin/axia-network-v2/snow/engine/snowman/block"
+	"github.com/axiacoin/axia-network-v2/snow/engine/kleroterion/block"
 	"github.com/axiacoin/axia-network-v2/vms/rpcchainvm/grpcutils"
 
 	vmpb "github.com/axiacoin/axia-network-v2/proto/pb/vm"

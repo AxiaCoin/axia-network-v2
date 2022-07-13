@@ -11,7 +11,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 
 	"github.com/axiacoin/axia-network-v2/ids"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/kleroterion"
 	"github.com/axiacoin/axia-network-v2/snow/engine/common"
 	"github.com/axiacoin/axia-network-v2/utils/timer"
 	"github.com/axiacoin/axia-network-v2/utils/timer/mockable"
@@ -140,7 +140,7 @@ func (m *blockBuilder) AddVerifiedTx(tx *Tx) error {
 }
 
 // BuildBlock builds a block to be added to consensus
-func (m *blockBuilder) BuildBlock() (snowman.Block, error) {
+func (m *blockBuilder) BuildBlock() (kleroterion.Block, error) {
 	m.dropIncoming = true
 	defer func() {
 		m.dropIncoming = false

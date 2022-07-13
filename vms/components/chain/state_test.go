@@ -12,7 +12,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/database"
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow/choices"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/kleroterion"
 	"github.com/axiacoin/axia-network-v2/utils/hashing"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/assert"
@@ -21,7 +21,7 @@ import (
 var _ Block = &TestBlock{}
 
 type TestBlock struct {
-	*snowman.TestBlock
+	*kleroterion.TestBlock
 }
 
 // SetStatus sets the status of the Block.
@@ -33,7 +33,7 @@ func NewTestBlock(i uint64, parentID ids.ID) *TestBlock {
 	b := []byte{byte(i)}
 	id := hashing.ComputeHash256Array(b)
 	return &TestBlock{
-		TestBlock: &snowman.TestBlock{
+		TestBlock: &kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     id,
 				StatusV: choices.Unknown,
@@ -58,7 +58,7 @@ func NewTestBlocks(numBlocks uint64) []*TestBlock {
 	return blks
 }
 
-func createInternalBlockFuncs(t *testing.T, blks []*TestBlock) (func(id ids.ID) (snowman.Block, error), func(b []byte) (snowman.Block, error), func(height uint64) (ids.ID, error)) {
+func createInternalBlockFuncs(t *testing.T, blks []*TestBlock) (func(id ids.ID) (kleroterion.Block, error), func(b []byte) (kleroterion.Block, error), func(height uint64) (ids.ID, error)) {
 	blkMap := make(map[ids.ID]*TestBlock)
 	blkByteMap := make(map[byte]*TestBlock)
 	for _, blk := range blks {
@@ -70,7 +70,7 @@ func createInternalBlockFuncs(t *testing.T, blks []*TestBlock) (func(id ids.ID) 
 		blkByteMap[blkBytes[0]] = blk
 	}
 
-	getBlock := func(id ids.ID) (snowman.Block, error) {
+	getBlock := func(id ids.ID) (kleroterion.Block, error) {
 		blk, ok := blkMap[id]
 		if !ok || !blk.Status().Fetched() {
 			return nil, database.ErrNotFound
@@ -79,7 +79,7 @@ func createInternalBlockFuncs(t *testing.T, blks []*TestBlock) (func(id ids.ID) 
 		return blk, nil
 	}
 
-	parseBlk := func(b []byte) (snowman.Block, error) {
+	parseBlk := func(b []byte) (kleroterion.Block, error) {
 		if len(b) != 1 {
 			return nil, fmt.Errorf("expected block bytes to be length 1, but found %d", len(b))
 		}
@@ -112,13 +112,13 @@ func createInternalBlockFuncs(t *testing.T, blks []*TestBlock) (func(id ids.ID) 
 	return getBlock, parseBlk, getAcceptedBlockIDAtHeight
 }
 
-func cantBuildBlock() (snowman.Block, error) {
+func cantBuildBlock() (kleroterion.Block, error) {
 	return nil, errors.New("can't build new block")
 }
 
 // checkProcessingBlock checks that [blk] is of the correct type and is
 // correctly uniquified when calling GetBlock and ParseBlock.
-func checkProcessingBlock(t *testing.T, s *State, blk snowman.Block) {
+func checkProcessingBlock(t *testing.T, s *State, blk kleroterion.Block) {
 	if _, ok := blk.(*BlockWrapper); !ok {
 		t.Fatalf("Expected block to be of type (*BlockWrapper)")
 	}
@@ -151,7 +151,7 @@ func checkProcessingBlock(t *testing.T, s *State, blk snowman.Block) {
 
 // checkDecidedBlock asserts that [blk] is returned with the correct status by ParseBlock
 // and GetBlock.
-func checkDecidedBlock(t *testing.T, s *State, blk snowman.Block, expectedStatus choices.Status, cached bool) {
+func checkDecidedBlock(t *testing.T, s *State, blk kleroterion.Block, expectedStatus choices.Status, cached bool) {
 	if _, ok := blk.(*BlockWrapper); !ok {
 		t.Fatalf("Expected block to be of type (*BlockWrapper)")
 	}
@@ -195,11 +195,11 @@ func checkDecidedBlock(t *testing.T, s *State, blk snowman.Block, expectedStatus
 	}
 }
 
-func checkAcceptedBlock(t *testing.T, s *State, blk snowman.Block, cached bool) {
+func checkAcceptedBlock(t *testing.T, s *State, blk kleroterion.Block, cached bool) {
 	checkDecidedBlock(t, s, blk, choices.Accepted, cached)
 }
 
-func checkRejectedBlock(t *testing.T, s *State, blk snowman.Block, cached bool) {
+func checkRejectedBlock(t *testing.T, s *State, blk kleroterion.Block, cached bool) {
 	checkDecidedBlock(t, s, blk, choices.Rejected, cached)
 }
 
@@ -214,7 +214,7 @@ func TestState(t *testing.T) {
 	blk3Bytes := []byte{byte(3)}
 	blk3ID := hashing.ComputeHash256Array(blk3Bytes)
 	blk3 := &TestBlock{
-		TestBlock: &snowman.TestBlock{
+		TestBlock: &kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     blk3ID,
 				StatusV: choices.Processing,
@@ -347,7 +347,7 @@ func TestBuildBlock(t *testing.T) {
 	blk1 := testBlks[1]
 
 	getBlock, parseBlock, getCanonicalBlockID := createInternalBlockFuncs(t, testBlks)
-	buildBlock := func() (snowman.Block, error) {
+	buildBlock := func() (kleroterion.Block, error) {
 		// Once the block is built, mark it as processing
 		blk1.SetStatus(choices.Processing)
 		return blk1, nil
@@ -524,7 +524,7 @@ func TestGetBlockInternal(t *testing.T) {
 
 	genesisBlockInternal := chainState.LastAcceptedBlockInternal()
 	if _, ok := genesisBlockInternal.(*TestBlock); !ok {
-		t.Fatalf("Expected LastAcceptedBlockInternal to return a block of type *snowman.TestBlock, but found %T", genesisBlockInternal)
+		t.Fatalf("Expected LastAcceptedBlockInternal to return a block of type *kleroterion.TestBlock, but found %T", genesisBlockInternal)
 	}
 	if genesisBlockInternal.ID() != genesisBlock.ID() {
 		t.Fatalf("Expected LastAcceptedBlockInternal to be blk %s, but found %s", genesisBlock.ID(), genesisBlockInternal.ID())
@@ -536,7 +536,7 @@ func TestGetBlockInternal(t *testing.T) {
 	}
 
 	if _, ok := blk.(*TestBlock); !ok {
-		t.Fatalf("Expected retrieved block to return a block of type *snowman.TestBlock, but found %T", blk)
+		t.Fatalf("Expected retrieved block to return a block of type *kleroterion.TestBlock, but found %T", blk)
 	}
 	if blk.ID() != genesisBlock.ID() {
 		t.Fatalf("Expected GetBlock to be blk %s, but found %s", genesisBlock.ID(), blk.ID())
@@ -550,7 +550,7 @@ func TestGetBlockError(t *testing.T) {
 	blk1 := testBlks[1]
 
 	getBlock, parseBlock, getCanonicalBlockID := createInternalBlockFuncs(t, testBlks)
-	wrappedGetBlock := func(id ids.ID) (snowman.Block, error) {
+	wrappedGetBlock := func(id ids.ID) (kleroterion.Block, error) {
 		blk, err := getBlock(id)
 		if err != nil {
 			return nil, fmt.Errorf("wrapping error to prevent caching miss: %w", err)
@@ -673,7 +673,7 @@ func TestStateBytesToIDCache(t *testing.T) {
 	blk2 := testBlks[2]
 
 	getBlock, parseBlock, getCanonicalBlockID := createInternalBlockFuncs(t, testBlks)
-	buildBlock := func() (snowman.Block, error) {
+	buildBlock := func() (kleroterion.Block, error) {
 		t.Fatal("shouldn't have been called")
 		return nil, errors.New("")
 	}
@@ -726,7 +726,7 @@ func TestSetLastAcceptedBlock(t *testing.T) {
 	postSetBlk1Bytes := []byte{byte(200)}
 	postSetBlk2Bytes := []byte{byte(201)}
 	postSetBlk1 := &TestBlock{
-		TestBlock: &snowman.TestBlock{
+		TestBlock: &kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     hashing.ComputeHash256Array(postSetBlk1Bytes),
 				StatusV: choices.Accepted,
@@ -737,7 +737,7 @@ func TestSetLastAcceptedBlock(t *testing.T) {
 		},
 	}
 	postSetBlk2 := &TestBlock{
-		TestBlock: &snowman.TestBlock{
+		TestBlock: &kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     hashing.ComputeHash256Array(postSetBlk2Bytes),
 				StatusV: choices.Processing,
@@ -814,7 +814,7 @@ func TestSetLastAcceptedBlockWithProcessingBlocksErrors(t *testing.T) {
 	resetBlk := testBlks[4]
 
 	getBlock, parseBlock, getCanonicalBlockID := createInternalBlockFuncs(t, testBlks)
-	buildBlock := func() (snowman.Block, error) {
+	buildBlock := func() (kleroterion.Block, error) {
 		// Once the block is built, mark it as processing
 		blk1.SetStatus(choices.Processing)
 		return blk1, nil

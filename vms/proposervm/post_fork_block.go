@@ -6,7 +6,7 @@ package proposervm
 import (
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow/choices"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/kleroterion"
 	"github.com/axiacoin/axia-network-v2/vms/proposervm/block"
 )
 
@@ -69,21 +69,21 @@ func (b *postForkBlock) Verify() error {
 }
 
 // Return the two options for the block that follows [b]
-func (b *postForkBlock) Options() ([2]snowman.Block, error) {
-	innerOracleBlk, ok := b.innerBlk.(snowman.OracleBlock)
+func (b *postForkBlock) Options() ([2]kleroterion.Block, error) {
+	innerOracleBlk, ok := b.innerBlk.(kleroterion.OracleBlock)
 	if !ok {
 		// [b]'s innerBlk isn't an oracle block
-		return [2]snowman.Block{}, snowman.ErrNotOracle
+		return [2]kleroterion.Block{}, kleroterion.ErrNotOracle
 	}
 
 	// The inner block's child options
 	innerOptions, err := innerOracleBlk.Options()
 	if err != nil {
-		return [2]snowman.Block{}, err
+		return [2]kleroterion.Block{}, err
 	}
 
 	parentID := b.ID()
-	outerOptions := [2]snowman.Block{}
+	outerOptions := [2]kleroterion.Block{}
 	for i, innerOption := range innerOptions {
 		// Wrap the inner block's child option
 		statelessOuterOption, err := block.BuildOption(
@@ -91,7 +91,7 @@ func (b *postForkBlock) Options() ([2]snowman.Block, error) {
 			innerOption.Bytes(),
 		)
 		if err != nil {
-			return [2]snowman.Block{}, err
+			return [2]kleroterion.Block{}, err
 		}
 
 		outerOptions[i] = &postForkOption{

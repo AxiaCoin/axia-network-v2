@@ -11,7 +11,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/database"
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow/choices"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/kleroterion"
 	"github.com/axiacoin/axia-network-v2/utils/timer/mockable"
 	"github.com/axiacoin/axia-network-v2/vms/proposervm/block"
 	"github.com/axiacoin/axia-network-v2/vms/proposervm/proposer"
@@ -20,12 +20,12 @@ import (
 func TestOracle_PreForkBlkImplementsInterface(t *testing.T) {
 	// setup
 	proBlk := preForkBlock{
-		Block: &snowman.TestBlock{},
+		Block: &kleroterion.TestBlock{},
 	}
 
 	// test
 	_, err := proBlk.Options()
-	if err != snowman.ErrNotOracle {
+	if err != kleroterion.ErrNotOracle {
 		t.Fatal("Proposer block should signal that it wraps a block not implementing Options interface with ErrNotOracleBlock error")
 	}
 
@@ -46,7 +46,7 @@ func TestOracle_PreForkBlkCanBuiltOnPreForkOption(t *testing.T) {
 
 	// create pre fork oracle block ...
 	oracleCoreBlk := &TestOptionsBlock{
-		TestBlock: snowman.TestBlock{
+		TestBlock: kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     ids.Empty.Prefix(1111),
 				StatusV: choices.Processing,
@@ -55,8 +55,8 @@ func TestOracle_PreForkBlkCanBuiltOnPreForkOption(t *testing.T) {
 			ParentV: coreGenBlk.ID(),
 		},
 	}
-	oracleCoreBlk.opts = [2]snowman.Block{
-		&snowman.TestBlock{
+	oracleCoreBlk.opts = [2]kleroterion.Block{
+		&kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     ids.Empty.Prefix(2222),
 				StatusV: choices.Processing,
@@ -64,7 +64,7 @@ func TestOracle_PreForkBlkCanBuiltOnPreForkOption(t *testing.T) {
 			BytesV:  []byte{2},
 			ParentV: oracleCoreBlk.ID(),
 		},
-		&snowman.TestBlock{
+		&kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     ids.Empty.Prefix(3333),
 				StatusV: choices.Processing,
@@ -74,8 +74,8 @@ func TestOracle_PreForkBlkCanBuiltOnPreForkOption(t *testing.T) {
 		},
 	}
 
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return oracleCoreBlk, nil }
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return oracleCoreBlk, nil }
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -114,7 +114,7 @@ func TestOracle_PreForkBlkCanBuiltOnPreForkOption(t *testing.T) {
 	}
 
 	lastCoreBlk := &TestOptionsBlock{
-		TestBlock: snowman.TestBlock{
+		TestBlock: kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     ids.Empty.Prefix(4444),
 				StatusV: choices.Processing,
@@ -123,7 +123,7 @@ func TestOracle_PreForkBlkCanBuiltOnPreForkOption(t *testing.T) {
 			ParentV: oracleCoreBlk.opts[0].ID(),
 		},
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return lastCoreBlk, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return lastCoreBlk, nil }
 
 	preForkChild, err := proVM.BuildBlock()
 	if err != nil {
@@ -140,7 +140,7 @@ func TestOracle_PostForkBlkCanBuiltOnPreForkOption(t *testing.T) {
 
 	// create pre fork oracle block pre activation time...
 	oracleCoreBlk := &TestOptionsBlock{
-		TestBlock: snowman.TestBlock{
+		TestBlock: kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     ids.Empty.Prefix(1111),
 				StatusV: choices.Processing,
@@ -152,8 +152,8 @@ func TestOracle_PostForkBlkCanBuiltOnPreForkOption(t *testing.T) {
 	}
 
 	// ... whose options are post activation time
-	oracleCoreBlk.opts = [2]snowman.Block{
-		&snowman.TestBlock{
+	oracleCoreBlk.opts = [2]kleroterion.Block{
+		&kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     ids.Empty.Prefix(2222),
 				StatusV: choices.Processing,
@@ -162,7 +162,7 @@ func TestOracle_PostForkBlkCanBuiltOnPreForkOption(t *testing.T) {
 			ParentV:    oracleCoreBlk.ID(),
 			TimestampV: activationTime.Add(time.Second),
 		},
-		&snowman.TestBlock{
+		&kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     ids.Empty.Prefix(3333),
 				StatusV: choices.Processing,
@@ -173,8 +173,8 @@ func TestOracle_PostForkBlkCanBuiltOnPreForkOption(t *testing.T) {
 		},
 	}
 
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return oracleCoreBlk, nil }
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return oracleCoreBlk, nil }
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -213,7 +213,7 @@ func TestOracle_PostForkBlkCanBuiltOnPreForkOption(t *testing.T) {
 	}
 
 	lastCoreBlk := &TestOptionsBlock{
-		TestBlock: snowman.TestBlock{
+		TestBlock: kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     ids.Empty.Prefix(4444),
 				StatusV: choices.Processing,
@@ -222,7 +222,7 @@ func TestOracle_PostForkBlkCanBuiltOnPreForkOption(t *testing.T) {
 			ParentV: oracleCoreBlk.opts[0].ID(),
 		},
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return lastCoreBlk, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return lastCoreBlk, nil }
 
 	postForkChild, err := proVM.BuildBlock()
 	if err != nil {
@@ -242,7 +242,7 @@ func TestBlockVerify_PreFork_ParentChecks(t *testing.T) {
 	}
 
 	// create parent block ...
-	prntCoreBlk := &snowman.TestBlock{
+	prntCoreBlk := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(1111),
 			StatusV: choices.Processing,
@@ -251,8 +251,8 @@ func TestBlockVerify_PreFork_ParentChecks(t *testing.T) {
 		ParentV:    coreGenBlk.ID(),
 		TimestampV: coreGenBlk.Timestamp(),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return prntCoreBlk, nil }
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return prntCoreBlk, nil }
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -262,7 +262,7 @@ func TestBlockVerify_PreFork_ParentChecks(t *testing.T) {
 			return nil, database.ErrNotFound
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil
@@ -280,7 +280,7 @@ func TestBlockVerify_PreFork_ParentChecks(t *testing.T) {
 	}
 
 	// .. create child block ...
-	childCoreBlk := &snowman.TestBlock{
+	childCoreBlk := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.GenerateTestID(),
 			StatusV: choices.Processing,
@@ -316,7 +316,7 @@ func TestBlockVerify_BlocksBuiltOnPreForkGenesis(t *testing.T) {
 	preActivationTime := activationTime.Add(-1 * time.Second)
 	proVM.Set(preActivationTime)
 
-	coreBlk := &snowman.TestBlock{
+	coreBlk := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(1111),
 			StatusV: choices.Processing,
@@ -326,7 +326,7 @@ func TestBlockVerify_BlocksBuiltOnPreForkGenesis(t *testing.T) {
 		TimestampV: preActivationTime,
 		VerifyV:    nil,
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk, nil }
 
 	// preFork block verifies if parent is before fork activation time
 	preForkChild, err := proVM.BuildBlock()
@@ -378,7 +378,7 @@ func TestBlockVerify_BlocksBuiltOnPreForkGenesis(t *testing.T) {
 		t.Fatal("could not set preference")
 	}
 
-	secondCoreBlk := &snowman.TestBlock{
+	secondCoreBlk := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV: ids.Empty.Prefix(2222),
 		},
@@ -387,8 +387,8 @@ func TestBlockVerify_BlocksBuiltOnPreForkGenesis(t *testing.T) {
 		TimestampV: postActivationTime,
 		VerifyV:    nil,
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return secondCoreBlk, nil }
-	coreVM.GetBlockF = func(id ids.ID) (snowman.Block, error) {
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return secondCoreBlk, nil }
+	coreVM.GetBlockF = func(id ids.ID) (kleroterion.Block, error) {
 		switch id {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -414,7 +414,7 @@ func TestBlockVerify_BlocksBuiltOnPreForkGenesis(t *testing.T) {
 	if err := proVM.SetPreference(lastPreForkBlk.ID()); err != nil {
 		t.Fatal("could not set preference")
 	}
-	thirdCoreBlk := &snowman.TestBlock{
+	thirdCoreBlk := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV: ids.Empty.Prefix(333),
 		},
@@ -423,8 +423,8 @@ func TestBlockVerify_BlocksBuiltOnPreForkGenesis(t *testing.T) {
 		TimestampV: postActivationTime,
 		VerifyV:    nil,
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return thirdCoreBlk, nil }
-	coreVM.GetBlockF = func(id ids.ID) (snowman.Block, error) {
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return thirdCoreBlk, nil }
+	coreVM.GetBlockF = func(id ids.ID) (kleroterion.Block, error) {
 		switch id {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -456,7 +456,7 @@ func TestBlockVerify_BlocksBuiltOnPostForkGenesis(t *testing.T) {
 	proVM.Set(activationTime)
 
 	// build parent block after fork activation time ...
-	coreBlock := &snowman.TestBlock{
+	coreBlock := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(1111),
 			StatusV: choices.Processing,
@@ -466,7 +466,7 @@ func TestBlockVerify_BlocksBuiltOnPostForkGenesis(t *testing.T) {
 		TimestampV: coreGenBlk.Timestamp(),
 		VerifyV:    nil,
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlock, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlock, nil }
 
 	// postFork block verifies if parent is after fork activation time
 	postForkChild, err := proVM.BuildBlock()
@@ -494,7 +494,7 @@ func TestBlockAccept_PreFork_SetsLastAcceptedBlock(t *testing.T) {
 	// setup
 	coreVM, _, proVM, coreGenBlk, _ := initTestProposerVM(t, mockable.MaxTime, 0)
 
-	coreBlk := &snowman.TestBlock{
+	coreBlk := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(1111),
 			StatusV: choices.Processing,
@@ -502,8 +502,8 @@ func TestBlockAccept_PreFork_SetsLastAcceptedBlock(t *testing.T) {
 		BytesV:  []byte{1},
 		ParentV: coreGenBlk.ID(),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk, nil }
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk, nil }
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -513,7 +513,7 @@ func TestBlockAccept_PreFork_SetsLastAcceptedBlock(t *testing.T) {
 			return nil, database.ErrNotFound
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil
@@ -550,7 +550,7 @@ func TestBlockAccept_PreFork_SetsLastAcceptedBlock(t *testing.T) {
 // ProposerBlock.Reject tests section
 func TestBlockReject_PreForkBlock_InnerBlockIsRejected(t *testing.T) {
 	coreVM, _, proVM, coreGenBlk, _ := initTestProposerVM(t, mockable.MaxTime, 0) // disable ProBlks
-	coreBlk := &snowman.TestBlock{
+	coreBlk := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(111),
 			StatusV: choices.Processing,
@@ -559,7 +559,7 @@ func TestBlockReject_PreForkBlock_InnerBlockIsRejected(t *testing.T) {
 		ParentV: coreGenBlk.ID(),
 		HeightV: coreGenBlk.Height() + 1,
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk, nil }
 
 	sb, err := proVM.BuildBlock()
 	if err != nil {
@@ -594,7 +594,7 @@ func TestBlockVerify_ForkBlockIsOracleBlock(t *testing.T) {
 
 	coreBlkID := ids.GenerateTestID()
 	coreBlk := &TestOptionsBlock{
-		TestBlock: snowman.TestBlock{
+		TestBlock: kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     coreBlkID,
 				StatusV: choices.Processing,
@@ -603,8 +603,8 @@ func TestBlockVerify_ForkBlockIsOracleBlock(t *testing.T) {
 			ParentV:    coreGenBlk.ID(),
 			TimestampV: postActivationTime,
 		},
-		opts: [2]snowman.Block{
-			&snowman.TestBlock{
+		opts: [2]kleroterion.Block{
+			&kleroterion.TestBlock{
 				TestDecidable: choices.TestDecidable{
 					IDV:     ids.GenerateTestID(),
 					StatusV: choices.Processing,
@@ -613,7 +613,7 @@ func TestBlockVerify_ForkBlockIsOracleBlock(t *testing.T) {
 				ParentV:    coreBlkID,
 				TimestampV: postActivationTime,
 			},
-			&snowman.TestBlock{
+			&kleroterion.TestBlock{
 				TestDecidable: choices.TestDecidable{
 					IDV:     ids.GenerateTestID(),
 					StatusV: choices.Processing,
@@ -625,7 +625,7 @@ func TestBlockVerify_ForkBlockIsOracleBlock(t *testing.T) {
 		},
 	}
 
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -639,7 +639,7 @@ func TestBlockVerify_ForkBlockIsOracleBlock(t *testing.T) {
 			return nil, database.ErrNotFound
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil
@@ -663,7 +663,7 @@ func TestBlockVerify_ForkBlockIsOracleBlock(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	oracleBlock, ok := firstBlock.(snowman.OracleBlock)
+	oracleBlock, ok := firstBlock.(kleroterion.OracleBlock)
 	if !ok {
 		t.Fatal("should have returned an oracle block")
 	}
@@ -693,7 +693,7 @@ func TestBlockVerify_ForkBlockIsOracleBlockButChildrenAreSigned(t *testing.T) {
 
 	coreBlkID := ids.GenerateTestID()
 	coreBlk := &TestOptionsBlock{
-		TestBlock: snowman.TestBlock{
+		TestBlock: kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     coreBlkID,
 				StatusV: choices.Processing,
@@ -702,8 +702,8 @@ func TestBlockVerify_ForkBlockIsOracleBlockButChildrenAreSigned(t *testing.T) {
 			ParentV:    coreGenBlk.ID(),
 			TimestampV: postActivationTime,
 		},
-		opts: [2]snowman.Block{
-			&snowman.TestBlock{
+		opts: [2]kleroterion.Block{
+			&kleroterion.TestBlock{
 				TestDecidable: choices.TestDecidable{
 					IDV:     ids.GenerateTestID(),
 					StatusV: choices.Processing,
@@ -712,7 +712,7 @@ func TestBlockVerify_ForkBlockIsOracleBlockButChildrenAreSigned(t *testing.T) {
 				ParentV:    coreBlkID,
 				TimestampV: postActivationTime,
 			},
-			&snowman.TestBlock{
+			&kleroterion.TestBlock{
 				TestDecidable: choices.TestDecidable{
 					IDV:     ids.GenerateTestID(),
 					StatusV: choices.Processing,
@@ -724,7 +724,7 @@ func TestBlockVerify_ForkBlockIsOracleBlockButChildrenAreSigned(t *testing.T) {
 		},
 	}
 
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -738,7 +738,7 @@ func TestBlockVerify_ForkBlockIsOracleBlockButChildrenAreSigned(t *testing.T) {
 			return nil, database.ErrNotFound
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil

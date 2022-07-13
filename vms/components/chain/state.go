@@ -11,7 +11,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/database"
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow/choices"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/kleroterion"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -20,17 +20,17 @@ import (
 type State struct {
 	// getBlock retrieves a block from the VM's storage. If getBlock returns
 	// a nil error, then the returned block must not have the status Unknown
-	getBlock func(ids.ID) (snowman.Block, error)
+	getBlock func(ids.ID) (kleroterion.Block, error)
 	// unmarshals [b] into a block
-	unmarshalBlock func([]byte) (snowman.Block, error)
+	unmarshalBlock func([]byte) (kleroterion.Block, error)
 	// buildBlock attempts to build a block on top of the currently preferred block
 	// buildBlock should always return a block with status Processing since it should never
 	// create an unknown block, and building on top of the preferred block should never yield
 	// a block that has already been decided.
-	buildBlock func() (snowman.Block, error)
+	buildBlock func() (kleroterion.Block, error)
 
 	// getStatus returns the status of the block
-	getStatus func(snowman.Block) (choices.Status, error)
+	getStatus func(kleroterion.Block) (choices.Status, error)
 
 	// verifiedBlocks is a map of blocks that have been verified and are
 	// therefore currently in consensus.
@@ -55,17 +55,17 @@ type Config struct {
 	// Cache configuration:
 	DecidedCacheSize, MissingCacheSize, UnverifiedCacheSize, BytesToIDCacheSize int
 
-	LastAcceptedBlock  snowman.Block
-	GetBlock           func(ids.ID) (snowman.Block, error)
-	UnmarshalBlock     func([]byte) (snowman.Block, error)
-	BuildBlock         func() (snowman.Block, error)
+	LastAcceptedBlock  kleroterion.Block
+	GetBlock           func(ids.ID) (kleroterion.Block, error)
+	UnmarshalBlock     func([]byte) (kleroterion.Block, error)
+	BuildBlock         func() (kleroterion.Block, error)
 	GetBlockIDAtHeight func(uint64) (ids.ID, error)
 }
 
-// Block is an interface wrapping the normal snowman.Block interface to be used in
+// Block is an interface wrapping the normal kleroterion.Block interface to be used in
 // association with passing in a non-nil function to GetBlockIDAtHeight
 type Block interface {
-	snowman.Block
+	kleroterion.Block
 
 	SetStatus(choices.Status)
 }
@@ -74,8 +74,8 @@ type Block interface {
 // passed in from the VM that gets the block ID at a specific height. It is assumed that for any height
 // less than or equal to the last accepted block, getBlockIDAtHeight returns the accepted blockID at
 // the requested height.
-func produceGetStatus(s *State, getBlockIDAtHeight func(uint64) (ids.ID, error)) func(snowman.Block) (choices.Status, error) {
-	return func(blk snowman.Block) (choices.Status, error) {
+func produceGetStatus(s *State, getBlockIDAtHeight func(uint64) (ids.ID, error)) func(kleroterion.Block) (choices.Status, error) {
+	return func(blk kleroterion.Block) (choices.Status, error) {
 		internalBlk, ok := blk.(Block)
 		if !ok {
 			return choices.Unknown, fmt.Errorf("expected block to match chain Block interface but found block of type %T", blk)
@@ -107,7 +107,7 @@ func (s *State) initialize(config *Config) {
 	s.buildBlock = config.BuildBlock
 	s.unmarshalBlock = config.UnmarshalBlock
 	if config.GetBlockIDAtHeight == nil {
-		s.getStatus = func(blk snowman.Block) (choices.Status, error) { return blk.Status(), nil }
+		s.getStatus = func(blk kleroterion.Block) (choices.Status, error) { return blk.Status(), nil }
 	} else {
 		s.getStatus = produceGetStatus(s, config.GetBlockIDAtHeight)
 	}
@@ -182,7 +182,7 @@ func NewMeteredState(
 //
 // This also flushes [lastAcceptedBlock] from missingBlocks and unverifiedBlocks to
 // ensure that their contents stay valid.
-func (s *State) SetLastAcceptedBlock(lastAcceptedBlock snowman.Block) error {
+func (s *State) SetLastAcceptedBlock(lastAcceptedBlock kleroterion.Block) error {
 	if len(s.verifiedBlocks) != 0 {
 		return fmt.Errorf("cannot set chain state last accepted block with non-zero number of verified blocks in processing: %d", len(s.verifiedBlocks))
 	}
@@ -212,8 +212,8 @@ func (s *State) Flush() {
 	s.bytesToIDCache.Flush()
 }
 
-// GetBlock returns the BlockWrapper as snowman.Block corresponding to [blkID]
-func (s *State) GetBlock(blkID ids.ID) (snowman.Block, error) {
+// GetBlock returns the BlockWrapper as kleroterion.Block corresponding to [blkID]
+func (s *State) GetBlock(blkID ids.ID) (kleroterion.Block, error) {
 	if blk, ok := s.getCachedBlock(blkID); ok {
 		return blk, nil
 	}
@@ -239,24 +239,24 @@ func (s *State) GetBlock(blkID ids.ID) (snowman.Block, error) {
 
 // getCachedBlock checks the caches for [blkID] by priority. Returning
 // true if [blkID] is found in one of the caches.
-func (s *State) getCachedBlock(blkID ids.ID) (snowman.Block, bool) {
+func (s *State) getCachedBlock(blkID ids.ID) (kleroterion.Block, bool) {
 	if blk, ok := s.verifiedBlocks[blkID]; ok {
 		return blk, true
 	}
 
 	if blk, ok := s.decidedBlocks.Get(blkID); ok {
-		return blk.(snowman.Block), true
+		return blk.(kleroterion.Block), true
 	}
 
 	if blk, ok := s.unverifiedBlocks.Get(blkID); ok {
-		return blk.(snowman.Block), true
+		return blk.(kleroterion.Block), true
 	}
 
 	return nil, false
 }
 
 // GetBlockInternal returns the internal representation of [blkID]
-func (s *State) GetBlockInternal(blkID ids.ID) (snowman.Block, error) {
+func (s *State) GetBlockInternal(blkID ids.ID) (kleroterion.Block, error) {
 	wrappedBlk, err := s.GetBlock(blkID)
 	if err != nil {
 		return nil, err
@@ -267,7 +267,7 @@ func (s *State) GetBlockInternal(blkID ids.ID) (snowman.Block, error) {
 
 // ParseBlock attempts to parse [b] into an internal Block and adds it to the appropriate
 // caching layer if successful.
-func (s *State) ParseBlock(b []byte) (snowman.Block, error) {
+func (s *State) ParseBlock(b []byte) (kleroterion.Block, error) {
 	// See if we've cached this block's ID by its byte repr.
 	blkIDIntf, blkIDCached := s.bytesToIDCache.Get(string(b))
 	if blkIDCached {
@@ -306,7 +306,7 @@ func (s *State) ParseBlock(b []byte) (snowman.Block, error) {
 
 // BuildBlock attempts to build a new internal Block, wraps it, and adds it
 // to the appropriate caching layer if successful.
-func (s *State) BuildBlock() (snowman.Block, error) {
+func (s *State) BuildBlock() (kleroterion.Block, error) {
 	blk, err := s.buildBlock()
 	if err != nil {
 		return nil, err
@@ -331,7 +331,7 @@ func (s *State) BuildBlock() (snowman.Block, error) {
 // assumes [blk] is a known, non-wrapped block that is not currently
 // in consensus. [blk] could be either decided or a block that has not yet
 // been verified and added to consensus.
-func (s *State) addBlockOutsideConsensus(blk snowman.Block) (snowman.Block, error) {
+func (s *State) addBlockOutsideConsensus(blk kleroterion.Block) (kleroterion.Block, error) {
 	wrappedBlk := &BlockWrapper{
 		Block: blk,
 		state: s,
@@ -363,7 +363,7 @@ func (s *State) LastAcceptedBlock() *BlockWrapper {
 	return s.lastAcceptedBlock
 }
 
-// LastAcceptedBlockInternal returns the internal snowman.Block that was last accepted
-func (s *State) LastAcceptedBlockInternal() snowman.Block {
+// LastAcceptedBlockInternal returns the internal kleroterion.Block that was last accepted
+func (s *State) LastAcceptedBlockInternal() kleroterion.Block {
 	return s.LastAcceptedBlock().Block
 }

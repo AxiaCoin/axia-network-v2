@@ -8,13 +8,13 @@ import (
 
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow/choices"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/kleroterion"
 	"github.com/stretchr/testify/assert"
 )
 
 var (
 	GenesisID = ids.GenerateTestID()
-	Genesis   = &snowman.TestBlock{TestDecidable: choices.TestDecidable{
+	Genesis   = &kleroterion.TestBlock{TestDecidable: choices.TestDecidable{
 		IDV:     GenesisID,
 		StatusV: choices.Accepted,
 	}}
@@ -23,7 +23,7 @@ var (
 func TestAcceptSingleBlock(t *testing.T) {
 	assert := assert.New(t)
 
-	block := &snowman.TestBlock{
+	block := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.GenerateTestID(),
 			StatusV: choices.Processing,
@@ -49,7 +49,7 @@ func TestAcceptSingleBlock(t *testing.T) {
 func TestAcceptBlockConflict(t *testing.T) {
 	assert := assert.New(t)
 
-	blockToAccept := &snowman.TestBlock{
+	blockToAccept := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.GenerateTestID(),
 			StatusV: choices.Processing,
@@ -57,7 +57,7 @@ func TestAcceptBlockConflict(t *testing.T) {
 		ParentV: Genesis.ID(),
 	}
 
-	blockToReject := &snowman.TestBlock{
+	blockToReject := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.GenerateTestID(),
 			StatusV: choices.Processing,
@@ -85,7 +85,7 @@ func TestAcceptBlockConflict(t *testing.T) {
 func TestAcceptChainConflict(t *testing.T) {
 	assert := assert.New(t)
 
-	blockToAccept := &snowman.TestBlock{
+	blockToAccept := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.GenerateTestID(),
 			StatusV: choices.Processing,
@@ -93,7 +93,7 @@ func TestAcceptChainConflict(t *testing.T) {
 		ParentV: Genesis.ID(),
 	}
 
-	blockToReject := &snowman.TestBlock{
+	blockToReject := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.GenerateTestID(),
 			StatusV: choices.Processing,
@@ -101,7 +101,7 @@ func TestAcceptChainConflict(t *testing.T) {
 		ParentV: Genesis.ID(),
 	}
 
-	blockToRejectChild := &snowman.TestBlock{
+	blockToRejectChild := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.GenerateTestID(),
 			StatusV: choices.Processing,

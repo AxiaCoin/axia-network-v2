@@ -24,7 +24,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow/engine/axia"
 	"github.com/axiacoin/axia-network-v2/snow/engine/common"
-	"github.com/axiacoin/axia-network-v2/snow/engine/snowman"
+	"github.com/axiacoin/axia-network-v2/snow/engine/kleroterion"
 	"github.com/axiacoin/axia-network-v2/snow/triggers"
 	"github.com/axiacoin/axia-network-v2/utils/logging"
 	"github.com/gorilla/rpc/v2"
@@ -223,7 +223,7 @@ func (i *indexer) RegisterChain(name string, engine common.Engine) {
 	}
 
 	switch engine.(type) {
-	case snowman.Engine:
+	case kleroterion.Engine:
 		index, err := i.registerChainHelper(chainID, blockPrefix, name, "block", i.consensusDispatcher)
 		if err != nil {
 			i.log.Fatal("couldn't create block index for %s: %s", name, err)

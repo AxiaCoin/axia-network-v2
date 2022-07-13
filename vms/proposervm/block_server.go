@@ -5,7 +5,7 @@ package proposervm
 
 import (
 	"github.com/axiacoin/axia-network-v2/ids"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/kleroterion"
 	"github.com/axiacoin/axia-network-v2/vms/proposervm/indexer"
 )
 
@@ -13,7 +13,7 @@ var _ indexer.BlockServer = &VM{}
 
 // Note: this is a contention heavy call that should be avoided
 // for frequent/repeated indexer ops
-func (vm *VM) GetFullPostForkBlock(blkID ids.ID) (snowman.Block, error) {
+func (vm *VM) GetFullPostForkBlock(blkID ids.ID) (kleroterion.Block, error) {
 	vm.ctx.Lock.Lock()
 	defer vm.ctx.Lock.Unlock()
 

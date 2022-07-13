@@ -10,7 +10,7 @@ import (
 
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow/choices"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/kleroterion"
 	"github.com/axiacoin/axia-network-v2/utils/hashing"
 )
 
@@ -79,7 +79,7 @@ var (
 
 // Block is the common interface that all staking blocks must have
 type Block interface {
-	snowman.Block
+	kleroterion.Block
 
 	// initialize this block's non-serialized fields.
 	//

@@ -17,9 +17,9 @@ import (
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow"
 	"github.com/axiacoin/axia-network-v2/snow/choices"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/kleroterion"
 	"github.com/axiacoin/axia-network-v2/snow/engine/common"
-	"github.com/axiacoin/axia-network-v2/snow/engine/snowman/block"
+	"github.com/axiacoin/axia-network-v2/snow/engine/kleroterion/block"
 	"github.com/axiacoin/axia-network-v2/snow/validators"
 	"github.com/axiacoin/axia-network-v2/staking"
 	"github.com/axiacoin/axia-network-v2/utils/hashing"
@@ -59,10 +59,10 @@ func initTestProposerVM(
 	*block.TestVM,
 	*validators.TestState,
 	*VM,
-	*snowman.TestBlock,
+	*kleroterion.TestBlock,
 	manager.Manager,
 ) {
-	coreGenBlk := &snowman.TestBlock{
+	coreGenBlk := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.GenerateTestID(),
 			StatusV: choices.Accepted,
@@ -85,7 +85,7 @@ func initTestProposerVM(
 		return nil
 	}
 	coreVM.LastAcceptedF = func() (ids.ID, error) { return coreGenBlk.ID(), nil }
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch {
 		case blkID == coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -93,7 +93,7 @@ func initTestProposerVM(
 			return nil, errUnknownBlock
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil
@@ -153,7 +153,7 @@ func TestBuildBlockTimestampAreRoundedToSeconds(t *testing.T) {
 	skewedTimestamp := time.Now().Truncate(time.Second).Add(time.Millisecond)
 	proVM.Set(skewedTimestamp)
 
-	coreBlk := &snowman.TestBlock{
+	coreBlk := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(111),
 			StatusV: choices.Processing,
@@ -163,7 +163,7 @@ func TestBuildBlockTimestampAreRoundedToSeconds(t *testing.T) {
 		HeightV:    coreGenBlk.Height() + 1,
 		TimestampV: coreGenBlk.Timestamp().Add(proposer.MaxDelay),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk, nil }
 
 	// test
 	builtBlk, err := proVM.BuildBlock()
@@ -180,7 +180,7 @@ func TestBuildBlockIsIdempotent(t *testing.T) {
 	// given the same core block, BuildBlock returns the same proposer block
 	coreVM, _, proVM, coreGenBlk, _ := initTestProposerVM(t, time.Time{}, 0) // enable ProBlks
 
-	coreBlk := &snowman.TestBlock{
+	coreBlk := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(111),
 			StatusV: choices.Processing,
@@ -190,7 +190,7 @@ func TestBuildBlockIsIdempotent(t *testing.T) {
 		HeightV:    coreGenBlk.Height() + 1,
 		TimestampV: coreGenBlk.Timestamp().Add(proposer.MaxDelay),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk, nil }
 
 	// test
 	builtBlk1, err := proVM.BuildBlock()
@@ -212,7 +212,7 @@ func TestFirstProposerBlockIsBuiltOnTopOfGenesis(t *testing.T) {
 	// setup
 	coreVM, _, proVM, coreGenBlk, _ := initTestProposerVM(t, time.Time{}, 0) // enable ProBlks
 
-	coreBlk := &snowman.TestBlock{
+	coreBlk := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(111),
 			StatusV: choices.Processing,
@@ -222,7 +222,7 @@ func TestFirstProposerBlockIsBuiltOnTopOfGenesis(t *testing.T) {
 		HeightV:    coreGenBlk.Height() + 1,
 		TimestampV: coreGenBlk.Timestamp().Add(proposer.MaxDelay),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk, nil }
 
 	// test
 	snowBlock, err := proVM.BuildBlock()
@@ -246,7 +246,7 @@ func TestProposerBlocksAreBuiltOnPreferredProBlock(t *testing.T) {
 	coreVM, _, proVM, coreGenBlk, _ := initTestProposerVM(t, time.Time{}, 0) // enable ProBlks
 
 	// add two proBlks...
-	coreBlk1 := &snowman.TestBlock{
+	coreBlk1 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(111),
 			StatusV: choices.Processing,
@@ -256,13 +256,13 @@ func TestProposerBlocksAreBuiltOnPreferredProBlock(t *testing.T) {
 		HeightV:    coreGenBlk.Height() + 1,
 		TimestampV: coreGenBlk.Timestamp(),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk1, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk1, nil }
 	proBlk1, err := proVM.BuildBlock()
 	if err != nil {
 		t.Fatalf("Could not build proBlk1 due to %s", err)
 	}
 
-	coreBlk2 := &snowman.TestBlock{
+	coreBlk2 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(222),
 			StatusV: choices.Processing,
@@ -272,7 +272,7 @@ func TestProposerBlocksAreBuiltOnPreferredProBlock(t *testing.T) {
 		HeightV:    coreGenBlk.Height() + 1,
 		TimestampV: coreGenBlk.Timestamp(),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk2, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk2, nil }
 	proBlk2, err := proVM.BuildBlock()
 	if err != nil {
 		t.Fatal("Could not build proBlk2")
@@ -286,7 +286,7 @@ func TestProposerBlocksAreBuiltOnPreferredProBlock(t *testing.T) {
 	}
 
 	// ...and set one as preferred
-	var prefcoreBlk *snowman.TestBlock
+	var prefcoreBlk *kleroterion.TestBlock
 	coreVM.SetPreferenceF = func(prefID ids.ID) error {
 		switch prefID {
 		case coreBlk1.ID():
@@ -300,7 +300,7 @@ func TestProposerBlocksAreBuiltOnPreferredProBlock(t *testing.T) {
 			return nil
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreBlk1.Bytes()):
 			return coreBlk1, nil
@@ -317,7 +317,7 @@ func TestProposerBlocksAreBuiltOnPreferredProBlock(t *testing.T) {
 	}
 
 	// build block...
-	coreBlk3 := &snowman.TestBlock{
+	coreBlk3 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(333),
 			StatusV: choices.Processing,
@@ -327,7 +327,7 @@ func TestProposerBlocksAreBuiltOnPreferredProBlock(t *testing.T) {
 		HeightV:    prefcoreBlk.Height() + 1,
 		TimestampV: coreGenBlk.Timestamp(),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk3, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk3, nil }
 
 	proVM.Set(proVM.Time().Add(proposer.MaxDelay))
 	builtBlk, err := proVM.BuildBlock()
@@ -344,7 +344,7 @@ func TestProposerBlocksAreBuiltOnPreferredProBlock(t *testing.T) {
 func TestCoreBlocksMustBeBuiltOnPreferredCoreBlock(t *testing.T) {
 	coreVM, _, proVM, coreGenBlk, _ := initTestProposerVM(t, time.Time{}, 0) // enable ProBlks
 
-	coreBlk1 := &snowman.TestBlock{
+	coreBlk1 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(111),
 			StatusV: choices.Processing,
@@ -354,13 +354,13 @@ func TestCoreBlocksMustBeBuiltOnPreferredCoreBlock(t *testing.T) {
 		HeightV:    coreGenBlk.Height() + 1,
 		TimestampV: coreGenBlk.Timestamp(),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk1, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk1, nil }
 	proBlk1, err := proVM.BuildBlock()
 	if err != nil {
 		t.Fatal("Could not build proBlk1")
 	}
 
-	coreBlk2 := &snowman.TestBlock{
+	coreBlk2 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(222),
 			StatusV: choices.Processing,
@@ -370,7 +370,7 @@ func TestCoreBlocksMustBeBuiltOnPreferredCoreBlock(t *testing.T) {
 		HeightV:    coreGenBlk.Height() + 1,
 		TimestampV: coreGenBlk.Timestamp(),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk2, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk2, nil }
 	proBlk2, err := proVM.BuildBlock()
 	if err != nil {
 		t.Fatal("Could not build proBlk2")
@@ -384,7 +384,7 @@ func TestCoreBlocksMustBeBuiltOnPreferredCoreBlock(t *testing.T) {
 	}
 
 	// ...and set one as preferred
-	var wronglyPreferredcoreBlk *snowman.TestBlock
+	var wronglyPreferredcoreBlk *kleroterion.TestBlock
 	coreVM.SetPreferenceF = func(prefID ids.ID) error {
 		switch prefID {
 		case coreBlk1.ID():
@@ -398,7 +398,7 @@ func TestCoreBlocksMustBeBuiltOnPreferredCoreBlock(t *testing.T) {
 			return nil
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreBlk1.Bytes()):
 			return coreBlk1, nil
@@ -415,7 +415,7 @@ func TestCoreBlocksMustBeBuiltOnPreferredCoreBlock(t *testing.T) {
 	}
 
 	// build block...
-	coreBlk3 := &snowman.TestBlock{
+	coreBlk3 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(333),
 			StatusV: choices.Processing,
@@ -425,7 +425,7 @@ func TestCoreBlocksMustBeBuiltOnPreferredCoreBlock(t *testing.T) {
 		HeightV:    wronglyPreferredcoreBlk.Height() + 1,
 		TimestampV: coreGenBlk.Timestamp(),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk3, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk3, nil }
 
 	proVM.Set(proVM.Time().Add(proposer.MaxDelay))
 	blk, err := proVM.BuildBlock()
@@ -442,11 +442,11 @@ func TestCoreBlocksMustBeBuiltOnPreferredCoreBlock(t *testing.T) {
 func TestCoreBlockFailureCauseProposerBlockParseFailure(t *testing.T) {
 	coreVM, _, proVM, _, _ := initTestProposerVM(t, time.Time{}, 0) // enable ProBlks
 
-	innerBlk := &snowman.TestBlock{
+	innerBlk := &kleroterion.TestBlock{
 		BytesV:     []byte{1},
 		TimestampV: proVM.Time(),
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		return nil, errMarshallingFailed
 	}
 	slb, err := statelessblock.Build(
@@ -481,13 +481,13 @@ func TestTwoProBlocksWrappingSameCoreBlockCanBeParsed(t *testing.T) {
 	coreVM, _, proVM, gencoreBlk, _ := initTestProposerVM(t, time.Time{}, 0) // enable ProBlks
 
 	// create two Proposer blocks at the same height
-	innerBlk := &snowman.TestBlock{
+	innerBlk := &kleroterion.TestBlock{
 		BytesV:     []byte{1},
 		ParentV:    gencoreBlk.ID(),
 		HeightV:    gencoreBlk.Height() + 1,
 		TimestampV: proVM.Time(),
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		if !bytes.Equal(b, innerBlk.Bytes()) {
 			t.Fatalf("Wrong bytes")
 		}
@@ -563,13 +563,13 @@ func TestTwoProBlocksWithSameParentCanBothVerify(t *testing.T) {
 	coreVM, _, proVM, coreGenBlk, _ := initTestProposerVM(t, time.Time{}, 0) // enable ProBlks
 
 	// one block is built from this proVM
-	localcoreBlk := &snowman.TestBlock{
+	localcoreBlk := &kleroterion.TestBlock{
 		BytesV:     []byte{111},
 		ParentV:    coreGenBlk.ID(),
 		HeightV:    coreGenBlk.Height() + 1,
 		TimestampV: genesisTimestamp,
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) {
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) {
 		return localcoreBlk, nil
 	}
 
@@ -582,13 +582,13 @@ func TestTwoProBlocksWithSameParentCanBothVerify(t *testing.T) {
 	}
 
 	// another block with same parent comes from network and is parsed
-	netcoreBlk := &snowman.TestBlock{
+	netcoreBlk := &kleroterion.TestBlock{
 		BytesV:     []byte{222},
 		ParentV:    coreGenBlk.ID(),
 		HeightV:    coreGenBlk.Height() + 1,
 		TimestampV: genesisTimestamp,
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil
@@ -658,7 +658,7 @@ func TestPreFork_BuildBlock(t *testing.T) {
 	// setup
 	coreVM, _, proVM, coreGenBlk, _ := initTestProposerVM(t, mockable.MaxTime, 0) // disable ProBlks
 
-	coreBlk := &snowman.TestBlock{
+	coreBlk := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(333),
 			StatusV: choices.Processing,
@@ -668,7 +668,7 @@ func TestPreFork_BuildBlock(t *testing.T) {
 		HeightV:    coreGenBlk.Height() + 1,
 		TimestampV: coreGenBlk.Timestamp().Add(proposer.MaxDelay),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk, nil }
 
 	// test
 	builtBlk, err := proVM.BuildBlock()
@@ -686,7 +686,7 @@ func TestPreFork_BuildBlock(t *testing.T) {
 	}
 
 	// test
-	coreVM.GetBlockF = func(id ids.ID) (snowman.Block, error) { return coreBlk, nil }
+	coreVM.GetBlockF = func(id ids.ID) (kleroterion.Block, error) { return coreBlk, nil }
 	storedBlk, err := proVM.GetBlock(builtBlk.ID())
 	if err != nil {
 		t.Fatal("proposerVM has not cached built block")
@@ -700,14 +700,14 @@ func TestPreFork_ParseBlock(t *testing.T) {
 	// setup
 	coreVM, _, proVM, _, _ := initTestProposerVM(t, mockable.MaxTime, 0) // disable ProBlks
 
-	coreBlk := &snowman.TestBlock{
+	coreBlk := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV: ids.Empty.Prefix(2021),
 		},
 		BytesV: []byte{1},
 	}
 
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		if !bytes.Equal(b, coreBlk.Bytes()) {
 			t.Fatalf("Wrong bytes")
 		}
@@ -728,7 +728,7 @@ func TestPreFork_ParseBlock(t *testing.T) {
 		t.Fatal("Parsed block does not match expected block")
 	}
 
-	coreVM.GetBlockF = func(id ids.ID) (snowman.Block, error) {
+	coreVM.GetBlockF = func(id ids.ID) (kleroterion.Block, error) {
 		if id != coreBlk.ID() {
 			t.Fatalf("Unknown core block")
 		}
@@ -746,7 +746,7 @@ func TestPreFork_ParseBlock(t *testing.T) {
 func TestPreFork_SetPreference(t *testing.T) {
 	coreVM, _, proVM, coreGenBlk, _ := initTestProposerVM(t, mockable.MaxTime, 0) // disable ProBlks
 
-	coreBlk0 := &snowman.TestBlock{
+	coreBlk0 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(333),
 			StatusV: choices.Processing,
@@ -756,13 +756,13 @@ func TestPreFork_SetPreference(t *testing.T) {
 		HeightV:    coreGenBlk.Height() + 1,
 		TimestampV: coreGenBlk.Timestamp(),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk0, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk0, nil }
 	builtBlk, err := proVM.BuildBlock()
 	if err != nil {
 		t.Fatal("Could not build proposer block")
 	}
 
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -772,7 +772,7 @@ func TestPreFork_SetPreference(t *testing.T) {
 			return nil, errUnknownBlock
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil
@@ -786,7 +786,7 @@ func TestPreFork_SetPreference(t *testing.T) {
 		t.Fatal("Could not set preference on proposer Block")
 	}
 
-	coreBlk1 := &snowman.TestBlock{
+	coreBlk1 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(444),
 			StatusV: choices.Processing,
@@ -796,7 +796,7 @@ func TestPreFork_SetPreference(t *testing.T) {
 		HeightV:    coreBlk0.Height() + 1,
 		TimestampV: coreBlk0.Timestamp(),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk1, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk1, nil }
 	nextBlk, err := proVM.BuildBlock()
 	if err != nil {
 		t.Fatalf("Could not build proposer block %s", err)
@@ -807,7 +807,7 @@ func TestPreFork_SetPreference(t *testing.T) {
 }
 
 func TestExpiredBuildBlock(t *testing.T) {
-	coreGenBlk := &snowman.TestBlock{
+	coreGenBlk := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.GenerateTestID(),
 			StatusV: choices.Accepted,
@@ -821,7 +821,7 @@ func TestExpiredBuildBlock(t *testing.T) {
 	coreVM.T = t
 
 	coreVM.LastAcceptedF = func() (ids.ID, error) { return coreGenBlk.ID(), nil }
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -829,7 +829,7 @@ func TestExpiredBuildBlock(t *testing.T) {
 			return nil, errUnknownBlock
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil
@@ -898,7 +898,7 @@ func TestExpiredBuildBlock(t *testing.T) {
 	// Notify the proposer VM of a new block on the inner block side
 	toScheduler <- common.PendingTxs
 
-	coreBlk := &snowman.TestBlock{
+	coreBlk := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.GenerateTestID(),
 			StatusV: choices.Processing,
@@ -918,7 +918,7 @@ func TestExpiredBuildBlock(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -928,7 +928,7 @@ func TestExpiredBuildBlock(t *testing.T) {
 			return nil, errUnknownBlock
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil
@@ -954,7 +954,7 @@ func TestExpiredBuildBlock(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	coreVM.BuildBlockF = func() (snowman.Block, error) {
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) {
 		t.Fatal("unexpectedly called build block")
 		panic("unexpectedly called build block")
 	}
@@ -975,7 +975,7 @@ func TestExpiredBuildBlock(t *testing.T) {
 }
 
 type wrappedBlock struct {
-	snowman.Block
+	kleroterion.Block
 	verified bool
 }
 
@@ -997,7 +997,7 @@ func (b *wrappedBlock) Verify() error {
 func TestInnerBlockDeduplication(t *testing.T) {
 	coreVM, _, proVM, coreGenBlk, _ := initTestProposerVM(t, time.Time{}, 0) // disable ProBlks
 
-	coreBlk := &snowman.TestBlock{
+	coreBlk := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.GenerateTestID(),
 			StatusV: choices.Processing,
@@ -1032,7 +1032,7 @@ func TestInnerBlockDeduplication(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -1042,7 +1042,7 @@ func TestInnerBlockDeduplication(t *testing.T) {
 			return nil, errUnknownBlock
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil
@@ -1066,7 +1066,7 @@ func TestInnerBlockDeduplication(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -1076,7 +1076,7 @@ func TestInnerBlockDeduplication(t *testing.T) {
 			return nil, errUnknownBlock
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil
@@ -1106,7 +1106,7 @@ func TestInnerBlockDeduplication(t *testing.T) {
 }
 
 func TestInnerVMRollback(t *testing.T) {
-	coreGenBlk := &snowman.TestBlock{
+	coreGenBlk := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.GenerateTestID(),
 			StatusV: choices.Accepted,
@@ -1130,7 +1130,7 @@ func TestInnerVMRollback(t *testing.T) {
 	coreVM.T = t
 
 	coreVM.LastAcceptedF = func() (ids.ID, error) { return coreGenBlk.ID(), nil }
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -1138,7 +1138,7 @@ func TestInnerVMRollback(t *testing.T) {
 			return nil, errUnknownBlock
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil
@@ -1182,7 +1182,7 @@ func TestInnerVMRollback(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	coreBlk := &snowman.TestBlock{
+	coreBlk := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.GenerateTestID(),
 			StatusV: choices.Processing,
@@ -1202,7 +1202,7 @@ func TestInnerVMRollback(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -1212,7 +1212,7 @@ func TestInnerVMRollback(t *testing.T) {
 			return nil, errUnknownBlock
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil
@@ -1284,7 +1284,7 @@ func TestBuildBlockDuringWindow(t *testing.T) {
 		}, nil
 	}
 
-	coreBlk0 := &snowman.TestBlock{
+	coreBlk0 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.GenerateTestID(),
 			StatusV: choices.Processing,
@@ -1294,7 +1294,7 @@ func TestBuildBlockDuringWindow(t *testing.T) {
 		HeightV:    coreGenBlk.Height() + 1,
 		TimestampV: coreGenBlk.Timestamp(),
 	}
-	coreBlk1 := &snowman.TestBlock{
+	coreBlk1 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.GenerateTestID(),
 			StatusV: choices.Processing,
@@ -1314,7 +1314,7 @@ func TestBuildBlockDuringWindow(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch blkID {
 		case coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -1326,7 +1326,7 @@ func TestBuildBlockDuringWindow(t *testing.T) {
 			return nil, errUnknownBlock
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil
@@ -1354,7 +1354,7 @@ func TestBuildBlockDuringWindow(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	coreVM.BuildBlockF = func() (snowman.Block, error) {
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) {
 		return coreBlk1, nil
 	}
 
@@ -1392,7 +1392,7 @@ func TestTwoForks_OneIsAccepted(t *testing.T) {
 	coreVM, _, proVM, gBlock, _ := initTestProposerVM(t, forkTime, 0)
 
 	// create pre-fork block X and post-fork block A
-	xBlock := &snowman.TestBlock{
+	xBlock := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.GenerateTestID(),
 			StatusV: choices.Processing,
@@ -1403,7 +1403,7 @@ func TestTwoForks_OneIsAccepted(t *testing.T) {
 		TimestampV: gBlock.Timestamp(),
 	}
 
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return xBlock, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return xBlock, nil }
 	aBlock, err := proVM.BuildBlock()
 	if err != nil {
 		t.Fatalf("proposerVM could not build block due to %s", err)
@@ -1414,7 +1414,7 @@ func TestTwoForks_OneIsAccepted(t *testing.T) {
 	}
 
 	// use a different way to constrcut pre-fork block Y and post-fork block B
-	yBlock := &snowman.TestBlock{
+	yBlock := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.GenerateTestID(),
 			StatusV: choices.Processing,
@@ -1449,7 +1449,7 @@ func TestTwoForks_OneIsAccepted(t *testing.T) {
 	}
 
 	// append Z/C to Y/B
-	zBlock := &snowman.TestBlock{
+	zBlock := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.GenerateTestID(),
 			StatusV: choices.Processing,
@@ -1460,7 +1460,7 @@ func TestTwoForks_OneIsAccepted(t *testing.T) {
 		TimestampV: yBlock.Timestamp(),
 	}
 
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return zBlock, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return zBlock, nil }
 	if err := proVM.SetPreference(bBlock.ID()); err != nil {
 		t.Fatal(err)
 	}
@@ -1505,7 +1505,7 @@ func TestTooFarAdvanced(t *testing.T) {
 	forkTime := time.Unix(0, 0)
 	coreVM, _, proVM, gBlock, _ := initTestProposerVM(t, forkTime, 0)
 
-	xBlock := &snowman.TestBlock{
+	xBlock := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.GenerateTestID(),
 			StatusV: choices.Processing,
@@ -1516,7 +1516,7 @@ func TestTooFarAdvanced(t *testing.T) {
 		TimestampV: gBlock.Timestamp(),
 	}
 
-	yBlock := &snowman.TestBlock{
+	yBlock := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.GenerateTestID(),
 			StatusV: choices.Processing,
@@ -1527,7 +1527,7 @@ func TestTooFarAdvanced(t *testing.T) {
 		TimestampV: xBlock.Timestamp(),
 	}
 
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return xBlock, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return xBlock, nil }
 	aBlock, err := proVM.BuildBlock()
 	if err != nil {
 		t.Fatalf("proposerVM could not build block due to %s", err)
@@ -1600,7 +1600,7 @@ func TestTwoOptions_OneIsAccepted(t *testing.T) {
 
 	xBlockID := ids.GenerateTestID()
 	xBlock := &TestOptionsBlock{
-		TestBlock: snowman.TestBlock{
+		TestBlock: kleroterion.TestBlock{
 			TestDecidable: choices.TestDecidable{
 				IDV:     xBlockID,
 				StatusV: choices.Processing,
@@ -1609,8 +1609,8 @@ func TestTwoOptions_OneIsAccepted(t *testing.T) {
 			ParentV:    coreGenBlk.ID(),
 			TimestampV: coreGenBlk.Timestamp(),
 		},
-		opts: [2]snowman.Block{
-			&snowman.TestBlock{
+		opts: [2]kleroterion.Block{
+			&kleroterion.TestBlock{
 				TestDecidable: choices.TestDecidable{
 					IDV:     ids.GenerateTestID(),
 					StatusV: choices.Processing,
@@ -1619,7 +1619,7 @@ func TestTwoOptions_OneIsAccepted(t *testing.T) {
 				ParentV:    xBlockID,
 				TimestampV: coreGenBlk.Timestamp(),
 			},
-			&snowman.TestBlock{
+			&kleroterion.TestBlock{
 				TestDecidable: choices.TestDecidable{
 					IDV:     ids.GenerateTestID(),
 					StatusV: choices.Processing,
@@ -1631,7 +1631,7 @@ func TestTwoOptions_OneIsAccepted(t *testing.T) {
 		},
 	}
 
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return xBlock, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return xBlock, nil }
 	aBlockIntf, err := proVM.BuildBlock()
 	if err != nil {
 		t.Fatal("could not build post fork oracle block")
@@ -1690,7 +1690,7 @@ func TestLaggedCoreChainHeight(t *testing.T) {
 	coreVM, _, proVM, coreGenBlk, _ := initTestProposerVM(t, time.Time{}, 0)
 	proVM.Set(coreGenBlk.Timestamp())
 
-	innerBlock := &snowman.TestBlock{
+	innerBlock := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.GenerateTestID(),
 			StatusV: choices.Processing,
@@ -1700,7 +1700,7 @@ func TestLaggedCoreChainHeight(t *testing.T) {
 		TimestampV: coreGenBlk.Timestamp(),
 	}
 
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return innerBlock, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return innerBlock, nil }
 	blockIntf, err := proVM.BuildBlock()
 	assert.NoError(err)
 

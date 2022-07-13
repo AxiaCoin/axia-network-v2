@@ -60,7 +60,7 @@ type Context struct {
 	SNLookup     AllychainLookup
 	Metrics      metrics.OptionalGatherer
 
-	// snowman++ attributes
+	// kleroterion++ attributes
 	ValidatorState    validators.State  // interface for Core-Chain validators
 	StakingLeafSigner crypto.Signer     // block signer
 	StakingCertLeaf   *x509.Certificate // block certificate

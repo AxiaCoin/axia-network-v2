@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/axiacoin/axia-network-v2/ids"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/kleroterion"
 	"github.com/axiacoin/axia-network-v2/utils/crypto"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/reward"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/status"
@@ -645,7 +645,7 @@ func TestAddNominatorTxHeapCorruption(t *testing.T) {
 	}
 }
 
-func verifyAndAcceptProposalCommitment(assert *assert.Assertions, blk snowman.Block) {
+func verifyAndAcceptProposalCommitment(assert *assert.Assertions, blk kleroterion.Block) {
 	// Verify the proposed block
 	err := blk.Verify()
 	assert.NoError(err)

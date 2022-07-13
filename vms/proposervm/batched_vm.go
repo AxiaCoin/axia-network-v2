@@ -9,8 +9,8 @@ import (
 	"github.com/axiacoin/axia-network-v2/database"
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow/choices"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
-	"github.com/axiacoin/axia-network-v2/snow/engine/snowman/block"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/kleroterion"
+	"github.com/axiacoin/axia-network-v2/snow/engine/kleroterion/block"
 	"github.com/axiacoin/axia-network-v2/utils/wrappers"
 
 	statelessblock "github.com/axiacoin/axia-network-v2/vms/proposervm/block"
@@ -33,7 +33,7 @@ func (vm *VM) GetAncestors(
 	currentByteLength := 0
 	startTime := time.Now()
 
-	// hereinafter loop over proposerVM cache and DB, possibly till snowman++
+	// hereinafter loop over proposerVM cache and DB, possibly till kleroterion++
 	// fork is hit
 	for {
 		blk, err := vm.getStatelessBlk(blkID)
@@ -61,7 +61,7 @@ func (vm *VM) GetAncestors(
 		}
 	}
 
-	// snowman++ fork may have been hit.
+	// kleroterion++ fork may have been hit.
 	preMaxBlocksNum := maxBlocksNum - len(res)
 	preMaxBlocksSize := maxBlocksSize - currentByteLength
 	preMaxBlocksRetrivalTime := maxBlocksRetrivalTime - time.Since(startTime)
@@ -76,7 +76,7 @@ func (vm *VM) GetAncestors(
 	return res, nil
 }
 
-func (vm *VM) BatchedParseBlock(blks [][]byte) ([]snowman.Block, error) {
+func (vm *VM) BatchedParseBlock(blks [][]byte) ([]kleroterion.Block, error) {
 	rVM, ok := vm.ChainVM.(block.BatchedChainVM)
 	if !ok {
 		return nil, block.ErrRemoteVMNotImplemented
@@ -88,7 +88,7 @@ func (vm *VM) BatchedParseBlock(blks [][]byte) ([]snowman.Block, error) {
 	}
 	var (
 		blocksIndex int
-		blocks      = make([]snowman.Block, len(blks))
+		blocks      = make([]kleroterion.Block, len(blks))
 
 		innerBlocksIndex    int
 		statelessBlockDescs = make([]partialData, 0, len(blks))

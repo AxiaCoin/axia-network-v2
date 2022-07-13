@@ -27,7 +27,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/snow/engine/common"
 	"github.com/axiacoin/axia-network-v2/snow/engine/common/queue"
 	"github.com/axiacoin/axia-network-v2/snow/engine/common/tracker"
-	"github.com/axiacoin/axia-network-v2/snow/engine/snowman/bootstrap"
+	"github.com/axiacoin/axia-network-v2/snow/engine/kleroterion/bootstrap"
 	"github.com/axiacoin/axia-network-v2/snow/networking/benchlist"
 	"github.com/axiacoin/axia-network-v2/snow/networking/handler"
 	"github.com/axiacoin/axia-network-v2/snow/networking/router"
@@ -50,9 +50,9 @@ import (
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/status"
 	"github.com/axiacoin/axia-network-v2/vms/secp256k1fx"
 
-	smcon "github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
-	smeng "github.com/axiacoin/axia-network-v2/snow/engine/snowman"
-	snowgetter "github.com/axiacoin/axia-network-v2/snow/engine/snowman/getter"
+	smcon "github.com/axiacoin/axia-network-v2/snow/consensus/kleroterion"
+	smeng "github.com/axiacoin/axia-network-v2/snow/engine/kleroterion"
+	snowgetter "github.com/axiacoin/axia-network-v2/snow/engine/kleroterion/getter"
 )
 
 var (

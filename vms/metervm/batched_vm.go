@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/axiacoin/axia-network-v2/ids"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
-	"github.com/axiacoin/axia-network-v2/snow/engine/snowman/block"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/kleroterion"
+	"github.com/axiacoin/axia-network-v2/snow/engine/kleroterion/block"
 )
 
 var _ block.BatchedChainVM = &blockVM{}
@@ -36,7 +36,7 @@ func (vm *blockVM) GetAncestors(
 	return ancestors, err
 }
 
-func (vm *blockVM) BatchedParseBlock(blks [][]byte) ([]snowman.Block, error) {
+func (vm *blockVM) BatchedParseBlock(blks [][]byte) ([]kleroterion.Block, error) {
 	rVM, ok := vm.ChainVM.(block.BatchedChainVM)
 	if !ok {
 		return nil, block.ErrRemoteVMNotImplemented
@@ -47,7 +47,7 @@ func (vm *blockVM) BatchedParseBlock(blks [][]byte) ([]snowman.Block, error) {
 	end := vm.clock.Time()
 	vm.blockMetrics.batchedParseBlock.Observe(float64(end.Sub(start)))
 
-	wrappedBlocks := make([]snowman.Block, len(blocks))
+	wrappedBlocks := make([]kleroterion.Block, len(blocks))
 	for i, block := range blocks {
 		wrappedBlocks[i] = &meterBlock{
 			Block: block,

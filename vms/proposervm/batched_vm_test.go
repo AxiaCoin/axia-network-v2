@@ -16,9 +16,9 @@ import (
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow"
 	"github.com/axiacoin/axia-network-v2/snow/choices"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/kleroterion"
 	"github.com/axiacoin/axia-network-v2/snow/engine/common"
-	"github.com/axiacoin/axia-network-v2/snow/engine/snowman/block"
+	"github.com/axiacoin/axia-network-v2/snow/engine/kleroterion/block"
 	"github.com/axiacoin/axia-network-v2/snow/validators"
 	"github.com/axiacoin/axia-network-v2/utils/hashing"
 	"github.com/axiacoin/axia-network-v2/utils/timer/mockable"
@@ -48,7 +48,7 @@ func TestGetAncestorsPreForkOnly(t *testing.T) {
 	coreVM, proRemoteVM, coreGenBlk := initTestRemoteProposerVM(t, mockable.MaxTime) // disable ProBlks
 
 	// Build some prefork blocks....
-	coreBlk1 := &snowman.TestBlock{
+	coreBlk1 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(111),
 			StatusV: choices.Processing,
@@ -58,13 +58,13 @@ func TestGetAncestorsPreForkOnly(t *testing.T) {
 		HeightV:    coreGenBlk.Height() + 1,
 		TimestampV: coreGenBlk.Timestamp(),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk1, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk1, nil }
 	builtBlk1, err := proRemoteVM.BuildBlock()
 	assert.NoError(err, "Could not build preFork block")
 
 	// prepare build of next block
 	assert.NoError(proRemoteVM.SetPreference(builtBlk1.ID()))
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch {
 		case blkID == coreBlk1.ID():
 			return coreBlk1, nil
@@ -73,7 +73,7 @@ func TestGetAncestorsPreForkOnly(t *testing.T) {
 		}
 	}
 
-	coreBlk2 := &snowman.TestBlock{
+	coreBlk2 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(222),
 			StatusV: choices.Processing,
@@ -83,13 +83,13 @@ func TestGetAncestorsPreForkOnly(t *testing.T) {
 		HeightV:    coreBlk1.Height() + 1,
 		TimestampV: coreBlk1.Timestamp(),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk2, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk2, nil }
 	builtBlk2, err := proRemoteVM.BuildBlock()
 	assert.NoError(err, "Could not build proposer block")
 
 	// prepare build of next block
 	assert.NoError(proRemoteVM.SetPreference(builtBlk2.ID()))
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch {
 		case blkID == coreBlk2.ID():
 			return coreBlk2, nil
@@ -98,7 +98,7 @@ func TestGetAncestorsPreForkOnly(t *testing.T) {
 		}
 	}
 
-	coreBlk3 := &snowman.TestBlock{
+	coreBlk3 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(222),
 			StatusV: choices.Processing,
@@ -108,7 +108,7 @@ func TestGetAncestorsPreForkOnly(t *testing.T) {
 		HeightV:    coreBlk2.Height() + 1,
 		TimestampV: coreBlk2.Timestamp(),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk3, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk3, nil }
 	builtBlk3, err := proRemoteVM.BuildBlock()
 	assert.NoError(err, "Could not build proposer block")
 
@@ -169,7 +169,7 @@ func TestGetAncestorsPostForkOnly(t *testing.T) {
 	coreVM, proRemoteVM, coreGenBlk := initTestRemoteProposerVM(t, time.Time{}) // enable ProBlks
 
 	// Build some post-Fork blocks....
-	coreBlk1 := &snowman.TestBlock{
+	coreBlk1 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(111),
 			StatusV: choices.Processing,
@@ -179,7 +179,7 @@ func TestGetAncestorsPostForkOnly(t *testing.T) {
 		HeightV:    coreGenBlk.Height() + 1,
 		TimestampV: coreGenBlk.Timestamp(),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk1, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk1, nil }
 	builtBlk1, err := proRemoteVM.BuildBlock()
 	assert.NoError(err, "Could not build preFork block")
 
@@ -188,7 +188,7 @@ func TestGetAncestorsPostForkOnly(t *testing.T) {
 	assert.NoError(proRemoteVM.SetPreference(builtBlk1.ID()))
 	proRemoteVM.Set(proRemoteVM.Time().Add(proposer.MaxDelay))
 
-	coreBlk2 := &snowman.TestBlock{
+	coreBlk2 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(222),
 			StatusV: choices.Processing,
@@ -198,7 +198,7 @@ func TestGetAncestorsPostForkOnly(t *testing.T) {
 		HeightV:    coreBlk1.Height() + 1,
 		TimestampV: coreBlk1.Timestamp().Add(proposer.MaxDelay),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk2, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk2, nil }
 	builtBlk2, err := proRemoteVM.BuildBlock()
 	assert.NoError(err, "Could not build proposer block")
 
@@ -207,7 +207,7 @@ func TestGetAncestorsPostForkOnly(t *testing.T) {
 	assert.NoError(proRemoteVM.SetPreference(builtBlk2.ID()))
 	proRemoteVM.Set(proRemoteVM.Time().Add(proposer.MaxDelay))
 
-	coreBlk3 := &snowman.TestBlock{
+	coreBlk3 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(333),
 			StatusV: choices.Processing,
@@ -217,7 +217,7 @@ func TestGetAncestorsPostForkOnly(t *testing.T) {
 		HeightV:    coreBlk2.Height() + 1,
 		TimestampV: coreBlk2.Timestamp(),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk3, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk3, nil }
 	builtBlk3, err := proRemoteVM.BuildBlock()
 	assert.NoError(err, "Could not build proposer block")
 
@@ -249,7 +249,7 @@ func TestGetAncestorsPostForkOnly(t *testing.T) {
 		}
 	}
 
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil
@@ -302,7 +302,7 @@ func TestGetAncestorsAtSnomanPlusPlusFork(t *testing.T) {
 
 	// Build some prefork blocks....
 	proRemoteVM.Set(preForkTime)
-	coreBlk1 := &snowman.TestBlock{
+	coreBlk1 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(111),
 			StatusV: choices.Processing,
@@ -312,7 +312,7 @@ func TestGetAncestorsAtSnomanPlusPlusFork(t *testing.T) {
 		HeightV:    coreGenBlk.Height() + 1,
 		TimestampV: preForkTime,
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk1, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk1, nil }
 	builtBlk1, err := proRemoteVM.BuildBlock()
 	assert.NoError(err, "Could not build preFork block")
 	_, ok := builtBlk1.(*preForkBlock)
@@ -320,7 +320,7 @@ func TestGetAncestorsAtSnomanPlusPlusFork(t *testing.T) {
 
 	// prepare build of next block
 	assert.NoError(proRemoteVM.SetPreference(builtBlk1.ID()))
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch {
 		case blkID == coreBlk1.ID():
 			return coreBlk1, nil
@@ -329,7 +329,7 @@ func TestGetAncestorsAtSnomanPlusPlusFork(t *testing.T) {
 		}
 	}
 
-	coreBlk2 := &snowman.TestBlock{
+	coreBlk2 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(222),
 			StatusV: choices.Processing,
@@ -339,7 +339,7 @@ func TestGetAncestorsAtSnomanPlusPlusFork(t *testing.T) {
 		HeightV:    coreBlk1.Height() + 1,
 		TimestampV: postForkTime,
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk2, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk2, nil }
 	builtBlk2, err := proRemoteVM.BuildBlock()
 	assert.NoError(err, "Could not build proposer block")
 	_, ok = builtBlk2.(*preForkBlock)
@@ -347,7 +347,7 @@ func TestGetAncestorsAtSnomanPlusPlusFork(t *testing.T) {
 
 	// prepare build of next block
 	assert.NoError(proRemoteVM.SetPreference(builtBlk2.ID()))
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch {
 		case blkID == coreBlk2.ID():
 			return coreBlk2, nil
@@ -358,7 +358,7 @@ func TestGetAncestorsAtSnomanPlusPlusFork(t *testing.T) {
 
 	// .. and some post-fork
 	proRemoteVM.Set(postForkTime)
-	coreBlk3 := &snowman.TestBlock{
+	coreBlk3 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(333),
 			StatusV: choices.Processing,
@@ -368,7 +368,7 @@ func TestGetAncestorsAtSnomanPlusPlusFork(t *testing.T) {
 		HeightV:    coreBlk2.Height() + 1,
 		TimestampV: postForkTime.Add(proposer.MaxDelay),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk3, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk3, nil }
 	builtBlk3, err := proRemoteVM.BuildBlock()
 	assert.NoError(err, "Could not build proposer block")
 	_, ok = builtBlk3.(*postForkBlock)
@@ -379,7 +379,7 @@ func TestGetAncestorsAtSnomanPlusPlusFork(t *testing.T) {
 	assert.NoError(proRemoteVM.SetPreference(builtBlk3.ID()))
 	proRemoteVM.Set(proRemoteVM.Time().Add(proposer.MaxDelay))
 
-	coreBlk4 := &snowman.TestBlock{
+	coreBlk4 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(444),
 			StatusV: choices.Processing,
@@ -389,7 +389,7 @@ func TestGetAncestorsAtSnomanPlusPlusFork(t *testing.T) {
 		HeightV:    coreBlk3.Height() + 1,
 		TimestampV: postForkTime,
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk4, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk4, nil }
 	builtBlk4, err := proRemoteVM.BuildBlock()
 	assert.NoError(err, "Could not build proposer block")
 	_, ok = builtBlk4.(*postForkBlock)
@@ -460,7 +460,7 @@ func TestBatchedParseBlockPreForkOnly(t *testing.T) {
 	coreVM, proRemoteVM, coreGenBlk := initTestRemoteProposerVM(t, mockable.MaxTime) // disable ProBlks
 
 	// Build some prefork blocks....
-	coreBlk1 := &snowman.TestBlock{
+	coreBlk1 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(111),
 			StatusV: choices.Processing,
@@ -470,13 +470,13 @@ func TestBatchedParseBlockPreForkOnly(t *testing.T) {
 		HeightV:    coreGenBlk.Height() + 1,
 		TimestampV: coreGenBlk.Timestamp(),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk1, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk1, nil }
 	builtBlk1, err := proRemoteVM.BuildBlock()
 	assert.NoError(err, "Could not build preFork block")
 
 	// prepare build of next block
 	assert.NoError(proRemoteVM.SetPreference(builtBlk1.ID()))
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch {
 		case blkID == coreBlk1.ID():
 			return coreBlk1, nil
@@ -485,7 +485,7 @@ func TestBatchedParseBlockPreForkOnly(t *testing.T) {
 		}
 	}
 
-	coreBlk2 := &snowman.TestBlock{
+	coreBlk2 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(222),
 			StatusV: choices.Processing,
@@ -495,13 +495,13 @@ func TestBatchedParseBlockPreForkOnly(t *testing.T) {
 		HeightV:    coreBlk1.Height() + 1,
 		TimestampV: coreBlk1.Timestamp(),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk2, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk2, nil }
 	builtBlk2, err := proRemoteVM.BuildBlock()
 	assert.NoError(err, "Could not build proposer block")
 
 	// prepare build of next block
 	assert.NoError(proRemoteVM.SetPreference(builtBlk2.ID()))
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch {
 		case blkID == coreBlk2.ID():
 			return coreBlk2, nil
@@ -510,7 +510,7 @@ func TestBatchedParseBlockPreForkOnly(t *testing.T) {
 		}
 	}
 
-	coreBlk3 := &snowman.TestBlock{
+	coreBlk3 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(222),
 			StatusV: choices.Processing,
@@ -520,11 +520,11 @@ func TestBatchedParseBlockPreForkOnly(t *testing.T) {
 		HeightV:    coreBlk2.Height() + 1,
 		TimestampV: coreBlk2.Timestamp(),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk3, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk3, nil }
 	builtBlk3, err := proRemoteVM.BuildBlock()
 	assert.NoError(err, "Could not build proposer block")
 
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreBlk1.Bytes()):
 			return coreBlk1, nil
@@ -537,8 +537,8 @@ func TestBatchedParseBlockPreForkOnly(t *testing.T) {
 		}
 	}
 
-	coreVM.BatchedParseBlockF = func(blks [][]byte) ([]snowman.Block, error) {
-		res := make([]snowman.Block, 0, len(blks))
+	coreVM.BatchedParseBlockF = func(blks [][]byte) ([]kleroterion.Block, error) {
+		res := make([]kleroterion.Block, 0, len(blks))
 		for _, blkBytes := range blks {
 			switch {
 			case bytes.Equal(blkBytes, coreBlk1.Bytes()):
@@ -572,7 +572,7 @@ func TestBatchedParseBlockPostForkOnly(t *testing.T) {
 	coreVM, proRemoteVM, coreGenBlk := initTestRemoteProposerVM(t, time.Time{}) // enable ProBlks
 
 	// Build some post-Fork blocks....
-	coreBlk1 := &snowman.TestBlock{
+	coreBlk1 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(111),
 			StatusV: choices.Processing,
@@ -582,7 +582,7 @@ func TestBatchedParseBlockPostForkOnly(t *testing.T) {
 		HeightV:    coreGenBlk.Height() + 1,
 		TimestampV: coreGenBlk.Timestamp(),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk1, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk1, nil }
 	builtBlk1, err := proRemoteVM.BuildBlock()
 	assert.NoError(err, "Could not build preFork block")
 
@@ -591,7 +591,7 @@ func TestBatchedParseBlockPostForkOnly(t *testing.T) {
 	assert.NoError(proRemoteVM.SetPreference(builtBlk1.ID()))
 	proRemoteVM.Set(proRemoteVM.Time().Add(proposer.MaxDelay))
 
-	coreBlk2 := &snowman.TestBlock{
+	coreBlk2 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(222),
 			StatusV: choices.Processing,
@@ -601,7 +601,7 @@ func TestBatchedParseBlockPostForkOnly(t *testing.T) {
 		HeightV:    coreBlk1.Height() + 1,
 		TimestampV: coreBlk1.Timestamp().Add(proposer.MaxDelay),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk2, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk2, nil }
 	builtBlk2, err := proRemoteVM.BuildBlock()
 	assert.NoError(err, "Could not build proposer block")
 
@@ -610,7 +610,7 @@ func TestBatchedParseBlockPostForkOnly(t *testing.T) {
 	assert.NoError(proRemoteVM.SetPreference(builtBlk2.ID()))
 	proRemoteVM.Set(proRemoteVM.Time().Add(proposer.MaxDelay))
 
-	coreBlk3 := &snowman.TestBlock{
+	coreBlk3 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(333),
 			StatusV: choices.Processing,
@@ -620,11 +620,11 @@ func TestBatchedParseBlockPostForkOnly(t *testing.T) {
 		HeightV:    coreBlk2.Height() + 1,
 		TimestampV: coreBlk2.Timestamp(),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk3, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk3, nil }
 	builtBlk3, err := proRemoteVM.BuildBlock()
 	assert.NoError(err, "Could not build proposer block")
 
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreBlk1.Bytes()):
 			return coreBlk1, nil
@@ -637,8 +637,8 @@ func TestBatchedParseBlockPostForkOnly(t *testing.T) {
 		}
 	}
 
-	coreVM.BatchedParseBlockF = func(blks [][]byte) ([]snowman.Block, error) {
-		res := make([]snowman.Block, 0, len(blks))
+	coreVM.BatchedParseBlockF = func(blks [][]byte) ([]kleroterion.Block, error) {
+		res := make([]kleroterion.Block, 0, len(blks))
 		for _, blkBytes := range blks {
 			switch {
 			case bytes.Equal(blkBytes, coreBlk1.Bytes()):
@@ -678,7 +678,7 @@ func TestBatchedParseBlockAtSnomanPlusPlusFork(t *testing.T) {
 
 	// Build some prefork blocks....
 	proRemoteVM.Set(preForkTime)
-	coreBlk1 := &snowman.TestBlock{
+	coreBlk1 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(111),
 			StatusV: choices.Processing,
@@ -688,7 +688,7 @@ func TestBatchedParseBlockAtSnomanPlusPlusFork(t *testing.T) {
 		HeightV:    coreGenBlk.Height() + 1,
 		TimestampV: preForkTime,
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk1, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk1, nil }
 	builtBlk1, err := proRemoteVM.BuildBlock()
 	assert.NoError(err, "Could not build preFork block")
 	_, ok := builtBlk1.(*preForkBlock)
@@ -696,7 +696,7 @@ func TestBatchedParseBlockAtSnomanPlusPlusFork(t *testing.T) {
 
 	// prepare build of next block
 	assert.NoError(proRemoteVM.SetPreference(builtBlk1.ID()))
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch {
 		case blkID == coreBlk1.ID():
 			return coreBlk1, nil
@@ -705,7 +705,7 @@ func TestBatchedParseBlockAtSnomanPlusPlusFork(t *testing.T) {
 		}
 	}
 
-	coreBlk2 := &snowman.TestBlock{
+	coreBlk2 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(222),
 			StatusV: choices.Processing,
@@ -715,7 +715,7 @@ func TestBatchedParseBlockAtSnomanPlusPlusFork(t *testing.T) {
 		HeightV:    coreBlk1.Height() + 1,
 		TimestampV: postForkTime,
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk2, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk2, nil }
 	builtBlk2, err := proRemoteVM.BuildBlock()
 	assert.NoError(err, "Could not build proposer block")
 	_, ok = builtBlk2.(*preForkBlock)
@@ -723,7 +723,7 @@ func TestBatchedParseBlockAtSnomanPlusPlusFork(t *testing.T) {
 
 	// prepare build of next block
 	assert.NoError(proRemoteVM.SetPreference(builtBlk2.ID()))
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch {
 		case blkID == coreBlk2.ID():
 			return coreBlk2, nil
@@ -734,7 +734,7 @@ func TestBatchedParseBlockAtSnomanPlusPlusFork(t *testing.T) {
 
 	// .. and some post-fork
 	proRemoteVM.Set(postForkTime)
-	coreBlk3 := &snowman.TestBlock{
+	coreBlk3 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(333),
 			StatusV: choices.Processing,
@@ -744,7 +744,7 @@ func TestBatchedParseBlockAtSnomanPlusPlusFork(t *testing.T) {
 		HeightV:    coreBlk2.Height() + 1,
 		TimestampV: postForkTime.Add(proposer.MaxDelay),
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk3, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk3, nil }
 	builtBlk3, err := proRemoteVM.BuildBlock()
 	assert.NoError(err, "Could not build proposer block")
 	_, ok = builtBlk3.(*postForkBlock)
@@ -755,7 +755,7 @@ func TestBatchedParseBlockAtSnomanPlusPlusFork(t *testing.T) {
 	assert.NoError(proRemoteVM.SetPreference(builtBlk3.ID()))
 	proRemoteVM.Set(proRemoteVM.Time().Add(proposer.MaxDelay))
 
-	coreBlk4 := &snowman.TestBlock{
+	coreBlk4 := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.Empty.Prefix(444),
 			StatusV: choices.Processing,
@@ -765,14 +765,14 @@ func TestBatchedParseBlockAtSnomanPlusPlusFork(t *testing.T) {
 		HeightV:    coreBlk3.Height() + 1,
 		TimestampV: postForkTime,
 	}
-	coreVM.BuildBlockF = func() (snowman.Block, error) { return coreBlk4, nil }
+	coreVM.BuildBlockF = func() (kleroterion.Block, error) { return coreBlk4, nil }
 	builtBlk4, err := proRemoteVM.BuildBlock()
 	assert.NoError(err, "Could not build proposer block")
 	_, ok = builtBlk4.(*postForkBlock)
 	assert.True(ok, "Block should be a post-fork one")
 	assert.NoError(builtBlk4.Verify())
 
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreBlk1.Bytes()):
 			return coreBlk1, nil
@@ -787,8 +787,8 @@ func TestBatchedParseBlockAtSnomanPlusPlusFork(t *testing.T) {
 		}
 	}
 
-	coreVM.BatchedParseBlockF = func(blks [][]byte) ([]snowman.Block, error) {
-		res := make([]snowman.Block, 0, len(blks))
+	coreVM.BatchedParseBlockF = func(blks [][]byte) ([]kleroterion.Block, error) {
+		res := make([]kleroterion.Block, 0, len(blks))
 		for _, blkBytes := range blks {
 			switch {
 			case bytes.Equal(blkBytes, coreBlk1.Bytes()):
@@ -833,9 +833,9 @@ func initTestRemoteProposerVM(
 ) (
 	TestRemoteProposerVM,
 	*VM,
-	*snowman.TestBlock,
+	*kleroterion.TestBlock,
 ) {
-	coreGenBlk := &snowman.TestBlock{
+	coreGenBlk := &kleroterion.TestBlock{
 		TestDecidable: choices.TestDecidable{
 			IDV:     ids.GenerateTestID(),
 			StatusV: choices.Accepted,
@@ -859,7 +859,7 @@ func initTestRemoteProposerVM(
 		return nil
 	}
 	coreVM.LastAcceptedF = func() (ids.ID, error) { return coreGenBlk.ID(), nil }
-	coreVM.GetBlockF = func(blkID ids.ID) (snowman.Block, error) {
+	coreVM.GetBlockF = func(blkID ids.ID) (kleroterion.Block, error) {
 		switch {
 		case blkID == coreGenBlk.ID():
 			return coreGenBlk, nil
@@ -867,7 +867,7 @@ func initTestRemoteProposerVM(
 			return nil, errUnknownBlock
 		}
 	}
-	coreVM.ParseBlockF = func(b []byte) (snowman.Block, error) {
+	coreVM.ParseBlockF = func(b []byte) (kleroterion.Block, error) {
 		switch {
 		case bytes.Equal(b, coreGenBlk.Bytes()):
 			return coreGenBlk, nil

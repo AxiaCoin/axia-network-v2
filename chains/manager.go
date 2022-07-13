@@ -29,7 +29,7 @@ import (
 	"github.com/axiacoin/axia-network-v2/snow/engine/common"
 	"github.com/axiacoin/axia-network-v2/snow/engine/common/queue"
 	"github.com/axiacoin/axia-network-v2/snow/engine/common/tracker"
-	"github.com/axiacoin/axia-network-v2/snow/engine/snowman/block"
+	"github.com/axiacoin/axia-network-v2/snow/engine/kleroterion/block"
 	"github.com/axiacoin/axia-network-v2/snow/networking/handler"
 	"github.com/axiacoin/axia-network-v2/snow/networking/router"
 	"github.com/axiacoin/axia-network-v2/snow/networking/sender"
@@ -50,17 +50,17 @@ import (
 	avbootstrap "github.com/axiacoin/axia-network-v2/snow/engine/axia/bootstrap"
 	avagetter "github.com/axiacoin/axia-network-v2/snow/engine/axia/getter"
 
-	smcon "github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
-	smeng "github.com/axiacoin/axia-network-v2/snow/engine/snowman"
-	smbootstrap "github.com/axiacoin/axia-network-v2/snow/engine/snowman/bootstrap"
-	snowgetter "github.com/axiacoin/axia-network-v2/snow/engine/snowman/getter"
+	smcon "github.com/axiacoin/axia-network-v2/snow/consensus/kleroterion"
+	smeng "github.com/axiacoin/axia-network-v2/snow/engine/kleroterion"
+	smbootstrap "github.com/axiacoin/axia-network-v2/snow/engine/kleroterion/bootstrap"
+	snowgetter "github.com/axiacoin/axia-network-v2/snow/engine/kleroterion/getter"
 )
 
 const defaultChannelSize = 1
 
 var (
 	errUnknownChainID   = errors.New("unknown chain ID")
-	errUnknownVMType    = errors.New("the vm should have type axia.DAGVM or snowman.ChainVM")
+	errUnknownVMType    = errors.New("the vm should have type axia.DAGVM or kleroterion.ChainVM")
 	errCreatePlatformVM = errors.New("attempted to create a chain running the PlatformVM")
 	errNotBootstrapped  = errors.New("chains not bootstrapped")
 
@@ -132,7 +132,7 @@ type ChainConfig struct {
 
 type ManagerConfig struct {
 	StakingEnabled              bool            // True iff the network has staking enabled
-	StakingCert                 tls.Certificate // needed to sign snowman++ blocks
+	StakingCert                 tls.Certificate // needed to sign kleroterion++ blocks
 	Log                         logging.Logger
 	LogFactory                  logging.Factory
 	VMManager                   vms.Manager // Manage mappings from vm ID --> vm
@@ -204,7 +204,7 @@ type manager struct {
 	// Value: The chain
 	chains map[ids.ID]handler.Handler
 
-	// snowman++ related interface to allow validators retrival
+	// kleroterion++ related interface to allow validators retrival
 	validatorState validators.State
 }
 
@@ -468,7 +468,7 @@ func (m *manager) buildChain(chainParams ChainParameters, sb Allychain) (*chain,
 			return nil, fmt.Errorf("error while creating new axia vm %w", err)
 		}
 	case block.ChainVM:
-		chain, err = m.createSnowmanChain(
+		chain, err = m.createKleroterionChain(
 			ctx,
 			chainParams.GenesisData,
 			vdrs,
@@ -480,7 +480,7 @@ func (m *manager) buildChain(chainParams ChainParameters, sb Allychain) (*chain,
 			sb,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("error while creating new snowman vm %w", err)
+			return nil, fmt.Errorf("error while creating new kleroterion vm %w", err)
 		}
 	default:
 		return nil, errUnknownVMType
@@ -707,8 +707,8 @@ func (m *manager) createAxiaChain(
 	}, nil
 }
 
-// Create a linear chain using the Snowman consensus engine
-func (m *manager) createSnowmanChain(
+// Create a linear chain using the Kleroterion consensus engine
+func (m *manager) createKleroterionChain(
 	ctx *snow.ConsensusContext,
 	genesisData []byte,
 	vdrs,
@@ -867,7 +867,7 @@ func (m *manager) createSnowmanChain(
 		},
 	)
 	if err != nil {
-		return nil, fmt.Errorf("error initializing snowman bootstrapper: %w", err)
+		return nil, fmt.Errorf("error initializing kleroterion bootstrapper: %w", err)
 	}
 	handler.SetBootstrapper(bootstrapper)
 
@@ -883,7 +883,7 @@ func (m *manager) createSnowmanChain(
 	}
 	engine, err := smeng.New(engineConfig)
 	if err != nil {
-		return nil, fmt.Errorf("error initializing snowman engine: %w", err)
+		return nil, fmt.Errorf("error initializing kleroterion engine: %w", err)
 	}
 	handler.SetConsensus(engine)
 

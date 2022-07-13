@@ -8,7 +8,7 @@ import (
 
 	"github.com/axiacoin/axia-network-v2/ids"
 	"github.com/axiacoin/axia-network-v2/snow/choices"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/kleroterion"
 	"github.com/axiacoin/axia-network-v2/vms/platformvm/status"
 )
 
@@ -149,10 +149,10 @@ func (pb *ProposalBlock) Verify() error {
 }
 
 // Options returns the possible children of this block in preferential order.
-func (pb *ProposalBlock) Options() ([2]snowman.Block, error) {
+func (pb *ProposalBlock) Options() ([2]kleroterion.Block, error) {
 	tx, ok := pb.Tx.UnsignedTx.(UnsignedProposalTx)
 	if !ok {
-		return [2]snowman.Block{}, fmt.Errorf(
+		return [2]kleroterion.Block{}, fmt.Errorf(
 			"%w, expected UnsignedProposalTx but got %T",
 			errWrongTxType,
 			pb.Tx.UnsignedTx,
@@ -165,23 +165,23 @@ func (pb *ProposalBlock) Options() ([2]snowman.Block, error) {
 
 	commit, err := pb.vm.newCommitBlock(blkID, nextHeight, prefersCommit)
 	if err != nil {
-		return [2]snowman.Block{}, fmt.Errorf(
+		return [2]kleroterion.Block{}, fmt.Errorf(
 			"failed to create commit block: %w",
 			err,
 		)
 	}
 	abort, err := pb.vm.newAbortBlock(blkID, nextHeight, !prefersCommit)
 	if err != nil {
-		return [2]snowman.Block{}, fmt.Errorf(
+		return [2]kleroterion.Block{}, fmt.Errorf(
 			"failed to create abort block: %w",
 			err,
 		)
 	}
 
 	if prefersCommit {
-		return [2]snowman.Block{commit, abort}, nil
+		return [2]kleroterion.Block{commit, abort}, nil
 	}
-	return [2]snowman.Block{abort, commit}, nil
+	return [2]kleroterion.Block{abort, commit}, nil
 }
 
 // newProposalBlock creates a new block that proposes to issue a transaction.

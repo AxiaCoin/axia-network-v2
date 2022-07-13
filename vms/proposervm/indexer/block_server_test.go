@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/axiacoin/axia-network-v2/ids"
-	"github.com/axiacoin/axia-network-v2/snow/consensus/snowman"
+	"github.com/axiacoin/axia-network-v2/snow/consensus/kleroterion"
 )
 
 var (
@@ -25,11 +25,11 @@ type TestBlockServer struct {
 	CantGetFullPostForkBlock bool
 	CantCommit               bool
 
-	GetFullPostForkBlockF func(blkID ids.ID) (snowman.Block, error)
+	GetFullPostForkBlockF func(blkID ids.ID) (kleroterion.Block, error)
 	CommitF               func() error
 }
 
-func (tsb *TestBlockServer) GetFullPostForkBlock(blkID ids.ID) (snowman.Block, error) {
+func (tsb *TestBlockServer) GetFullPostForkBlock(blkID ids.ID) (kleroterion.Block, error) {
 	if tsb.GetFullPostForkBlockF != nil {
 		return tsb.GetFullPostForkBlockF(blkID)
 	}
