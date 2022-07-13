@@ -1,5 +1,5 @@
 version: v1
-name: buf.build/ava-labs/axia
+name: buf.build/axiacoin/axia
 breaking:
   use:
     - FILE

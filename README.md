@@ -31,7 +31,7 @@ If you plan to build Axia from source, you will also need the following software
 Clone the Axia repository:
 
 ```sh
-git clone git@github.com:ava-labs/axia.git
+git clone git@github.com:axiacoin/axia.git
 cd axia
 ```
 

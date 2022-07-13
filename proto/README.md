@@ -1,7 +1,7 @@
 # Axia gRPC
 ## buf
 
-Protobuf files are hosted at [https://buf.build/ava-labs/axia](https://buf.build/ava-labs/axia) and can be used as dependencies in other projects.
+Protobuf files are hosted at [https://buf.build/axiacoin/axia](https://buf.build/axiacoin/axia) and can be used as dependencies in other projects.
 
 Protobuf linting and generation for this project is managed by [buf](https://github.com/bufbuild/buf).
 
