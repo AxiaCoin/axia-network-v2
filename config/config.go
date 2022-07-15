@@ -1039,8 +1039,6 @@ func GetNodeConfig(v *viper.Viper, buildDir string) (node.Config, error) {
 	// Network ID
 	nodeConfig.NetworkID, err = constants.NetworkID(v.GetString(NetworkNameKey))
 
-	fmt.Printf("networkID: %b\n", nodeConfig.NetworkID)
-	fmt.Printf("NetworkNameKey: %s\n", NetworkNameKey)
 	if err != nil {
 		return node.Config{}, err
 	}
