@@ -36,7 +36,7 @@ var indexEnabledAvmConfig = Config{
 func TestIndexTransaction_Ordered(t *testing.T) {
 	genesisBytes := BuildGenesisTest(t)
 	issuer := make(chan common.Message, 1)
-	baseDBManager := manager.NewMemDB(version.DefaultVersion1_0_0)
+	baseDBManager := manager.NewMemDB(version.DefaultVersion2_0_0)
 	ctx := NewContext(t)
 	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 	axcID := genesisTx.ID()
@@ -130,7 +130,7 @@ func TestIndexTransaction_Ordered(t *testing.T) {
 func TestIndexTransaction_MultipleTransactions(t *testing.T) {
 	genesisBytes := BuildGenesisTest(t)
 	issuer := make(chan common.Message, 1)
-	baseDBManager := manager.NewMemDB(version.DefaultVersion1_0_0)
+	baseDBManager := manager.NewMemDB(version.DefaultVersion2_0_0)
 	ctx := NewContext(t)
 	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 
@@ -223,7 +223,7 @@ func TestIndexTransaction_MultipleTransactions(t *testing.T) {
 func TestIndexTransaction_MultipleAddresses(t *testing.T) {
 	genesisBytes := BuildGenesisTest(t)
 	issuer := make(chan common.Message, 1)
-	baseDBManager := manager.NewMemDB(version.DefaultVersion1_0_0)
+	baseDBManager := manager.NewMemDB(version.DefaultVersion2_0_0)
 	ctx := NewContext(t)
 	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 
@@ -290,7 +290,7 @@ func TestIndexTransaction_MultipleAddresses(t *testing.T) {
 func TestIndexTransaction_UnorderedWrites(t *testing.T) {
 	genesisBytes := BuildGenesisTest(t)
 	issuer := make(chan common.Message, 1)
-	baseDBManager := manager.NewMemDB(version.DefaultVersion1_0_0)
+	baseDBManager := manager.NewMemDB(version.DefaultVersion2_0_0)
 	ctx := NewContext(t)
 	genesisTx := GetAXCTxFromGenesisTest(genesisBytes, t)
 	axcID := genesisTx.ID()
@@ -412,7 +412,7 @@ func TestIndexer_Read(t *testing.T) {
 }
 
 func TestIndexingNewInitWithIndexingEnabled(t *testing.T) {
-	baseDBManager := manager.NewMemDB(version.DefaultVersion1_0_0)
+	baseDBManager := manager.NewMemDB(version.DefaultVersion2_0_0)
 	ctx := NewContext(t)
 
 	db := baseDBManager.NewPrefixDBManager([]byte{1}).Current().Database
@@ -456,7 +456,7 @@ func TestIndexingNewInitWithIndexingDisabled(t *testing.T) {
 }
 
 func TestIndexingAllowIncomplete(t *testing.T) {
-	baseDBManager := manager.NewMemDB(version.DefaultVersion1_0_0)
+	baseDBManager := manager.NewMemDB(version.DefaultVersion2_0_0)
 	ctx := NewContext(t)
 
 	prefixDB := baseDBManager.NewPrefixDBManager([]byte{1}).Current().Database

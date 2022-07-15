@@ -124,7 +124,7 @@ func initTestProposerVM(
 	ctx.StakingLeafSigner = pTestCert.PrivateKey.(crypto.Signer)
 	ctx.ValidatorState = valState
 
-	dummyDBManager := manager.NewMemDB(version.DefaultVersion1_0_0)
+	dummyDBManager := manager.NewMemDB(version.DefaultVersion2_0_0)
 	// make sure that DBs are compressed correctly
 	dummyDBManager = dummyDBManager.NewPrefixDBManager([]byte{})
 	if err := proVM.Initialize(ctx, dummyDBManager, initialState, nil, nil, nil, nil, nil); err != nil {
@@ -857,7 +857,7 @@ func TestExpiredBuildBlock(t *testing.T) {
 	ctx.StakingLeafSigner = pTestCert.PrivateKey.(crypto.Signer)
 	ctx.ValidatorState = valState
 
-	dbManager := manager.NewMemDB(version.DefaultVersion1_0_0)
+	dbManager := manager.NewMemDB(version.DefaultVersion2_0_0)
 	toEngine := make(chan common.Message, 1)
 	var toScheduler chan<- common.Message
 
@@ -1166,7 +1166,7 @@ func TestInnerVMRollback(t *testing.T) {
 		return nil
 	}
 
-	dbManager := manager.NewMemDB(version.DefaultVersion1_0_0)
+	dbManager := manager.NewMemDB(version.DefaultVersion2_0_0)
 
 	proVM := New(coreVM, time.Time{}, 0, false)
 

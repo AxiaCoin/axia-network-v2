@@ -338,7 +338,7 @@ func defaultVM() (*VM, database.Database, *common.SenderTest) {
 		ApricotPhase5Time:      defaultValidateEndTime,
 	}}
 
-	baseDBManager := manager.NewMemDB(version.DefaultVersion1_0_0)
+	baseDBManager := manager.NewMemDB(version.DefaultVersion2_0_0)
 	chainDBManager := baseDBManager.NewPrefixDBManager([]byte{0})
 	atomicDB := prefixdb.New([]byte{1}, baseDBManager.Current().Database)
 
@@ -413,7 +413,7 @@ func GenesisVMWithArgs(t *testing.T, args *BuildGenesisArgs) ([]byte, chan commo
 		RewardConfig:           defaultRewardConfig,
 	}}
 
-	baseDBManager := manager.NewMemDB(version.DefaultVersion1_0_0)
+	baseDBManager := manager.NewMemDB(version.DefaultVersion2_0_0)
 	chainDBManager := baseDBManager.NewPrefixDBManager([]byte{0})
 	atomicDB := prefixdb.New([]byte{1}, baseDBManager.Current().Database)
 
@@ -1710,7 +1710,7 @@ func TestOptimisticAtomicImport(t *testing.T) {
 // test restarting the node
 func TestRestartPartiallyAccepted(t *testing.T) {
 	_, genesisBytes := defaultGenesis()
-	db := manager.NewMemDB(version.DefaultVersion1_0_0)
+	db := manager.NewMemDB(version.DefaultVersion2_0_0)
 
 	firstDB := db.NewPrefixDBManager([]byte{})
 	firstVM := &VM{Factory: Factory{
@@ -1833,7 +1833,7 @@ func TestRestartPartiallyAccepted(t *testing.T) {
 func TestRestartFullyAccepted(t *testing.T) {
 	_, genesisBytes := defaultGenesis()
 
-	db := manager.NewMemDB(version.DefaultVersion1_0_0)
+	db := manager.NewMemDB(version.DefaultVersion2_0_0)
 	firstDB := db.NewPrefixDBManager([]byte{})
 	firstVM := &VM{Factory: Factory{
 		Chains:                 chains.MockManager{},
@@ -1949,7 +1949,7 @@ func TestRestartFullyAccepted(t *testing.T) {
 func TestBootstrapPartiallyAccepted(t *testing.T) {
 	_, genesisBytes := defaultGenesis()
 
-	baseDBManager := manager.NewMemDB(version.DefaultVersion1_0_0)
+	baseDBManager := manager.NewMemDB(version.DefaultVersion2_0_0)
 	vmDBManager := baseDBManager.NewPrefixDBManager([]byte("vm"))
 	bootstrappingDB := prefixdb.New([]byte("bootstrapping"), baseDBManager.Current().Database)
 
@@ -2228,7 +2228,7 @@ func TestBootstrapPartiallyAccepted(t *testing.T) {
 func TestUnverifiedParent(t *testing.T) {
 	_, genesisBytes := defaultGenesis()
 
-	dbManager := manager.NewMemDB(version.DefaultVersion1_0_0)
+	dbManager := manager.NewMemDB(version.DefaultVersion2_0_0)
 
 	vm := &VM{Factory: Factory{
 		Chains:                 chains.MockManager{},
@@ -2382,7 +2382,7 @@ func TestMaxStakeAmount(t *testing.T) {
 func TestUnverifiedParentPanic(t *testing.T) {
 	_, genesisBytes := defaultGenesis()
 
-	baseDBManager := manager.NewMemDB(version.DefaultVersion1_0_0)
+	baseDBManager := manager.NewMemDB(version.DefaultVersion2_0_0)
 	atomicDB := prefixdb.New([]byte{1}, baseDBManager.Current().Database)
 
 	vm := &VM{Factory: Factory{

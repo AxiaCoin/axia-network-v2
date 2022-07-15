@@ -250,7 +250,7 @@ func GenesisVMWithArgs(tb testing.TB, additionalFxs []*common.Fx, args *BuildGen
 
 	ctx := NewContext(tb)
 
-	baseDBManager := manager.NewMemDB(version.DefaultVersion1_0_0)
+	baseDBManager := manager.NewMemDB(version.DefaultVersion2_0_0)
 
 	m := &atomic.Memory{}
 	err := m.Initialize(logging.NoLog{}, prefixdb.New([]byte{0}, baseDBManager.Current().Database))
@@ -605,7 +605,7 @@ func TestInvalidGenesis(t *testing.T) {
 
 	err := vm.Initialize(
 		ctx, // context
-		manager.NewMemDB(version.DefaultVersion1_0_0), // dbManager
+		manager.NewMemDB(version.DefaultVersion2_0_0), // dbManager
 		nil,                          // genesisState
 		nil,                          // upgradeBytes
 		nil,                          // configBytes
@@ -632,7 +632,7 @@ func TestInvalidFx(t *testing.T) {
 	genesisBytes := BuildGenesisTest(t)
 	err := vm.Initialize(
 		ctx, // context
-		manager.NewMemDB(version.DefaultVersion1_0_0), // dbManager
+		manager.NewMemDB(version.DefaultVersion2_0_0), // dbManager
 		genesisBytes,                 // genesisState
 		nil,                          // upgradeBytes
 		nil,                          // configBytes
@@ -661,7 +661,7 @@ func TestFxInitializationFailure(t *testing.T) {
 	genesisBytes := BuildGenesisTest(t)
 	err := vm.Initialize(
 		ctx, // context
-		manager.NewMemDB(version.DefaultVersion1_0_0), // dbManager
+		manager.NewMemDB(version.DefaultVersion2_0_0), // dbManager
 		genesisBytes,                 // genesisState
 		nil,                          // upgradeBytes
 		nil,                          // configBytes
@@ -763,7 +763,7 @@ func TestIssueNFT(t *testing.T) {
 	issuer := make(chan common.Message, 1)
 	err := vm.Initialize(
 		ctx,
-		manager.NewMemDB(version.DefaultVersion1_0_0),
+		manager.NewMemDB(version.DefaultVersion2_0_0),
 		genesisBytes,
 		nil,
 		nil,
@@ -911,7 +911,7 @@ func TestIssueProperty(t *testing.T) {
 	issuer := make(chan common.Message, 1)
 	err := vm.Initialize(
 		ctx,
-		manager.NewMemDB(version.DefaultVersion1_0_0),
+		manager.NewMemDB(version.DefaultVersion2_0_0),
 		genesisBytes,
 		nil,
 		nil,

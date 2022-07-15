@@ -934,7 +934,7 @@ func TestBaseTxSemanticVerifyUnauthorizedFx(t *testing.T) {
 	issuer := make(chan common.Message, 1)
 	err := vm.Initialize(
 		ctx,
-		manager.NewMemDB(version.DefaultVersion1_0_0),
+		manager.NewMemDB(version.DefaultVersion2_0_0),
 		genesisBytes,
 		nil,
 		nil,
@@ -1360,7 +1360,7 @@ func TestBaseTxSemanticVerifyPendingUnauthorizedFx(t *testing.T) {
 
 	err := vm.Initialize(
 		ctx,
-		manager.NewMemDB(version.DefaultVersion1_0_0),
+		manager.NewMemDB(version.DefaultVersion2_0_0),
 		genesisBytes,
 		nil,
 		nil,
@@ -1505,7 +1505,7 @@ func TestBaseTxSemanticVerifyPendingInvalidSignature(t *testing.T) {
 
 	err := vm.Initialize(
 		ctx,
-		manager.NewMemDB(version.DefaultVersion1_0_0),
+		manager.NewMemDB(version.DefaultVersion2_0_0),
 		genesisBytes,
 		nil,
 		nil,

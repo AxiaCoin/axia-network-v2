@@ -1064,7 +1064,7 @@ func TestExportTxSemanticVerifyInvalidFx(t *testing.T) {
 	genesisBytes := BuildGenesisTest(t)
 	ctx := NewContext(t)
 
-	baseDBManager := manager.NewMemDB(version.DefaultVersion1_0_0)
+	baseDBManager := manager.NewMemDB(version.DefaultVersion2_0_0)
 
 	m := &atomic.Memory{}
 	err := m.Initialize(logging.NoLog{}, prefixdb.New([]byte{0}, baseDBManager.Current().Database))
@@ -1247,7 +1247,7 @@ func TestIssueExportTx(t *testing.T) {
 	genesisBytes := BuildGenesisTest(t)
 
 	issuer := make(chan common.Message, 1)
-	baseDBManager := manager.NewMemDB(version.DefaultVersion1_0_0)
+	baseDBManager := manager.NewMemDB(version.DefaultVersion2_0_0)
 
 	m := &atomic.Memory{}
 	err := m.Initialize(logging.NoLog{}, prefixdb.New([]byte{0}, baseDBManager.Current().Database))
@@ -1376,7 +1376,7 @@ func TestClearForceAcceptedExportTx(t *testing.T) {
 	genesisBytes := BuildGenesisTest(t)
 
 	issuer := make(chan common.Message, 1)
-	baseDBManager := manager.NewMemDB(version.DefaultVersion1_0_0)
+	baseDBManager := manager.NewMemDB(version.DefaultVersion2_0_0)
 
 	m := &atomic.Memory{}
 	err := m.Initialize(logging.NoLog{}, prefixdb.New([]byte{0}, baseDBManager.Current().Database))

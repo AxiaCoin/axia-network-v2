@@ -20,7 +20,7 @@ import (
 func TestNewSingleRocksDB(t *testing.T) {
 	dir := t.TempDir()
 
-	v1 := version.DefaultVersion1_0_0
+	v1 := version.DefaultVersion2_0_0
 
 	dbPath := filepath.Join(dir, v1.String())
 	db, err := rocksdb.New(dbPath, nil, logging.NoLog{})
