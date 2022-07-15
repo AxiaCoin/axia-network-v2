@@ -387,7 +387,7 @@ var (
 				MaxConsumptionRate: .12 * reward.PercentDenominator,
 				MinConsumptionRate: .10 * reward.PercentDenominator,
 				MintingPeriod:      2 * 365 * 24 * time.Hour,
-				SupplyCap:          uint128.Uint128{Hi: 10, Lo: 000000000000000000},
+				SupplyCap:          uint128.Uint128{Hi: 180, Lo: 000000000000000000},
 			},
 		},
 	}
