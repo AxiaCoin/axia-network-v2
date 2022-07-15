@@ -11,18 +11,18 @@ import (
 
 // These are globals that describe network upgrades and node versions
 var (
-	Current                      = NewDefaultVersion(2, 7, 10)
+	Current                      = NewDefaultVersion(2, 0, 0)
 	CurrentApp                   = NewDefaultApplication(constants.PlatformName, Current.Major(), Current.Minor(), Current.Patch())
-	MinimumCompatibleVersion     = NewDefaultApplication(constants.PlatformName, 2, 7, 10)
-	PrevMinimumCompatibleVersion = NewDefaultApplication(constants.PlatformName, 2, 7, 10)
-	MinimumUnmaskedVersion       = NewDefaultApplication(constants.PlatformName, 2, 7, 10)
-	PrevMinimumUnmaskedVersion   = NewDefaultApplication(constants.PlatformName, 2, 7, 10)
+	MinimumCompatibleVersion     = NewDefaultApplication(constants.PlatformName, 2, 0, 0)
+	PrevMinimumCompatibleVersion = NewDefaultApplication(constants.PlatformName, 2, 0, 0)
+	MinimumUnmaskedVersion       = NewDefaultApplication(constants.PlatformName, 2, 0, 0)
+	PrevMinimumUnmaskedVersion   = NewDefaultApplication(constants.PlatformName, 2, 0, 0)
 	VersionParser                = NewDefaultApplicationParser()
 
-	CurrentDatabase = DatabaseVersion2_4_5
-	PrevDatabase    = DatabaseVersion2_4_5
+	CurrentDatabase = DatabaseVersion2_0_0
+	PrevDatabase    = DatabaseVersion2_0_0
 
-	DatabaseVersion2_4_5 = NewDefaultVersion(2, 4, 5)
+	DatabaseVersion2_0_0 = NewDefaultVersion(2, 0, 0)
 
 	ApricotPhase0Times = map[uint32]time.Time{
 		constants.MainnetID: time.Date(2020, time.December, 8, 3, 0, 0, 0, time.UTC),
