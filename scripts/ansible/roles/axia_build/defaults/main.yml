@@ -1,0 +1,5 @@
+axia_binaries_dir: "{{ repo_folder }}/build"
+repo_folder: "~{{ ansible_facts.user_id }}/go/src/github.com/axiacoin/axia-network-v2"
+repo_name: axiacoin/axia
+repo_url: https://github.com/{{ repo_name }}
+repo_branch: dev

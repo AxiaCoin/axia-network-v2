@@ -1,0 +1,17 @@
+- name: Kill Node
+  command: killall -SIGTERM axia
+  register: killall_axia
+  changed_when:
+    - "killall_axia.rc in [0]"
+  failed_when:
+    - "killall_axia.rc not in [0]"
+    - "killall_axia.stderr not in ['axia: no process found']"
+
+- name: Kill EVM
+  command: killall -SIGTERM evm
+  register: killall_evm
+  changed_when:
+    - "killall_evm.rc in [0]"
+  failed_when:
+    - "killall_evm.rc not in [0]"
+    - "killall_evm.stderr not in ['evm: no process found']"
